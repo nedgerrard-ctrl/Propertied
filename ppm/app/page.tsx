@@ -41,25 +41,24 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#efefef] text-[#1f2937]">
-      <div className="w-full px-3 py-2">
-        <div className="border border-[#d0d0d0] bg-[#f5f5f5] px-2 py-3">
-          <header className="flex flex-col gap-3 bg-[#dfe2e6] px-3 py-3 md:flex-row md:items-center md:justify-between">
-            <div className="text-[15px] font-bold text-[#2f2f2f]">
-              Property Project Marketing Pty Ltd
-            </div>
+    <main className="min-h-screen w-full bg-[#efefef] text-[#1f2937]">
 
-            <nav className="flex flex-wrap gap-3 text-[10px] font-medium text-[#334155] md:gap-4">
-              <a href="#">Home</a>
-              <a href="#">About Us</a>
-              <a href="#">Buyers</a>
-              <a href="#">Services</a>
-              <a href="#">Developers</a>
-              <a href="#">Blog</a>
-              <a href="#">Testimonials</a>
-              <a href="#">Contact</a>
-            </nav>
-          </header>
+      <header className="flex flex-col gap-3 bg-[#dfe2e6] px-4 py-3 md:flex-row md:items-center md:justify-between">
+        <div className="text-[15px] font-bold text-[#2f2f2f]">
+          Property Project Marketing Pty Ltd
+        </div>
+
+        <nav className="flex flex-wrap gap-3 text-[10px] font-medium text-[#334155] md:gap-4">
+          <a href="/">Home</a>
+          <a href="/about">About Us</a>
+          <a href="#">Buyers</a>
+          <a href="#">Services</a>
+          <a href="#">Developers</a>
+          <a href="#">Blog</a>
+          <a href="#">Testimonials</a>
+          <a href="#">Contact</a>
+        </nav>
+      </header>
 
           <section className="mt-3 border border-[#9d9d9d] bg-white p-2">
             <div className="relative h-[250px] border border-[#666] bg-[#f9f9f9]">
@@ -185,8 +184,6 @@ export default function Home() {
               <a href="#">inLinkedIn</a>
             </div>
           </footer>
-        </div>
-      </div>
     </main>
   );
 }
