@@ -1,4 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import HeroCarousel from "./components/HeroCarousel";
+
 export default function Home() {
+
+  const bannerImages = [
+    "/images/house1.png",
+    "/images/house2.png",
+    "/images/banner3.png",
+    "/images/banner4.png",
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) =>
+      prev === 0 ? bannerImages.length - 1 : prev - 1
+    );
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+  }, [currentSlide, bannerImages.length]);
+
   const stats = [
     {
       value: "10+ Years",
@@ -78,60 +115,7 @@ export default function Home() {
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <section className="overflow-hidden rounded-sm border border-[#d8cdc0] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
-          <div className="relative h-[420px] bg-[#d9d1c6]">
-            
-            <img
-              src="/images/house1.png"
-              alt="Luxury property banner"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            
-            <button className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/10 text-lg text-white backdrop-blur transition hover:bg-white/20">
-              ‹
-            </button>
-
-            <button className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/10 text-lg text-white backdrop-blur transition hover:bg-white/20">
-              ›
-            </button>
-
-            <div className="absolute left-8 top-1/2 max-w-xl -translate-y-1/2 text-white md:left-12">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.28em] text-white/80">
-                Premium Property Marketing
-              </p>
-              <h1 className="text-3xl font-light leading-tight md:text-5xl">
-                Elevating projects with strategy, presentation, and reach
-              </h1>
-              <p className="mt-4 max-w-md text-sm leading-7 text-white/85 md:text-base">
-                Delivering premium property outcomes through refined marketing,
-                buyer engagement, and end-to-end project support.
-              </p>
-            </div>
-
-            <a
-              href="#"
-              className="absolute bottom-8 right-8 inline-flex items-center gap-3 rounded-sm border border-white bg-white px-7 py-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-[#1f1a17] shadow-lg transition hover:bg-[#f3ede4]"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6 stroke-[#2f2a24]"
-                fill="none"
-                strokeWidth="1.8"
-              >
-                <path d="M21 15a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h13a3 3 0 0 1 3 3v9Z" />
-                <path d="M8 8h8v6H8z" />
-              </svg>
-              <span>Find Your Property</span>
-            </a>
-          </div>
-
-          <div className="flex justify-center gap-3 border-t border-[#e7ddd0] bg-[#fcfaf7] py-5">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#1f1a17]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#c2b7aa]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#c2b7aa]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#c2b7aa]" />
-          </div>
-        </section>
+        <HeroCarousel />
 
         <section className="mt-20 grid gap-12 md:grid-cols-3">
           {stats.map((stat) => (
