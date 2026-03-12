@@ -32,12 +32,12 @@ export default function Home() {
   ];
 
   const cards = [
-    { title: "About Us", subtitle: "View Company Details" },
-    { title: "Portfolio Services", subtitle: "View More" },
-    { title: "Blog & Insights", subtitle: "Read Articles" },
-    { title: "For Developers", subtitle: "Discover Partnerships" },
-    { title: "For Buyers", subtitle: "Explore Buyer Options" },
-    { title: "Testimonials", subtitle: "See Client Feedback" },
+    { title: "About Us", subtitle: "View Company Details", image: "/images/house1.png" },
+    { title: "Portfolio Services", subtitle: "View More", image: "/images/house2.png" },
+    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png" },
+    { title: "For Developers", subtitle: "Discover Partnerships", image: "/images/house2.png" },
+    { title: "For Buyers", subtitle: "Explore Buyer Options", image: "/images/house1.png" },
+    { title: "Testimonials", subtitle: "See Client Feedback", image: "/images/house2.png" },
   ];
 
   return (
@@ -80,31 +80,13 @@ export default function Home() {
       <div className="mx-auto max-w-7xl px-6 py-8">
         <section className="overflow-hidden rounded-sm border border-[#d8cdc0] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
           <div className="relative h-[420px] bg-[#d9d1c6]">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-black/10" />
-
-            <svg
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              className="absolute inset-0 h-full w-full"
-            >
-              <line
-                x1="0"
-                y1="0"
-                x2="100"
-                y2="100"
-                stroke="#7c7369"
-                strokeWidth="0.25"
-              />
-              <line
-                x1="100"
-                y1="0"
-                x2="0"
-                y2="100"
-                stroke="#7c7369"
-                strokeWidth="0.25"
-              />
-            </svg>
-
+            
+            <img
+              src="/images/house1.png"
+              alt="Luxury property banner"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            
             <button className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/10 text-lg text-white backdrop-blur transition hover:bg-white/20">
               ‹
             </button>
@@ -186,29 +168,12 @@ export default function Home() {
                 className="group overflow-hidden rounded-sm border border-[#dfd4c7] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
               >
                 <div className="m-4 overflow-hidden rounded-sm bg-[#e3dbd0]">
-                  <div className="h-[190px]">
-                    <svg
-                      viewBox="0 0 100 100"
-                      preserveAspectRatio="none"
-                      className="h-full w-full"
-                    >
-                      <line
-                        x1="0"
-                        y1="0"
-                        x2="100"
-                        y2="100"
-                        stroke="#7b7268"
-                        strokeWidth="0.35"
-                      />
-                      <line
-                        x1="100"
-                        y1="0"
-                        x2="0"
-                        y2="100"
-                        stroke="#7b7268"
-                        strokeWidth="0.35"
-                      />
-                    </svg>
+                  <div className="m-3 h-[105px] overflow-hidden">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 </div>
 
