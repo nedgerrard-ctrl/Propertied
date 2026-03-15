@@ -110,6 +110,12 @@ export default function Home() {
             <a href="/contact" className="transition hover:text-[#1f1a17]">
               Contact
             </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Projects
+            </a>
+            <a href="/#" className="transition hover:text-[#1f1a17]">
+              Login
+            </a>
           </nav>
         </div>
       </header>

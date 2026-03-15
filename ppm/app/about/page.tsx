@@ -23,6 +23,8 @@ export default function AboutPage() {
           <a href="#">Blog</a>
           <a href="#">Testimonials</a>
           <a href="#">Contact</a>
+          <a href="#">Projects</a>
+          <a href="#">Login</a>
         </nav>
       </header>
 
