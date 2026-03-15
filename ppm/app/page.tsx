@@ -81,11 +81,11 @@ export default function Home() {
     <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
       <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
-          <div className="text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
+          <div className="shrink-0 text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
             Property Project Marketing Pty Ltd
           </div>
 
-          <nav className="flex flex-wrap gap-5 text-[11px] font-medium uppercase tracking-[0.14em] text-[#5b5147] md:gap-6">
+          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
             <a href="/" className="transition hover:text-[#1f1a17]">
               Home
             </a>
