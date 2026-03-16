@@ -69,12 +69,12 @@ export default function Home() {
   ];
 
   const cards = [
-    { title: "About Us", subtitle: "View Company Details", image: "/images/house1.png" },
-    { title: "Portfolio Services", subtitle: "View More", image: "/images/house2.png" },
-    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png" },
-    { title: "For Developers", subtitle: "Discover Partnerships", image: "/images/house2.png" },
-    { title: "For Buyers", subtitle: "Explore Buyer Options", image: "/images/house1.png" },
-    { title: "Testimonials", subtitle: "See Client Feedback", image: "/images/house2.png" },
+    { title: "About Us", subtitle: "View Company Details", image: "/images/house1.png", href: "/about" },
+    { title: "Portfolio Services", subtitle: "View More", image: "/images/house2.png", href: "#" },
+    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png", href: "#" },
+    { title: "For Developers", subtitle: "Discover Partnerships", image: "/images/house2.png", href: "#" },
+    { title: "For Buyers", subtitle: "Explore Buyer Options", image: "/images/house1.png", href: "#" },
+    { title: "Testimonials", subtitle: "See Client Feedback", image: "/images/house2.png", href: "#" },
   ];
 
   return (
@@ -154,7 +154,7 @@ export default function Home() {
             {cards.map((card) => (
               <a
                 key={card.title}
-                href="#"
+                href={card.href}
                 className="group overflow-hidden rounded-sm border border-[#dfd4c7] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
               >
                 <div className="m-4 overflow-hidden rounded-sm bg-[#e3dbd0]">

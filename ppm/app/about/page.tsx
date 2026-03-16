@@ -8,38 +8,43 @@ export default function AboutPage() {
   ];
 
   return (
-    <main className="min-h-screen w-full bg-[#efefef] text-[#1f2937]">
-      <header className="flex flex-col gap-3 bg-[#dfe2e6] px-4 py-3 md:flex-row md:items-center md:justify-between">
-        <div className="text-[15px] font-bold text-[#2f2f2f]">
-          Property Project Marketing Pty Ltd
-        </div>
+    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+      <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
+          <div className="shrink-0 text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
+            Property Project Marketing Pty Ltd
+          </div>
 
-        <nav className="flex flex-wrap gap-3 text-[10px] font-medium text-[#334155] md:gap-4">
-          <a href="/">Home</a>
-          <a href="/about">About Us</a>
-          <a href="#">Buyers</a>
-          <a href="#">Services</a>
-          <a href="#">Developers</a>
-          <a href="#">Blog</a>
-          <a href="#">Testimonials</a>
-          <a href="#">Contact</a>
-          <a href="#">Projects</a>
-          <a href="#">Login</a>
-        </nav>
+          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
+            <a href="/" className="transition hover:text-[#1f1a17]">Home</a>
+            <a href="/about" className="transition hover:text-[#1f1a17]">About Us</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Buyers</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Services</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Developers</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Blog</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Testimonials</a>
+            <a href="/contact" className="transition hover:text-[#1f1a17]">Contact</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Projects</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Login</a>
+          </nav>
+        </div>
       </header>
 
-      <section className="px-6 py-8">
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
-          <div className="text-center">
-            <h1 className="mb-4 text-[20px] font-bold text-[#2f3a4a]">
-                About Us
-            </h1>
+      <div className="mx-auto max-w-7xl px-6 py-10">
 
-            <div className="mx-auto max-w-[520px] space-y-3 text-[11px] leading-5 text-[#222]">
+        {/* About section */}
+        <section className="grid gap-10 lg:grid-cols-2 lg:items-start">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+              Who We Are
+            </p>
+            <h1 className="mt-3 text-3xl font-light text-[#1f1a17]">About PPM</h1>
+
+            <div className="mt-6 space-y-4 text-[13px] leading-6 text-[#3d3530]">
               <p>
-                Property Project Marketing Pty Ltd is focused on connecting
-                buyers, investors, and development opportunities through a
-                simple and professional property marketing approach.
+                Property Project Marketing Pty Ltd (PPM) is focused on connecting
+                buyers, investors, and development opportunities through a simple
+                and professional property marketing approach.
               </p>
               <p>
                 We work across sourcing, buyer support, project promotion, and
@@ -54,111 +59,66 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="flex justify-center lg:justify-end">
-            <div className="h-[190px] w-full max-w-[420px] border border-[#666] bg-[#f9f9f9]">
-              <svg
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                className="h-full w-full"
-              >
-                <line
-                  x1="0"
-                  y1="0"
-                  x2="100"
-                  y2="100"
-                  stroke="#333"
-                  strokeWidth="0.35"
-                />
-                <line
-                  x1="100"
-                  y1="0"
-                  x2="0"
-                  y2="100"
-                  stroke="#333"
-                  strokeWidth="0.35"
-                />
-              </svg>
-            </div>
+          <div className="overflow-hidden rounded-sm border border-[#ddd3c6]">
+            <img
+              src="/images/banner3.png"
+              alt="PPM property"
+              className="h-full w-full object-cover"
+            />
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="px-6 py-4">
-        <h2 className="mb-4 text-center text-[20px] font-bold text-[#2f3a4a]">
-          End-to-End Model
-        </h2>
+        {/* End-to-End Model */}
+        <section className="mt-16">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+            Our Approach
+          </p>
+          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">End-to-End Model</h2>
 
-        <div className="mx-auto h-[220px] w-full border border-[#666] bg-[#f9f9f9]">
-          <svg
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            className="h-full w-full"
-          >
-            <line
-              x1="0"
-              y1="0"
-              x2="100"
-              y2="100"
-              stroke="#333"
-              strokeWidth="0.3"
+          <div className="mt-6 overflow-hidden rounded-sm border border-[#ddd3c6]">
+            <img
+              src="/images/banner4.png"
+              alt="End-to-end model"
+              className="h-[240px] w-full object-cover"
             />
-            <line
-              x1="100"
-              y1="0"
-              x2="0"
-              y2="100"
-              stroke="#333"
-              strokeWidth="0.3"
-            />
-          </svg>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <section className="px-6 py-8">
-        <h2 className="mb-6 text-center text-[20px] font-bold text-[#2f3a4a]">
-          Our Team
-        </h2>
+        {/* Team */}
+        <section className="mt-16">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+            The People
+          </p>
+          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">Our Team</h2>
 
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {team.map((member, index) => (
-            <div key={index} className="text-center">
-              <div className="mx-auto h-[120px] w-[120px] border border-[#666] bg-[#f9f9f9]">
-                <svg
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  className="h-full w-full"
-                >
-                  <line
-                    x1="0"
-                    y1="0"
-                    x2="100"
-                    y2="100"
-                    stroke="#333"
-                    strokeWidth="0.45"
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            {team.map((member, index) => (
+              <div key={index} className="text-center">
+                <div className="mx-auto h-[120px] w-[120px] overflow-hidden rounded-sm border border-[#ddd3c6] bg-[#e8e0d5]">
+                  <img
+                    src={index % 2 === 0 ? "/images/house1.png" : "/images/house2.png"}
+                    alt={member.name}
+                    className="h-full w-full object-cover opacity-60"
                   />
-                  <line
-                    x1="100"
-                    y1="0"
-                    x2="0"
-                    y2="100"
-                    stroke="#333"
-                    strokeWidth="0.45"
-                  />
-                </svg>
+                </div>
+                <p className="mt-3 text-[11px] text-[#5b5147]">{member.name}</p>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <p className="mt-3 text-[11px] text-[#333]">{member.name}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      </div>
 
-      <footer className="mt-8 bg-[#dfe2e6] px-4 py-4 text-center text-[11px] text-[#374151]">
-        <p>© 2026 Property Project Marketing Pty Ltd</p>
-        <div className="mt-2 flex justify-center gap-4">
-          <a href="#">fFacebook</a>
-          <a href="#">𝕏Twitter</a>
-          <a href="#">inLinkedIn</a>
+      <footer className="mt-16 border-t border-[#ddd3c6] bg-[#efe8dd]">
+        <div className="mx-auto max-w-7xl px-6 py-8 text-center">
+          <p className="text-[12px] tracking-[0.08em] text-[#5f554b]">
+            © 2026 Property Project Marketing Pty Ltd
+          </p>
+          <div className="mt-4 flex justify-center gap-6 text-[12px] uppercase tracking-[0.14em] text-[#5f554b]">
+            <a href="#" className="transition hover:text-[#1f1a17]">Facebook</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Twitter</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">LinkedIn</a>
+          </div>
         </div>
       </footer>
     </main>
