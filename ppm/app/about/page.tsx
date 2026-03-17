@@ -61,7 +61,7 @@ export default function AboutPage() {
 
           <div className="overflow-hidden rounded-sm border border-[#ddd3c6]">
             <img
-              src="/images/banner3.png"
+              src="/images/aboutus.png"
               alt="PPM property"
               className="h-full w-full object-cover"
             />
