@@ -113,7 +113,7 @@ export default function Home() {
             <a href="#" className="transition hover:text-[#1f1a17]">
               Projects
             </a>
-            <a href="/#" className="transition hover:text-[#1f1a17]">
+            <a href="/login" className="transition hover:text-[#1f1a17]">
               Login
             </a>
           </nav>
