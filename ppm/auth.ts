@@ -36,9 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        if (user.role !== "admin") {
-          return null;
-        }
+     
 
         const passwordOk = await bcrypt.compare(password, user.passwordHash);
         if (!passwordOk) {

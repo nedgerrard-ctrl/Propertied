@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { signIn, getSession } from "next-auth/react";
 
-export default function AdminLoginPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,82 +21,157 @@ export default function AdminLoginPage() {
       redirect: false,
     });
 
-    setLoading(false);
-
     if (!result || result.error) {
+      setLoading(false);
       setError("Invalid email or password.");
       return;
     }
 
-    window.location.href = "/admin/dashboard";
+    const session = await getSession();
+    const role = session?.user?.role;
+
+    if (role === "admin") {
+      window.location.href = "/admin/dashboard";
+      return;
+    }
+
+    if (role === "client") {
+      window.location.href = "/client/dashboard";
+      return;
+    }
+
+    setLoading(false);
+    setError("Your account does not have a valid role.");
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 px-6 py-12">
-      <div className="mx-auto flex min-h-[80vh] max-w-5xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-3xl bg-white shadow-xl lg:grid-cols-2">
-          <section className="hidden bg-neutral-900 p-10 text-white lg:block">
-            <p className="text-sm uppercase tracking-[0.2em] text-neutral-400">
-              PPM Internal
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold leading-tight">
-              Admin login for internal staff only.
-            </h1>
-            <p className="mt-6 max-w-md text-neutral-300">
-              Manage enquiries, update blog content, and review admin stats.
-            </p>
-          </section>
+    <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
+      <header className="border-b border-[#d8d0c4] bg-[#ebe6dd]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link
+            href="/"
+            className="text-[15px] font-semibold uppercase tracking-[0.18em] text-[#2f2923]"
+          >
+            Property Project Marketing Pty Ltd
+          </Link>
 
-          <section className="p-8 sm:p-10">
-            <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">
-              PPM
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold text-neutral-900">
-              Admin Login
-            </h2>
-            <p className="mt-2 text-sm text-neutral-600">
-              Sign in to access the internal dashboard.
-            </p>
+          <nav className="hidden items-center gap-8 md:flex">
+            <Link
+              href="/"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Home
+            </Link>
+            <Link
+              href="/about"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              About Us
+            </Link>
+            <Link
+              href="/buyers"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Buyers
+            </Link>
+            <Link
+              href="/services"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Services
+            </Link>
+            <Link
+              href="/developers"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Developers
+            </Link>
+            <Link
+              href="/blog"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Blog
+            </Link>
+            <Link
+              href="/contact"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/projects"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
+              Projects
+            </Link>
+            <Link
+              href="/login"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#2f2923]"
+            >
+              Login
+            </Link>
+          </nav>
+        </div>
+      </header>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+      <section className="flex min-h-[calc(100vh-170px)] items-center justify-center px-6 py-14">
+        <div className="w-full max-w-[620px] rounded-[28px] border border-[#d8d0c4] bg-[#fbfaf7] shadow-[0_10px_30px_rgba(47,41,35,0.06)]">
+          <div className="px-8 pb-10 pt-10 sm:px-14">
+            <div className="mb-10 text-center">
+              <p className="text-[12px] font-medium uppercase tracking-[0.28em] text-[#9a8f83]">
+                Property Project Marketing
+              </p>
+              <h1 className="mt-5 text-4xl font-medium tracking-tight text-[#2f2923] sm:text-5xl">
+                Sign in
+              </h1>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-[#6e655c] sm:text-base">
+                Access your account to continue to your portal.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-neutral-700"
+                  className="mb-2 block text-sm font-medium text-[#4d453d]"
                 >
-                  Email
+                  Email address
                 </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="admin@ppm.com.au"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-neutral-300 px-4 py-3 outline-none focus:border-neutral-900"
-                  required
-                />
+                <div className="rounded-2xl border border-[#8e857a] bg-[#fbfaf7] px-4 py-3">
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="hello@propertyprojectmarketing.com.au"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-transparent text-[15px] text-[#2f2923] outline-none placeholder:text-[#a49a8d]"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-neutral-700"
+                  className="mb-2 block text-sm font-medium text-[#4d453d]"
                 >
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-neutral-300 px-4 py-3 outline-none focus:border-neutral-900"
-                  required
-                />
+                <div className="rounded-2xl border border-[#8e857a] bg-[#fbfaf7] px-4 py-3">
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-transparent text-[15px] text-[#2f2923] outline-none placeholder:text-[#a49a8d]"
+                    required
+                  />
+                </div>
               </div>
 
               {error ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-2xl border border-[#d4b7b0] bg-[#f7e9e6] px-4 py-3 text-sm text-[#8a3d31]">
                   {error}
                 </div>
               ) : null}
@@ -103,14 +179,66 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-2xl bg-neutral-900 px-4 py-3 font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+                className="w-full rounded-2xl border border-[#2f2923] bg-[#2f2923] px-4 py-3 text-base font-medium text-[#fbfaf7] transition hover:bg-[#453d35] hover:border-[#453d35] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? "Signing in..." : "Continue"}
               </button>
             </form>
-          </section>
+
+            <div className="my-8 flex items-center gap-4">
+              <div className="h-px flex-1 bg-[#ddd5c8]" />
+              <span className="text-sm font-medium uppercase tracking-[0.18em] text-[#8f867a]">
+                Portal access
+              </span>
+              <div className="h-px flex-1 bg-[#ddd5c8]" />
+            </div>
+
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-[#d8d0c4] bg-[#f7f3ec] px-5 py-4 text-sm text-[#6e655c]">
+                Use your registered email and password to sign in.
+              </div>
+              <div className="rounded-2xl border border-[#d8d0c4] bg-[#f7f3ec] px-5 py-4 text-sm text-[#6e655c]">
+                Access will depend on your account role and permissions.
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#ddd5c8] bg-[#f3eee6] px-8 py-6 text-center sm:px-14">
+            <p className="text-sm leading-6 text-[#7a7166]">
+              By continuing, you agree to our Terms of Use and Privacy Policy.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <footer className="border-t border-[#d8d0c4] bg-[#ebe6dd]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-center md:flex-row md:text-left">
+          <p className="text-sm text-[#7a7166]">
+            © 2026 Property Project Marketing Pty Ltd
+          </p>
+
+          <div className="flex items-center gap-6">
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              Facebook
+            </Link>
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              Twitter
+            </Link>
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              LinkedIn
+            </Link>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
