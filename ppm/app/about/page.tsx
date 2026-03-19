@@ -77,7 +77,7 @@ export default function AboutPage() {
 
           <div className="mt-6 overflow-hidden rounded-sm border border-[#ddd3c6]">
             <img
-              src="/images/banner4.png"
+              src="/images/house4.png"
               alt="End-to-end model"
               className="h-[240px] w-full object-cover"
             />
