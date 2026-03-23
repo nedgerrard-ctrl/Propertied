@@ -7,8 +7,8 @@ export default function HeroCarousel() {
   const slides: string[] = [
     "/images/house1.png",
     "/images/house2.png",
-    "/images/banner3.png",
-    "/images/banner4.png",
+    "/images/house3.png",
+    "/images/house4.png",
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
