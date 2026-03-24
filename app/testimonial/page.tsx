@@ -1,6 +1,7 @@
 import TestimonialCard from "../components/TestimonialCard";
 import Link from "next/link";
 
+
 type Testimonial = {
   id: string;
   rating: number;
@@ -177,31 +178,15 @@ export default function TestimonialsPage() {
           </div>
         </section>
       </div>
-      <footer className="border-t border-[#d8d0c4] bg-[#ebe6dd]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-center md:flex-row md:text-left">
-          <p className="text-sm text-[#7a7166]">
+       <footer className="mt-16 border-t border-[#ddd3c6] bg-[#efe8dd]">
+        <div className="mx-auto max-w-7xl px-6 py-8 text-center">
+          <p className="text-[12px] tracking-[0.08em] text-[#5f554b]">
             © 2026 Property Project Marketing Pty Ltd
           </p>
-
-          <div className="flex items-center gap-6">
-            <Link
-              href="#"
-              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-            >
-              Facebook
-            </Link>
-            <Link
-              href="#"
-              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-            >
-              Twitter
-            </Link>
-            <Link
-              href="#"
-              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-            >
-              LinkedIn
-            </Link>
+          <div className="mt-4 flex justify-center gap-6 text-[12px] uppercase tracking-[0.14em] text-[#5f554b]">
+            <a href="#" className="transition hover:text-[#1f1a17]">Facebook</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">Twitter</a>
+            <a href="#" className="transition hover:text-[#1f1a17]">LinkedIn</a>
           </div>
         </div>
       </footer>
