@@ -60,70 +60,43 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
-      <header className="border-b border-[#d8d0c4] bg-[#ebe6dd]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link
-            href="/"
-            className="text-[15px] font-semibold uppercase tracking-[0.18em] text-[#2f2923]"
-          >
+      <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
+          <div className="shrink-0 text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
             Property Project Marketing Pty Ltd
-          </Link>
+          </div>
 
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
+            <a href="/" className="transition hover:text-[#1f1a17]">
               Home
-            </Link>
-            <Link
-              href="/about"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="/about" className="transition hover:text-[#1f1a17]">
               About Us
-            </Link>
-            <Link
-              href="/buyers"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
               Buyers
-            </Link>
-            <Link
-              href="/services"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
               Services
-            </Link>
-            <Link
-              href="/developers"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
               Developers
-            </Link>
-            <Link
-              href="/blog"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
               Blog
-            </Link>
-            <Link
-              href="/contact"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="testimonial" className="transition hover:text-[#1f1a17]">
+              Testimonials
+            </a>
+            <a href="/contact" className="transition hover:text-[#1f1a17]">
               Contact
-            </Link>
-            <Link
-              href="/projects"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
               Projects
-            </Link>
-            <Link
-              href="/login"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#2f2923]"
-            >
+            </a>
+            <a href="/login" className="transition hover:text-[#1f1a17]">
               Login
-            </Link>
+            </a>
           </nav>
         </div>
       </header>

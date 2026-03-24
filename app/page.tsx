@@ -104,7 +104,7 @@ export default function Home() {
             <a href="#" className="transition hover:text-[#1f1a17]">
               Blog
             </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            <a href="testimonial" className="transition hover:text-[#1f1a17]">
               Testimonials
             </a>
             <a href="/contact" className="transition hover:text-[#1f1a17]">

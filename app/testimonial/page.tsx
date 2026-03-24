@@ -64,6 +64,24 @@ const testimonials: Testimonial[] = [
     review:
       "Professional presentation, timely follow-up, and a strong understanding of what investors actually need.",
   },
+  {
+    id: "7",
+    rating: 4,
+    username: "Bryan C",
+    role: "Local Investor",
+    image: "/images/house2.png",
+    review:
+      "Professional presentation, timely follow-up, and a strong understanding of what investors actually need.",
+  },
+  {
+    id: "8",
+    rating: 4,
+    username: "Wallace C",
+    role: "Local Investor",
+    image: "/images/house2.png",
+    review:
+      "Professional presentation, timely follow-up, and a strong understanding of what investors actually need.",
+  },
 ];
 
 const averageRating =
