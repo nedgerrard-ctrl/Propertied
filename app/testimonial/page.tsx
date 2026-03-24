@@ -1,4 +1,5 @@
 import TestimonialCard from "../components/TestimonialCard";
+import Link from "next/link";
 
 type Testimonial = {
   id: string;
@@ -106,6 +107,46 @@ function StarSummary() {
 export default function TestimonialsPage() {
   return (
     <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+        <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
+          <div className="shrink-0 text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
+            Property Project Marketing Pty Ltd
+          </div>
+
+          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
+            <a href="/" className="transition hover:text-[#1f1a17]">
+              Home
+            </a>
+            <a href="/about" className="transition hover:text-[#1f1a17]">
+              About Us
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Buyers
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Services
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Developers
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Blog
+            </a>
+            <a href="testimonial" className="transition hover:text-[#1f1a17]">
+              Testimonials
+            </a>
+            <a href="/contact" className="transition hover:text-[#1f1a17]">
+              Contact
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Projects
+            </a>
+            <a href="/login" className="transition hover:text-[#1f1a17]">
+              Login
+            </a>
+          </nav>
+        </div>
+      </header>
       <div className="mx-auto max-w-7xl px-6 py-10">
         <section className="border border-[#e3d8ca] bg-[#fbf8f3] px-6 py-14 text-center">
           <h1 className="text-3xl font-light md:text-5xl">Testimonials</h1>
@@ -136,6 +177,35 @@ export default function TestimonialsPage() {
           </div>
         </section>
       </div>
+      <footer className="border-t border-[#d8d0c4] bg-[#ebe6dd]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-center md:flex-row md:text-left">
+          <p className="text-sm text-[#7a7166]">
+            © 2026 Property Project Marketing Pty Ltd
+          </p>
+
+          <div className="flex items-center gap-6">
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              Facebook
+            </Link>
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              Twitter
+            </Link>
+            <Link
+              href="#"
+              className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
+            >
+              LinkedIn
+            </Link>
+          </div>
+        </div>
+      </footer>
     </main>
+    
   );
 }
