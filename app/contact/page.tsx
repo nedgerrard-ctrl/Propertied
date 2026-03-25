@@ -73,132 +73,207 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#efefef] text-[#1f2937]">
-      <header className="flex flex-col gap-3 bg-[#dfe2e6] px-4 py-3 md:flex-row md:items-center md:justify-between">
-        <div className="text-[15px] font-bold text-[#2f2f2f]">
-          Property Project Marketing Pty Ltd
-        </div>
+    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+      <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
+          <a href="/" className="shrink-0 text-lg font-semibold uppercase tracking-[0.12em] text-[#2f2a24] hover:opacity-80 transition">
+            Property Project Marketing Pty Ltd
+          </a>
 
-        <nav className="flex flex-wrap gap-3 text-[10px] font-medium text-[#334155] md:gap-4">
-          <a href="/">Home</a>
-          <a href="/about">About Us</a>
-          <a href="#">Buyers</a>
-          <a href="#">Services</a>
-          <a href="#">Developers</a>
-          <a href="#">Blog</a>
-          <a href="#">Testimonials</a>
-          <a href="/contact">Contact</a>
-        </nav>
+          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
+            <a href="/" className="transition hover:text-[#1f1a17]">
+              Home
+            </a>
+            <a href="/about" className="transition hover:text-[#1f1a17]">
+              About Us
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Buyers
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Services
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Developers
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Blog
+            </a>
+            <a href="/testimonial" className="transition hover:text-[#1f1a17]">
+              Testimonials
+            </a>
+            <a
+              href="/contact"
+              className="transition text-[#1f1a17] font-semibold"
+            >
+              Contact
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Projects
+            </a>
+            <a href="/login" className="transition hover:text-[#1f1a17]">
+              Login
+            </a>
+          </nav>
+        </div>
       </header>
 
-      <section className="px-6 py-10">
-        <h1 className="text-center text-[24px] font-bold text-[#2f3a4a]">
-          CONTACT US
-        </h1>
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+            Get In Touch
+          </p>
+          <h1 className="mt-3 text-4xl font-light text-[#1f1a17] md:text-5xl">
+            Contact Us
+          </h1>
+          <p className="mt-4 text-[15px] leading-7 text-[#6c6258]">
+            Speak with our team about buying opportunities, project marketing,
+            or tailored property advice.
+          </p>
+        </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto mt-10 max-w-[760px] space-y-8"
-        >
-          <div>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Name*"
-              required
-              className="w-full border-b border-[#b9c2d0] bg-transparent px-0 py-3 text-[13px] outline-none"
-            />
-          </div>
+        <div className="mx-auto mt-12 max-w-4xl rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-12">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid gap-8 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your name"
+                  required
+                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                />
+              </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email*"
-              required
-              className="w-full border-b border-[#b9c2d0] bg-transparent px-0 py-3 text-[13px] outline-none"
-            />
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                  required
+                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                />
+              </div>
+            </div>
 
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Phone*"
-              required
-              className="w-full border-b border-[#b9c2d0] bg-transparent px-0 py-3 text-[13px] outline-none"
-            />
-          </div>
+            <div className="grid gap-8 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                />
+              </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
-            <select
-              name="propertyInterest"
-              value={formData.propertyInterest}
-              onChange={handleChange}
-              required
-              className="w-full border-b border-[#b9c2d0] bg-transparent px-0 py-3 text-[13px] outline-none"
-            >
-              <option value="">Property Interest*</option>
-              <option value="off-plan">Off-plan</option>
-              <option value="established">Established</option>
-            </select>
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Property Interest
+                </label>
+                <select
+                  name="propertyInterest"
+                  value={formData.propertyInterest}
+                  onChange={handleChange}
+                  required
+                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition focus:border-[#5f5245]"
+                >
+                  <option value="">Select property interest</option>
+                  <option value="off-plan">Off-plan</option>
+                  <option value="established">Established</option>
+                </select>
+              </div>
+            </div>
 
-            <select
-              name="investorType"
-              value={formData.investorType}
-              onChange={handleChange}
-              required
-              className="w-full border-b border-[#b9c2d0] bg-transparent px-0 py-3 text-[13px] outline-none"
-            >
-              <option value="">Investor Type*</option>
-              <option value="local">Local</option>
-              <option value="overseas">Overseas</option>
-            </select>
-          </div>
+            <div className="grid gap-8 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Investor Type
+                </label>
+                <select
+                  name="investorType"
+                  value={formData.investorType}
+                  onChange={handleChange}
+                  required
+                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition focus:border-[#5f5245]"
+                >
+                  <option value="">Select investor type</option>
+                  <option value="local">Local</option>
+                  <option value="overseas">Overseas</option>
+                </select>
+              </div>
 
-          <div>
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="Short Message"
-              rows={6}
-              className="w-full rounded-sm border border-[#b9c2d0] bg-transparent p-3 text-[13px] outline-none resize-none"
-            />
-          </div>
+              <div className="hidden md:block" />
+            </div>
 
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex min-w-[180px] items-center justify-center bg-[#1f2937] px-6 py-3 text-[13px] font-semibold text-white transition hover:bg-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Submitting..." : "Send Enquiry"}
-            </button>
-          </div>
+            <div>
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                Message
+              </label>
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                placeholder="Tell us a little about what you're looking for"
+                rows={6}
+                className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] text-[#1f1a17] outline-none resize-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+              />
+            </div>
 
-          {statusMessage && (
-            <p
-              className={`text-center text-[12px] ${
-                isSuccess ? "text-green-700" : "text-red-600"
-              }`}
-            >
-              {statusMessage}
-            </p>
-          )}
-        </form>
+            <div className="flex justify-center pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex min-w-[200px] items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Submitting..." : "Send Enquiry"}
+              </button>
+            </div>
+
+            {statusMessage && (
+              <p
+                className={`text-center text-[13px] ${
+                  isSuccess ? "text-green-700" : "text-red-600"
+                }`}
+              >
+                {statusMessage}
+              </p>
+            )}
+          </form>
+        </div>
       </section>
 
-      <footer className="mt-8 bg-[#dfe2e6] px-4 py-4 text-center text-[11px] text-[#374151]">
-        <p>© 2026 Property Project Marketing Pty Ltd</p>
-        <div className="mt-2 flex justify-center gap-4">
-          <a href="#">fFacebook</a>
-          <a href="#">𝕏Twitter</a>
-          <a href="#">inLinkedIn</a>
+      <footer className="mt-16 border-t border-[#ddd3c6] bg-[#efe8dd]">
+        <div className="mx-auto max-w-7xl px-6 py-8 text-center">
+          <p className="text-[12px] tracking-[0.08em] text-[#5f554b]">
+            © 2026 Property Project Marketing Pty Ltd
+          </p>
+          <div className="mt-4 flex justify-center gap-6 text-[12px] uppercase tracking-[0.14em] text-[#5f554b]">
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Facebook
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              Twitter
+            </a>
+            <a href="#" className="transition hover:text-[#1f1a17]">
+              LinkedIn
+            </a>
+          </div>
         </div>
       </footer>
     </main>

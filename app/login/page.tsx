@@ -62,9 +62,9 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
       <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
-          <div className="shrink-0 text-lg font-semibold tracking-[0.12em] text-[#2f2a24] uppercase">
+          <a href="/" className="shrink-0 text-lg font-semibold uppercase tracking-[0.12em] text-[#2f2a24] hover:opacity-80 transition">
             Property Project Marketing Pty Ltd
-          </div>
+          </a>
 
           <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
             <a href="/" className="transition hover:text-[#1f1a17]">
