@@ -15,56 +15,58 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    setMessage("");
+  e.preventDefault();
+  setError("");
+  setMessage("");
 
-    if (!token) {
-      setError("Missing reset token.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Unable to reset password.");
-        setLoading(false);
-        return;
-      }
-
-      setMessage(data.message || "Password updated successfully.");
-      setPassword("");
-      setConfirmPassword("");
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  if (!token) {
+    setError("Missing reset token.");
+    return;
   }
+
+  if (password.length < 8) {
+    setError("Password must be at least 8 characters long.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || "Unable to reset password.");
+      setLoading(false);
+      return;
+    }
+
+    setMessage("Password updated successfully. Redirecting to login...");
+
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 1500);
+  } catch {
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
