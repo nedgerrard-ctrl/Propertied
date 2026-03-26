@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function AboutPage() {
   const cycleSteps = [
@@ -127,25 +129,7 @@ export default function AboutPage() {
 
   return (
     <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
-      <header className="border-b border-[#ddd3c6] bg-[#f6f2eb]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
-          <a href="/" className="shrink-0 text-lg font-semibold uppercase tracking-[0.12em] text-[#2f2a24] hover:opacity-80 transition">
-            Property Project Marketing Pty Ltd
-          </a>
-          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
-            <a href="/" className="transition hover:text-[#1f1a17]">Home</a>
-            <a href="/about" className="text-[#1f1a17]">About Us</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Buyers</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Services</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Developers</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Blog</a>
-            <a href="/testimonial" className="transition hover:text-[#1f1a17]">Testimonials</a>
-            <a href="/contact" className="transition hover:text-[#1f1a17]">Contact</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Projects</a>
-            <a href="/login" className="transition hover:text-[#1f1a17]">Login</a>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="mx-auto max-w-7xl px-6 py-10">
 
@@ -527,18 +511,7 @@ export default function AboutPage() {
         </section>
       </div>
 
-      <footer className="mt-16 border-t border-[#ddd3c6] bg-[#efe8dd]">
-        <div className="mx-auto max-w-7xl px-6 py-8 text-center">
-          <p className="text-[12px] tracking-[0.08em] text-[#5f554b]">
-            © 2026 Property Project Marketing Pty Ltd
-          </p>
-          <div className="mt-4 flex justify-center gap-6 text-[12px] uppercase tracking-[0.14em] text-[#5f554b]">
-            <a href="#" className="transition hover:text-[#1f1a17]">Facebook</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">Twitter</a>
-            <a href="#" className="transition hover:text-[#1f1a17]">LinkedIn</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
