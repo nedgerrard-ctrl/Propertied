@@ -9,7 +9,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: "/admin/login",
+    signIn: "/login",
   },
   providers: [
     Credentials({
@@ -36,8 +36,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-     
-
         const passwordOk = await bcrypt.compare(password, user.passwordHash);
         if (!passwordOk) {
           return null;
@@ -61,7 +59,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string }).role = token.role as string | undefined;
+        (session.user as { role?: string }).role = token.role as
+          | string
+          | undefined;
       }
       return session;
     },

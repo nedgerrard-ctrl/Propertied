@@ -6,14 +6,9 @@ export default auth((req) => {
   const role = req.auth?.user?.role;
   const pathname = req.nextUrl.pathname;
 
-  const isLoginPage = pathname === "/login";
   const isAdminRoute = pathname.startsWith("/admin");
 
-  if (isLoginPage && isLoggedIn && role === "admin") {
-    return NextResponse.redirect(new URL("/admin/dashboard", req.url));
-  }
-
-  if (isAdminRoute && !isLoginPage && (!isLoggedIn || role !== "admin")) {
+  if (isAdminRoute && (!isLoggedIn || role !== "admin")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

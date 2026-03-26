@@ -22,7 +22,7 @@ export default function LoginPage() {
     }
 
     checkSession();
-  }, []);
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,37 +66,61 @@ export default function LoginPage() {
             Property Project Marketing Pty Ltd
           </a>
 
-          <nav className="ml-16 flex items-center gap-6 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.14em] text-[#5b5147]">
-            <a href="/" className="transition hover:text-[#1f1a17]">
+          <nav className="hidden items-center gap-8 md:flex">
+            <Link
+              href="/"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Home
-            </a>
-            <a href="/about" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/about"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               About Us
-            </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/buyers"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Buyers
-            </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/services"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Services
-            </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/developers"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Developers
-            </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/blog"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Blog
-            </a>
-            <a href="testimonial" className="transition hover:text-[#1f1a17]">
-              Testimonials
-            </a>
-            <a href="/contact" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/contact"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Contact
-            </a>
-            <a href="#" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/projects"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
+            >
               Projects
-            </a>
-            <a href="/login" className="transition hover:text-[#1f1a17]">
+            </Link>
+            <Link
+              href="/login"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#2f2923]"
+            >
               Login
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
@@ -155,6 +179,15 @@ export default function LoginPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-[#6e655c] underline underline-offset-4 hover:text-[#2f2923]"
+                >
+                  Forgot password?
+                </Link>
               </div>
 
               {error ? (
