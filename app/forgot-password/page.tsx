@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -51,73 +53,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
-      <header className="border-b border-[#d8d0c4] bg-[#ebe6dd]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link
-            href="/"
-            className="text-[15px] font-semibold uppercase tracking-[0.18em] text-[#2f2923]"
-          >
-            Property Project Marketing Pty Ltd
-          </Link>
-
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Home
-            </Link>
-            <Link
-              href="/about"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              About Us
-            </Link>
-            <Link
-              href="/buyers"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Buyers
-            </Link>
-            <Link
-              href="/services"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Services
-            </Link>
-            <Link
-              href="/developers"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Developers
-            </Link>
-            <Link
-              href="/blog"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Blog
-            </Link>
-            <Link
-              href="/contact"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Contact
-            </Link>
-            <Link
-              href="/projects"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#6e655c] transition hover:text-[#2f2923]"
-            >
-              Projects
-            </Link>
-            <Link
-              href="/login"
-              className="text-[11px] uppercase tracking-[0.18em] text-[#2f2923]"
-            >
-              Login
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
       <section className="flex min-h-screen items-center justify-center px-6 py-14">
         <div className="w-full max-w-[560px] rounded-[28px] border border-[#d8d0c4] bg-[#fbfaf7] shadow-[0_10px_30px_rgba(47,41,35,0.06)]">
           <div className="px-8 pb-10 pt-10 sm:px-14">
@@ -200,34 +136,7 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
       </section>
-      <footer className="border-t border-[#d8d0c4] bg-[#ebe6dd]">
-              <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-center md:flex-row md:text-left">
-                <p className="text-sm text-[#7a7166]">
-                  © 2026 Property Project Marketing Pty Ltd
-                </p>
-      
-                <div className="flex items-center gap-6">
-                  <Link
-                    href="#"
-                    className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-                  >
-                    Facebook
-                  </Link>
-                  <Link
-                    href="#"
-                    className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-                  >
-                    Twitter
-                  </Link>
-                  <Link
-                    href="#"
-                    className="text-[12px] uppercase tracking-[0.18em] text-[#7a7166] transition hover:text-[#2f2923]"
-                  >
-                    LinkedIn
-                  </Link>
-                </div>
-              </div>
-          </footer>
+      <Footer />
     </main>
   );
 }
