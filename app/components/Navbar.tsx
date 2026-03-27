@@ -34,7 +34,7 @@ export default function Navbar() {
             Developers
           </Link>
 
-          <Link href="#" className="transition hover:text-[#1f1a17]">
+          <Link href="/blog" className="transition hover:text-[#1f1a17]">
             Blog
           </Link>
 

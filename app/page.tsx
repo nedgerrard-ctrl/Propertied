@@ -73,7 +73,7 @@ export default function Home() {
   const cards = [
     { title: "About Us", subtitle: "View Company Details", image: "/images/house1.png", href: "/about" },
     { title: "Portfolio Services", subtitle: "View More", image: "/images/house2.png", href: "#" },
-    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png", href: "#" },
+    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png", href: "/blog" },
     { title: "For Developers", subtitle: "Discover Partnerships", image: "/images/house2.png", href: "#" },
     { title: "For Buyers", subtitle: "Explore Buyer Options", image: "/images/house1.png", href: "#" },
     { title: "Testimonials", subtitle: "See Client Feedback", image: "/images/house2.png", href: "#" },
