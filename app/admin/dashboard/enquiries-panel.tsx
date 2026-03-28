@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 
-type EnquiryStatus = "new" | "contacted" | "closed";
+type EnquiryStatus = "qualified" | "in-progress" | "closed";
 
 type Enquiry = {
   _id: string;
@@ -16,19 +16,34 @@ type Enquiry = {
   createdAt: string;
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Status helpers ──────────────────────────────────────────────────────────
 
-function statusBadge(status: EnquiryStatus) {
-  const styles: Record<EnquiryStatus, string> = {
-    new: "bg-amber-100 text-amber-800",
-    contacted: "bg-blue-100 text-blue-800",
-    closed: "bg-neutral-200 text-neutral-600",
-  };
+const STATUS_OPTIONS: EnquiryStatus[] = ["qualified", "in-progress", "closed"];
+
+const STATUS_LABEL: Record<EnquiryStatus, string> = {
+  qualified: "Qualified",
+  "in-progress": "In Progress",
+  closed: "Closed",
+};
+
+const STATUS_BADGE: Record<EnquiryStatus, string> = {
+  qualified: "bg-emerald-100 text-emerald-800",
+  "in-progress": "bg-blue-100 text-blue-800",
+  closed: "bg-neutral-200 text-neutral-600",
+};
+
+const STATUS_BUTTON: Record<EnquiryStatus, string> = {
+  qualified: "border-emerald-400 bg-emerald-50 text-emerald-800",
+  "in-progress": "border-blue-400 bg-blue-50 text-blue-800",
+  closed: "border-neutral-400 bg-neutral-100 text-neutral-600",
+};
+
+function StatusBadge({ status }: { status: EnquiryStatus }) {
   return (
     <span
-      className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles[status]}`}
+      className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${STATUS_BADGE[status] ?? "bg-neutral-100 text-neutral-500"}`}
     >
-      {status}
+      {STATUS_LABEL[status] ?? status}
     </span>
   );
 }
@@ -39,6 +54,54 @@ function formatDate(iso: string) {
     month: "short",
     year: "numeric",
   });
+}
+
+// ── Shared API call ─────────────────────────────────────────────────────────
+
+async function patchStatus(id: string, status: EnquiryStatus) {
+  const res = await fetch(`/api/admin/enquiries/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  return res.ok;
+}
+
+// ── Inline status select (table row) ────────────────────────────────────────
+
+function InlineStatusSelect({
+  enquiry,
+  onStatusUpdate,
+}: {
+  enquiry: Enquiry;
+  onStatusUpdate: (id: string, status: EnquiryStatus) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    e.stopPropagation();
+    const next = e.target.value as EnquiryStatus;
+    setSaving(true);
+    const ok = await patchStatus(enquiry._id, next);
+    if (ok) onStatusUpdate(enquiry._id, next);
+    setSaving(false);
+  }
+
+  return (
+    <select
+      value={enquiry.status}
+      onChange={handleChange}
+      onClick={(e) => e.stopPropagation()}
+      disabled={saving}
+      className={`cursor-pointer rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] transition disabled:opacity-50 ${STATUS_BADGE[enquiry.status] ?? "bg-neutral-100 text-neutral-500"}`}
+    >
+      {STATUS_OPTIONS.map((s) => (
+        <option key={s} value={s} className="bg-white normal-case text-neutral-900">
+          {STATUS_LABEL[s]}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 // ── Detail slide-over ───────────────────────────────────────────────────────
@@ -52,46 +115,31 @@ function DetailPanel({
   onClose: () => void;
   onStatusUpdate: (id: string, status: EnquiryStatus) => void;
 }) {
-  const [pendingStatus, setPendingStatus] = useState<EnquiryStatus>(
-    enquiry.status
-  );
+  const [pendingStatus, setPendingStatus] = useState<EnquiryStatus>(enquiry.status);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Sync if the enquiry status was changed inline while panel is open
+  useEffect(() => {
+    setPendingStatus(enquiry.status);
+  }, [enquiry.status]);
 
   async function handleSave() {
     if (pendingStatus === enquiry.status) return;
     setSaving(true);
-    try {
-      const res = await fetch(`/api/admin/enquiries/${enquiry._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: pendingStatus }),
-      });
-      if (res.ok) {
-        onStatusUpdate(enquiry._id, pendingStatus);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      }
-    } finally {
-      setSaving(false);
+    const ok = await patchStatus(enquiry._id, pendingStatus);
+    if (ok) {
+      onStatusUpdate(enquiry._id, pendingStatus);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     }
+    setSaving(false);
   }
-
-  const statusOptions: EnquiryStatus[] = ["new", "contacted", "closed"];
-  const optionStyles: Record<EnquiryStatus, string> = {
-    new: "border-amber-400 bg-amber-50 text-amber-800",
-    contacted: "border-blue-400 bg-blue-50 text-blue-800",
-    closed: "border-neutral-400 bg-neutral-100 text-neutral-600",
-  };
-  const optionIdle = "border-neutral-200 bg-white text-neutral-500";
 
   return (
     <>
       {/* Overlay */}
-      <div
-        className="fixed inset-0 z-30 bg-black/20"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-30 bg-black/20" onClick={onClose} />
 
       {/* Panel */}
       <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl">
@@ -118,7 +166,7 @@ function DetailPanel({
 
         {/* Body */}
         <div className="flex flex-1 flex-col gap-6 px-6 py-6">
-          {/* Contact info */}
+          {/* Contact */}
           <section>
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
               Contact
@@ -126,7 +174,7 @@ function DetailPanel({
             <dl className="space-y-2 text-[13px]">
               <div className="flex gap-3">
                 <dt className="w-24 shrink-0 text-neutral-400">Email</dt>
-                <dd className="font-medium text-neutral-900 break-all">
+                <dd className="break-all font-medium text-neutral-900">
                   <a href={`mailto:${enquiry.email}`} className="hover:underline">
                     {enquiry.email}
                   </a>
@@ -159,10 +207,8 @@ function DetailPanel({
             <dl className="space-y-2 text-[13px]">
               <div className="flex gap-3">
                 <dt className="w-24 shrink-0 text-neutral-400">Source</dt>
-                <dd className="font-medium capitalize text-neutral-900">
-                  {enquiry.propertyInterest === "off-plan"
-                    ? "Off-the-Plan"
-                    : "Established"}
+                <dd className="font-medium text-neutral-900">
+                  {enquiry.propertyInterest === "off-plan" ? "Off-the-Plan" : "Established"}
                 </dd>
               </div>
               <div className="flex gap-3">
@@ -173,7 +219,7 @@ function DetailPanel({
               </div>
               <div className="flex gap-3">
                 <dt className="w-24 shrink-0 text-neutral-400">Status</dt>
-                <dd>{statusBadge(enquiry.status)}</dd>
+                <dd><StatusBadge status={enquiry.status} /></dd>
               </div>
             </dl>
           </section>
@@ -185,7 +231,7 @@ function DetailPanel({
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                   Message
                 </p>
-                <p className="text-[13px] leading-6 text-neutral-700 whitespace-pre-wrap">
+                <p className="whitespace-pre-wrap text-[13px] leading-6 text-neutral-700">
                   {enquiry.message}
                 </p>
               </section>
@@ -200,15 +246,17 @@ function DetailPanel({
               Update Status
             </p>
             <div className="flex gap-2">
-              {statusOptions.map((s) => (
+              {STATUS_OPTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => setPendingStatus(s)}
                   className={`flex-1 rounded border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
-                    pendingStatus === s ? optionStyles[s] : optionIdle
+                    pendingStatus === s
+                      ? STATUS_BUTTON[s]
+                      : "border-neutral-200 bg-white text-neutral-400"
                   }`}
                 >
-                  {s}
+                  {STATUS_LABEL[s]}
                 </button>
               ))}
             </div>
@@ -259,8 +307,7 @@ export default function EnquiriesPanel() {
   const filtered = useMemo(() => {
     return enquiries.filter((e) => {
       if (statusFilter !== "all" && e.status !== statusFilter) return false;
-      if (sourceFilter !== "all" && e.propertyInterest !== sourceFilter)
-        return false;
+      if (sourceFilter !== "all" && e.propertyInterest !== sourceFilter) return false;
       if (dateFrom) {
         const from = new Date(dateFrom);
         from.setHours(0, 0, 0, 0);
@@ -275,26 +322,17 @@ export default function EnquiriesPanel() {
     });
   }, [enquiries, statusFilter, sourceFilter, dateFrom, dateTo]);
 
-  // Stats
   const counts = useMemo(
     () => ({
       total: enquiries.length,
-      new: enquiries.filter((e) => e.status === "new").length,
-      contacted: enquiries.filter((e) => e.status === "contacted").length,
+      qualified: enquiries.filter((e) => e.status === "qualified").length,
+      "in-progress": enquiries.filter((e) => e.status === "in-progress").length,
       closed: enquiries.filter((e) => e.status === "closed").length,
     }),
     [enquiries]
   );
 
-  const hasFilters =
-    statusFilter !== "all" || sourceFilter !== "all" || dateFrom || dateTo;
-
-  function clearFilters() {
-    setStatusFilter("all");
-    setSourceFilter("all");
-    setDateFrom("");
-    setDateTo("");
-  }
+  const hasFilters = statusFilter !== "all" || sourceFilter !== "all" || dateFrom || dateTo;
 
   if (loading) {
     return (
@@ -317,10 +355,10 @@ export default function EnquiriesPanel() {
       {/* Stats bar */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Total", value: counts.total, color: "text-neutral-900" },
-          { label: "New", value: counts.new, color: "text-amber-700" },
-          { label: "Contacted", value: counts.contacted, color: "text-blue-700" },
-          { label: "Closed", value: counts.closed, color: "text-neutral-400" },
+          { label: "Total",       value: counts.total,           color: "text-neutral-900" },
+          { label: "Qualified",   value: counts.qualified,        color: "text-emerald-700" },
+          { label: "In Progress", value: counts["in-progress"],   color: "text-blue-700"    },
+          { label: "Closed",      value: counts.closed,           color: "text-neutral-400" },
         ].map((s) => (
           <div
             key={s.label}
@@ -329,9 +367,7 @@ export default function EnquiriesPanel() {
             <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
               {s.label}
             </p>
-            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>
-              {s.value}
-            </p>
+            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -348,8 +384,8 @@ export default function EnquiriesPanel() {
             className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           >
             <option value="all">All statuses</option>
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
+            <option value="qualified">Qualified</option>
+            <option value="in-progress">In Progress</option>
             <option value="closed">Closed</option>
           </select>
         </div>
@@ -395,7 +431,12 @@ export default function EnquiriesPanel() {
 
         {hasFilters && (
           <button
-            onClick={clearFilters}
+            onClick={() => {
+              setStatusFilter("all");
+              setSourceFilter("all");
+              setDateFrom("");
+              setDateTo("");
+            }}
             className="self-end rounded border border-neutral-200 px-3 py-1.5 text-[12px] text-neutral-500 transition hover:border-neutral-400 hover:text-neutral-700"
           >
             Clear filters
@@ -445,15 +486,18 @@ export default function EnquiriesPanel() {
                   </td>
                   <td className="px-5 py-3.5 text-neutral-600">{e.email}</td>
                   <td className="px-5 py-3.5 text-neutral-600">{e.phone}</td>
-                  <td className="px-5 py-3.5 capitalize text-neutral-600">
-                    {e.propertyInterest === "off-plan"
-                      ? "Off-the-Plan"
-                      : "Established"}
+                  <td className="px-5 py-3.5 text-neutral-600">
+                    {e.propertyInterest === "off-plan" ? "Off-the-Plan" : "Established"}
                   </td>
                   <td className="px-5 py-3.5 capitalize text-neutral-600">
                     {e.investorType}
                   </td>
-                  <td className="px-5 py-3.5">{statusBadge(e.status)}</td>
+                  <td className="px-5 py-3.5">
+                    <InlineStatusSelect
+                      enquiry={e}
+                      onStatusUpdate={handleStatusUpdate}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
