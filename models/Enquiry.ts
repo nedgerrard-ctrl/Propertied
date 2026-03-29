@@ -33,6 +33,11 @@ const enquirySchema = new Schema(
       trim: true,
       default: "",
     },
+    status: {
+      type: String,
+      enum: ["qualified", "in-progress", "closed"],
+      default: "qualified",
+    },
   },
   {
     timestamps: true,

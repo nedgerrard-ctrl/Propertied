@@ -22,7 +22,7 @@ export default function Navbar() {
             About Us
           </Link>
 
-          <Link href="#" className="transition hover:text-[#1f1a17]">
+          <Link href="/buyers" className="transition hover:text-[#1f1a17]">
             Buyers
           </Link>
 
