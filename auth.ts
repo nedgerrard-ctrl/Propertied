@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import { isValidPassword } from "@/lib/password-validation";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -23,6 +24,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
 
         if (!email || !password) {
+          return null;
+        }
+
+        if (!isValidPassword(password)) {
           return null;
         }
 
