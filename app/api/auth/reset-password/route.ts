@@ -3,6 +3,10 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import {
+  isValidPassword,
+  PASSWORD_REQUIREMENTS_MESSAGE,
+} from "@/lib/password-validation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,19 +19,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!password || typeof password !== "string" || password.length < 8) {
+    if (!password || typeof password !== "string" || !isValidPassword(password)) {
       return NextResponse.json(
-        { message: "Password must be at least 8 characters long." },
+        { message: PASSWORD_REQUIREMENTS_MESSAGE },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
       resetPasswordTokenHash: hashedToken,

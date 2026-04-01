@@ -5,6 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import {
+  isValidPassword,
+  PASSWORD_REQUIREMENTS_MESSAGE,
+} from "@/lib/password-validation";
 
 export default function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -26,8 +30,8 @@ export default function ResetPasswordContent() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    if (!isValidPassword(password)) {
+      setError(PASSWORD_REQUIREMENTS_MESSAGE);
       return;
     }
 
@@ -108,6 +112,10 @@ export default function ResetPasswordContent() {
                     required
                   />
                 </div>
+                <p className="mt-2 text-xs leading-5 text-[#7a7166]">
+                  Must be at least 8 characters and include 1 uppercase letter,
+                  1 lowercase letter, 1 number, and 1 special character.
+                </p>
               </div>
 
               <div>
