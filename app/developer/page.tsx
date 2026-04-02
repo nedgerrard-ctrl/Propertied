@@ -2,43 +2,50 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const benefits = [
+const partnershipBenefits = [
   {
-    title: "Independent market representation",
+    title: "Independent third-party representation",
     description:
-      "PPM operates as an independent third-party project marketing partner, helping connect the right buyers and investors to the right development opportunity.",
+      "PPM is not tied to a single project or developer. We work as an independent project marketing partner, helping align the right development opportunities with the right buyers and investors.",
   },
   {
-    title: "Qualified lead generation",
+    title: "End-to-end investor journey",
     description:
-      "PPM is focused on attracting quality interest and creating a smoother path between market demand and project opportunity.",
+      "Our model goes beyond an initial sale. Through our broader investment and portfolio services approach, we support a longer-term relationship that can extend from acquisition through to management and eventual resale.",
   },
   {
-    title: "End-to-end buyer guidance",
+    title: "Experienced off-the-plan specialists",
     description:
-      "From first enquiry through display suite coordination and sales support, PPM helps move prospects through the buyer journey with clarity and confidence.",
+      "PPM’s background is rooted in off-the-plan apartments and townhouses, with practical experience in project marketing, buyer qualification, display suite coordination, and sales progression.",
   },
 ];
 
 const processSteps = [
   {
     step: "01",
-    title: "Project review",
+    title: "Project alignment",
     description:
-      "PPM works with developers to understand the project, location, target buyer profile, and the overall sales opportunity.",
+      "We work with developers to understand the project, the target buyer profile, and where the opportunity sits within the current market.",
   },
   {
     step: "02",
-    title: "Positioning and marketing support",
+    title: "Project representation",
     description:
-      "The project is positioned to appeal to qualified buyers and investors through a premium, trust-focused marketing presence.",
+      "PPM represents suitable developments on a commission basis, positioning them to the right buyers and investors while maintaining a premium and professional presentation.",
   },
   {
     step: "03",
-    title: "Buyer matching and sales progression",
+    title: "Buyer matching and progression",
     description:
-      "PPM supports the journey from early interest through buyer qualification, inspections or walkthroughs, and ongoing sales progression.",
+      "We guide interested buyers through the next steps, including project discussions, display suite visits or virtual walkthroughs, and progression toward sale.",
   },
+];
+
+const differentiators = [
+  "Independent channel partner, not tied to one developer",
+  "Commission-based representation for suitable developments",
+  "Experience across sourcing, selling, managing, and resale",
+  "Strong background working with investor clients",
 ];
 
 export default function DevelopersPage() {
@@ -61,9 +68,9 @@ export default function DevelopersPage() {
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-[15px] leading-7 text-[#5b5147]">
-                  We specialise in off-the-plan project marketing, connecting
-                  developers with qualified buyers and investors while managing
-                  the sales process from enquiry to conversion.
+                  We specialise in off-the-plan project marketing, working with
+                  developers as an independent third-party partner to connect
+                  quality projects with suitable buyers and investors.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-4">
@@ -71,7 +78,7 @@ export default function DevelopersPage() {
                     href="/contact"
                     className="inline-flex items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
                   >
-                    Contact Us
+                    Partner With Us
                   </Link>
 
                   <Link
@@ -90,12 +97,7 @@ export default function DevelopersPage() {
                   </p>
 
                   <div className="mt-5 space-y-4">
-                    {[
-                      "Independent third-party representation",
-                      "Qualified buyer and investor matching",
-                      "Premium project marketing support",
-                      "Clear path from interest to sale",
-                    ].map((item) => (
+                    {differentiators.map((item) => (
                       <div key={item} className="flex items-start gap-3">
                         <span className="mt-1.5 h-2 w-2 rounded-full bg-[#2f2a24]" />
                         <p className="text-[13px] leading-6 text-[#5b5147]">
@@ -109,12 +111,13 @@ export default function DevelopersPage() {
             </div>
           </div>
 
+         
           
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
-        {/* Intro content block */}
+        {/* Intro section */}
         <div className="max-w-5xl">
           <h2 className="text-3xl font-light text-[#1f1a17] md:text-4xl">
             How PPM works with developers
@@ -122,39 +125,40 @@ export default function DevelopersPage() {
 
           <div className="mt-8 space-y-6 text-[15px] leading-8 text-[#5b5147]">
             <p>
-              PPM works with developers as an independent project marketing
-              partner focused on connecting the right developments with the
-              right buyers and investors.
+              PPM works with developers as an independent third-party channel
+              partner. Rather than operating as a developer-owned in-house sales
+              team, we represent suitable projects on a commission basis and
+              help align them with the right buyers and investors.
             </p>
 
             <p>
-              Rather than acting as a simple listing platform, PPM supports the
-              broader sales journey by helping position projects effectively,
-              building trust with prospective buyers, and guiding interest
-              toward meaningful sales conversations.
+              This approach allows PPM to focus on quality project
+              representation, trusted buyer relationships, and a more tailored
+              path from first interest through to display suite engagement,
+              project understanding, and sales progression.
             </p>
 
             <p>
-              This approach gives developers a clearer pathway to market, with a
-              premium presentation, stronger buyer alignment, and support across
-              the project marketing process.
+              For developers, that means working with a partner that understands
+              off-the-plan sales, premium project positioning, and the broader
+              investment context surrounding each opportunity.
             </p>
           </div>
         </div>
 
-        {/* Benefits */}
+        {/* Why partner */}
         <section className="mt-16">
           <div className="mb-10">
             <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Benefits of Partnering With PPM
+              Why Partner With PPM
             </p>
             <h3 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
-              Built for trust, visibility, and stronger sales outcomes
+              Built on experience, trust, and long-term investor relationships
             </h3>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {benefits.map((benefit) => (
+            {partnershipBenefits.map((benefit) => (
               <article
                 key={benefit.title}
                 className="rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 shadow-[0_8px_24px_rgba(0,0,0,0.03)]"
@@ -174,6 +178,64 @@ export default function DevelopersPage() {
                 </p>
               </article>
             ))}
+          </div>
+        </section>
+
+        {/* End-to-end section */}
+        <section className="mt-16 grid gap-10 md:grid-cols-[1.15fr_0.85fr] md:items-start">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+              The PPM Difference
+            </p>
+            <h3 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
+              More than a project marketer
+            </h3>
+
+            <div className="mt-6 space-y-6 text-[15px] leading-8 text-[#5b5147]">
+              <p>
+                PPM’s broader model extends beyond simply introducing a buyer to
+                a project. The business is built around a wider investment
+                journey that can continue after the initial sale through
+                portfolio support and eventual resale.
+              </p>
+
+              <p>
+                That matters to developers because it reflects deeper investor
+                relationships, stronger market understanding, and a service
+                model that is connected to the full life cycle of property
+                ownership rather than a single transaction.
+              </p>
+
+              <p>
+                It also gives the PPM brand a point of difference: an
+                off-the-plan specialist with experience across sourcing,
+                selling, managing, and resale.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-sm border border-[#ddd3c6] bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a7b6d]">
+              End-to-End Model
+            </p>
+
+            <div className="mt-6 space-y-5">
+              {[
+                "Source the right opportunity",
+                "Support the buyer journey",
+                "Manage long-term investor relationships",
+                "Assist with future resale and reinvestment",
+              ].map((item, index) => (
+                <div key={item} className="flex items-start gap-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d7cabc] text-[11px] font-semibold text-[#2f2a24]">
+                    {index + 1}
+                  </div>
+                  <p className="pt-1 text-[13px] leading-6 text-[#5b5147]">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -208,6 +270,32 @@ export default function DevelopersPage() {
           </div>
         </section>
 
+        {/* Closing text block */}
+        <section className="mt-16 max-w-5xl">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+            Built Around Trust
+          </p>
+          <h3 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
+            A premium, relationship-led approach
+          </h3>
+
+          <div className="mt-6 space-y-6 text-[15px] leading-8 text-[#5b5147]">
+            <p>
+              PPM’s developer partnerships are grounded in experience, project
+              understanding, and a premium client-facing approach. We are not
+              trying to be a mass-market listing portal or a generic volume
+              agency.
+            </p>
+
+            <p>
+              Instead, the business is positioned around thoughtful project
+              representation, strong investor understanding, and a longer-term
+              relationship model that supports trust on both the developer side
+              and the buyer side.
+            </p>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="mt-16 rounded-sm border border-[#d9cec0] bg-[#efe8dd] px-8 py-10 md:px-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -216,11 +304,12 @@ export default function DevelopersPage() {
                 Work With PPM
               </p>
               <h3 className="mt-3 text-3xl font-light text-[#1f1a17]">
-                Interested in partnering with us?
+                Interested in discussing your development?
               </h3>
               <p className="mt-4 text-[14px] leading-7 text-[#5b5147]">
-                Get in touch with our team to discuss your project and how PPM
-                can support your development marketing goals.
+                Contact our team to discuss how PPM can support your project
+                through commission-based representation and premium market
+                positioning.
               </p>
             </div>
 
