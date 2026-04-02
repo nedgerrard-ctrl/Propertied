@@ -7,15 +7,21 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const {
+      enquiryType,
       name,
       email,
       phone,
+      message,
+      budget,
+      preferredLocation,
       propertyInterest,
       investorType,
-      message,
+      projectName,
+      projectLocation,
+      commissionStructureInterest,
     } = body;
 
-    if (!name || !email || !phone || !propertyInterest || !investorType) {
+    if (!enquiryType || !name || !email || !phone) {
       return NextResponse.json(
         {
           success: false,
@@ -25,15 +31,55 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!["general", "developer", "buyer"].includes(enquiryType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid enquiry type.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (enquiryType === "buyer") {
+      if (!budget || !preferredLocation || !propertyInterest || !investorType) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Please fill in all required buyer/investor fields.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (enquiryType === "developer") {
+      if (!projectName || !projectLocation || !commissionStructureInterest) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Please fill in all required developer fields.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     await connectDB();
 
     const enquiry = await Enquiry.create({
+      enquiryType,
       name,
       email,
       phone,
-      propertyInterest,
-      investorType,
-      message,
+      message: message || "",
+      budget: budget || "",
+      preferredLocation: preferredLocation || "",
+      propertyInterest: propertyInterest || "",
+      investorType: investorType || "",
+      projectName: projectName || "",
+      projectLocation: projectLocation || "",
+      commissionStructureInterest: commissionStructureInterest || "",
     });
 
     return NextResponse.json(
