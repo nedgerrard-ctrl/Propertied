@@ -4,32 +4,30 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
-type BuyerFormData = {
-  enquiryType: "buyer";
+type DeveloperFormData = {
+  enquiryType: "developer";
   name: string;
   email: string;
   phone: string;
-  budget: string;
-  preferredLocation: string;
-  propertyInterest: string;
-  investorType: string;
+  projectName: string;
+  projectLocation: string;
+  commissionStructureInterest: string;
   message: string;
 };
 
-const initialFormData: BuyerFormData = {
-  enquiryType: "buyer",
+const initialFormData: DeveloperFormData = {
+  enquiryType: "developer",
   name: "",
   email: "",
   phone: "",
-  budget: "",
-  preferredLocation: "",
-  propertyInterest: "",
-  investorType: "",
+  projectName: "",
+  projectLocation: "",
+  commissionStructureInterest: "",
   message: "",
 };
 
-export default function BuyersInvestorsContactPage() {
-  const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
+export default function DevelopersContactPage() {
+  const [formData, setFormData] = useState<DeveloperFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -63,7 +61,7 @@ export default function BuyersInvestorsContactPage() {
       }
 
       setIsSuccess(true);
-      setStatusMessage("Your buyer/investor enquiry has been submitted successfully.");
+      setStatusMessage("Your developer enquiry has been submitted successfully.");
       setFormData(initialFormData);
     } catch (error) {
       const message =
@@ -78,40 +76,39 @@ export default function BuyersInvestorsContactPage() {
   return (
     <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
       <Navbar />
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-      <a
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
+    <a
         href="/contact"
          className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] hover:border-[#5f5245] hover:text-[#1f1a17]"
-      >
+    >
         General Enquiry
-      </a>
+    </a>
 
-      <a
+    <a
         href="/contact/buyers-investors"
-        
-      className="min-w-[180px] border border-[#5f5245] bg-[#2f2a24] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
-      >
-        Buyers / Investors
-      </a>
-
-      <a
-        href="/contact/developers"
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] hover:border-[#5f5245] hover:text-[#1f1a17]"
-      >
+    >
+        Buyers / Investors
+    </a>
+
+    <a
+        href="/contact/developers"
+         className="min-w-[180px] border border-[#5f5245] bg-[#2f2a24] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
+    >
         Developers
-      </a>
+    </a>
     </div>
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Buyers / Investors
+            For Developers
           </p>
           <h1 className="mt-3 text-4xl font-light text-[#1f1a17] md:text-5xl">
-            Register Your Property Interest
+            Developer Enquiry Form
           </h1>
           <p className="mt-4 text-[15px] leading-7 text-[#6c6258]">
-            Tell us what you are looking for and our team will contact you with
-            suitable opportunities.
+            Speak with PPM about project representation and commission-based
+            collaboration.
           </p>
         </div>
 
@@ -120,7 +117,7 @@ export default function BuyersInvestorsContactPage() {
             <div className="grid gap-8 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Full Name
+                  Contact Name
                 </label>
                 <input
                   type="text"
@@ -164,14 +161,13 @@ export default function BuyersInvestorsContactPage() {
 
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Budget
+                  Project Name
                 </label>
                 <input
                   type="text"
-                  name="budget"
-                  value={formData.budget}
+                  name="projectName"
+                  value={formData.projectName}
                   onChange={handleChange}
-                  placeholder="e.g. $700,000 - $900,000"
                   required
                   className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
                 />
@@ -181,14 +177,13 @@ export default function BuyersInvestorsContactPage() {
             <div className="grid gap-8 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Preferred Location
+                  Project Location
                 </label>
                 <input
                   type="text"
-                  name="preferredLocation"
-                  value={formData.preferredLocation}
+                  name="projectLocation"
+                  value={formData.projectLocation}
                   onChange={handleChange}
-                  placeholder="Suburb, area, or project"
                   required
                   className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
                 />
@@ -196,41 +191,18 @@ export default function BuyersInvestorsContactPage() {
 
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Property Interest
+                  Commission Structure Interest
                 </label>
-                <select
-                  name="propertyInterest"
-                  value={formData.propertyInterest}
+                <input
+                  type="text"
+                  name="commissionStructureInterest"
+                  value={formData.commissionStructureInterest}
                   onChange={handleChange}
+                  placeholder="e.g. project marketing / sales representation"
                   required
                   className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
-                >
-                  <option value="">Select property interest</option>
-                  <option value="off-plan">Off-plan</option>
-                  <option value="established">Established</option>
-                </select>
+                />
               </div>
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Investor Type
-                </label>
-                <select
-                  name="investorType"
-                  value={formData.investorType}
-                  onChange={handleChange}
-                  required
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
-                >
-                  <option value="">Select investor type</option>
-                  <option value="local">Local</option>
-                  <option value="overseas">Overseas</option>
-                </select>
-              </div>
-
-              <div className="hidden md:block" />
             </div>
 
             <div>
@@ -242,7 +214,7 @@ export default function BuyersInvestorsContactPage() {
                 value={formData.message}
                 onChange={handleChange}
                 rows={6}
-                placeholder="Tell us more about what you are looking for"
+                placeholder="Tell us more about your project or requirements"
                 className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] outline-none resize-none"
               />
             </div>
