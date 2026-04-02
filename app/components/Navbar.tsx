@@ -30,7 +30,7 @@ export default function Navbar() {
             Services
           </Link>
 
-          <Link href="#" className="transition hover:text-[#1f1a17]">
+          <Link href="/developer" className="transition hover:text-[#1f1a17]">
             Developers
           </Link>
 
