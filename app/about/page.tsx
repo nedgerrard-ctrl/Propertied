@@ -1,523 +1,387 @@
-import Link from "next/link";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import OverseasReachSection from "../components/OverseasReachSection";
+'use client'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import OverseasReachSection from '../components/OverseasReachSection'
+
+const FloatingDust = dynamic(() => import('../components/FloatingDust'), {
+  ssr: false,
+  loading: () => null,
+})
+
+// ─── Page data ──────────────────────────────────────────────────────────────
+
+const cycleSteps = [
+  {
+    step: '01',
+    title: 'Source',
+    description:
+      'We identify and curate the finest off-the-plan developments across Melbourne — from boutique townhouses to high-rise apartments.',
+  },
+  {
+    step: '02',
+    title: 'Buy',
+    description:
+      'We match you to the right property, organise display suite visits, and guide you through purchase. Our fee is paid by the developer — not by you.',
+  },
+  {
+    step: '03',
+    title: 'Manage',
+    description:
+      'Through our sister division Online Property Services, we steward your residential asset as a premium portfolio — maximising returns, not just collecting rent.',
+  },
+  {
+    step: '04',
+    title: 'Maximise',
+    description:
+      'We actively protect and grow the value of your investment, keeping you informed and consistently ahead of the market.',
+  },
+  {
+    step: '05',
+    title: 'Resell',
+    description:
+      'When the time is right, we leverage deep market knowledge to appraise and resell your property — achieving the best possible outcome.',
+  },
+  {
+    step: '06',
+    title: 'Reinvest',
+    description:
+      'We identify your next opportunity, keeping your capital working and your portfolio growing for the long term.',
+  },
+]
+
+const developerServices = [
+  'Project Marketing & Sales Management',
+  'Independent Sales Agency & Qualified Buyer Network',
+  'Feasibility & Pricing Strategy Advisory',
+  'Campaign Reporting & Settlement Support',
+]
+
+const featuredProjects = [
+  { location: 'Southbank, Melbourne', type: 'High-Rise Apartments',    status: 'Sold Out' },
+  { location: 'Richmond, Melbourne',  type: 'Boutique Townhouses',      status: 'Sold Out' },
+  { location: 'Docklands, Melbourne', type: 'Mixed-Use Residential',    status: 'Sold Out' },
+]
+
+const team = [
+  {
+    name: 'Ned Gerrard',
+    role: 'Co-Founder & Director',
+    bio: 'With a background in management consulting, accounting, and marketing, Ned brings strategic discipline to every engagement — from developer feasibility to long-term client strategy. He built PPM into Melbourne\'s silent engine for over a decade before bringing the brand to market.',
+  },
+  {
+    name: 'Joan Alcock',
+    role: 'Director & Officer in Effective Control',
+    bio: 'Ranked nationally in the Top 2% of sales professionals, Joan holds the agency licence and leads all client relationships. Multi-award winning, her approach is direct, experienced, and entirely client-first.',
+  },
+]
+
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function AboutPage() {
-  const cycleSteps = [
-    {
-      step: "01",
-      title: "Source",
-      description:
-        "We identify and curate the best off-the-plan developments across Melbourne on your behalf — from boutique townhouses to high-rise apartments.",
-    },
-    {
-      step: "02",
-      title: "Buy",
-      description:
-        "We match you with the right property, organise display suite visits, and guide you through the purchase with no fees to the buyer — our commission is paid by the developer.",
-    },
-    {
-      step: "03",
-      title: "Manage",
-      description:
-        "Through our sister division Online Property Services, we manage your residential asset as a premium portfolio — maximising returns, not just collecting rent.",
-    },
-    {
-      step: "04",
-      title: "Maximise",
-      description:
-        "We actively protect and grow the value of your investment over time, keeping you informed and ahead of the market.",
-    },
-    {
-      step: "05",
-      title: "Resell",
-      description:
-        "When the time is right, we appraise and resell your property — leveraging our market knowledge to achieve the best possible result.",
-    },
-    {
-      step: "06",
-      title: "Reinvest",
-      description:
-        "We help you re-enter the market with new opportunities, keeping you in the loop for long-term wealth building.",
-    },
-  ];
-
-  const differentiators = [
-    {
-      title: "Independent Third-Party Agent",
-      description:
-        "We are not tied to any single developer or project. We source the best available stock across Melbourne and match it to your needs — with no conflict of interest.",
-    },
-    {
-      title: "$1.5B+ in Delivered Projects",
-      description:
-        "For over a decade we operated as the silent engine behind major Melbourne residential developments. Now we bring that expertise directly to you.",
-    },
-    {
-      title: "Premium Portfolio Management",
-      description:
-        "We manage a $50M+ residential asset portfolio on behalf of long-term investors. This is not standard property management — it is strategic asset stewardship.",
-    },
-    {
-      title: "Overseas Investor Specialists",
-      description:
-        "With a client base that is predominantly overseas-based, we understand the complexities of investing in Australian property from abroad and guide you every step of the way.",
-    },
-  ];
-
-  const developerServices = [
-    {
-      title: "Project Marketing & Sales Management",
-      description:
-        "We have managed the end-to-end sales campaigns for major Melbourne residential developments — handling everything from launch strategy to contract execution. Your project is in hands that have delivered over $1.5 billion in results.",
-    },
-    {
-      title: "Independent Sales Agency",
-      description:
-        "As a third-party agent, we are not beholden to any single developer. We bring credibility, a qualified buyer network, and transparent reporting — so you always know exactly where your project stands.",
-    },
-    {
-      title: "Qualified Buyer Network",
-      description:
-        "Our buyer database spans local owner-occupiers, local investors, and overseas investors — particularly across Asia-Pacific. We match the right buyer to the right product from day one.",
-    },
-    {
-      title: "Feasibility & Strategy Advisory",
-      description:
-        "Before a single contract is signed, we work with you on product mix, pricing strategy, and market positioning to maximise sellout outcomes and minimise holding risk.",
-    },
-  ];
-
-  const featuredProjects = [
-    {
-      name: "Project Alpha",
-      location: "Southbank, Melbourne",
-      type: "High-Rise Apartments",
-      status: "Completed",
-      units: "180 Units",
-    },
-    {
-      name: "Project Beta",
-      location: "Richmond, Melbourne",
-      type: "Boutique Townhouses",
-      status: "Completed",
-      units: "32 Units",
-    },
-    {
-      name: "Project Gamma",
-      location: "Docklands, Melbourne",
-      type: "Mixed-Use Residential",
-      status: "Sold Out",
-      units: "240 Units",
-    },
-  ];
-
-  const team = [
-    {
-      name: "Ned Gerrard",
-      role: "Co-Founder & Director",
-      description:
-        "With a background in management consulting, accounting, and marketing, Ned brings a strategic approach to every project. He leads developer relationships, feasibility planning, and client strategy.",
-    },
-    {
-      name: "Joan Alcock",
-      role: "Director & Officer in Effective Control",
-      description:
-        "A multi-award-winning sales professional ranked in the Top 2% nationally, Joan leads the sales division and holds the agency licence for Property Project Marketing.",
-    },
-  ];
-
   return (
-    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+    <main className="min-h-screen w-full text-[#1f1a17]">
       <Navbar />
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      {/* ── S1: Opening Statement ─────────────────────────────────────────── */}
+      <section className="relative min-h-[88vh] bg-[#1c1814] flex flex-col justify-center overflow-hidden">
+        <FloatingDust />
 
-        {/* About Us — Hero */}
-        <section className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-8 py-24">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
               Who We Are
             </p>
-            <h1 className="mt-3 text-3xl font-light text-[#1f1a17]">
-              Melbourne&rsquo;s discreet off-the-plan &amp; portfolio specialists
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
+              Est. 2013
+            </p>
+          </div>
+
+          <div className="mt-8 border-t border-[#3a302a] pt-12 lg:pt-16">
+            <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-light leading-[1.06] text-white max-w-4xl">
+              The trusted name behind<br />
+              Melbourne&apos;s most significant<br />
+              <span className="text-[#c8a96e]">residential developments.</span>
             </h1>
+          </div>
 
-            <div className="mt-6 space-y-4 text-[13px] leading-6 text-[#3d3530]">
-              <p>
-                Property Project Marketing Pty Ltd (PPM) was founded in April
-                2013 and for over a decade operated invisibly behind major
-                Melbourne residential developers — delivering more than{" "}
-                <strong>$1.5 billion</strong> in off-the-plan property sales
-                with zero public presence.
-              </p>
-              <p>
-                We are now launching our own premium brand for the first time.
-                After years of working exclusively under developers&rsquo; names,
-                we are bringing that same expertise directly to buyers,
-                investors, and developers who want a trusted end-to-end partner.
-              </p>
-              <p>
-                Our approach goes far beyond a traditional real estate
-                transaction. We source, we sell, we manage, and we resell — a
-                true closed-loop service from first viewing to lifelong
-                investment success.
+          <div className="mt-16 flex items-center gap-4 text-[10px] uppercase tracking-[0.26em] text-[#4a3f37]">
+            <span className="block h-px w-10 bg-[#3a302a]" />
+            <span>Our Story</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── S2: Brand Story ───────────────────────────────────────────────── */}
+      <section className="bg-white py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-8">
+          <div className="grid lg:grid-cols-[5fr_7fr] gap-16 lg:gap-24 lg:items-start">
+
+            {/* Pull quote */}
+            <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-10 pt-1">
+              <p className="text-2xl lg:text-[1.85rem] font-light italic text-[#1f1a17] leading-snug">
+                &ldquo;For over a decade,<br />we were<br />the silent engine.&rdquo;
               </p>
             </div>
 
-            <div className="mt-8">
-              <Link
-                href="/contact"
-                className="inline-block border border-[#2f2a24] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24] transition hover:bg-[#2f2a24] hover:text-white"
-              >
-                Get in Touch
-              </Link>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-sm border border-[#ddd3c6]">
-            <img
-              src="/images/aboutus.png"
-              alt="PPM property"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </section>
-
-        {/* Stats bar */}
-        <section className="mt-16 grid gap-px border border-[#ddd3c6] bg-[#ddd3c6] sm:grid-cols-3">
-          {[
-            { value: "2013", label: "Founded" },
-            { value: "$1.5B+", label: "In Delivered Sales" },
-            { value: "10+ Years", label: "Industry Experience" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-[#f6f2eb] px-8 py-8 text-center"
-            >
-              <p className="text-[28px] font-semibold tracking-[-0.02em] text-[#1f1a17]">
-                {stat.value}
+            {/* Body */}
+            <div className="space-y-5 text-[14px] leading-[1.95] text-[#3d3530]">
+              <p>
+                Property Project Marketing Pty Ltd (PPM) was founded in April 2013 and for
+                over a decade operated invisibly behind Melbourne&apos;s major residential
+                developers — delivering more than{' '}
+                <strong className="text-[#1f1a17] font-medium">$1.5 billion</strong> in
+                off-the-plan property sales with zero public presence.
               </p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d]">
-                {stat.label}
+              <p className="font-medium text-[#1f1a17]">We are now changing that.</p>
+              <p>
+                After years of working exclusively under developers&apos; names, we are
+                bringing that same expertise directly to buyers, investors, and developers
+                who want a trusted, end-to-end partner for the full investment lifecycle.
+              </p>
+              <p>
+                Our approach goes far beyond a transaction. We source, sell, manage, and
+                resell — a closed-loop service that keeps working for you long after
+                settlement.
               </p>
             </div>
-          ))}
-        </section>
 
-        {/* Mission & Vision */}
-        <section className="mt-20 grid gap-6 sm:grid-cols-2">
-          <div className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-8 py-10">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Our Mission
-            </p>
-            <h2 className="mt-3 text-xl font-light text-[#1f1a17]">
-              Connecting the right people to the right property
-            </h2>
-            <p className="mt-4 text-[13px] leading-6 text-[#5b5147]">
-              To be Melbourne&rsquo;s most trusted end-to-end off-the-plan property
-              partner — connecting buyers, investors, and developers with the
-              right opportunities and stewarding those assets for long-term
-              growth. We do not simply transact. We build lasting relationships
-              grounded in expertise, transparency, and results.
-            </p>
           </div>
+        </div>
+      </section>
 
-          <div className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-8 py-10">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Our Vision
-            </p>
-            <h2 className="mt-3 text-xl font-light text-[#1f1a17]">
-              The premium name in Melbourne property investment
-            </h2>
-            <p className="mt-4 text-[13px] leading-6 text-[#5b5147]">
-              To be recognised as Melbourne&rsquo;s leading premium property services
-              brand — known for delivering exceptional outcomes across the full
-              investment lifecycle. We are building a business where every client,
-              whether a first-time buyer or a seasoned developer, receives the
-              same level of strategic, personalised service.
-            </p>
-          </div>
-        </section>
-
-        {/* End-to-End Model */}
-        <section className="mt-20">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Our Approach
-          </p>
-          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
-            The End-to-End Model
-          </h2>
-          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-[#3d3530]">
-            Unlike a traditional agent who simply sells or simply manages, PPM
-            covers the complete investment cycle. Once you become a client, you
-            never have to start from scratch again.
-          </p>
-
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cycleSteps.map((item) => (
+      {/* ── S3: The Numbers ───────────────────────────────────────────────── */}
+      <section className="bg-[#f6f2eb] py-20 lg:py-24">
+        <div className="mx-auto max-w-7xl px-8">
+          <div className="flex flex-col sm:flex-row sm:divide-x divide-[#ddd3c6]">
+            {[
+              { value: '$1.5B+', label: 'In Delivered Sales' },
+              { value: '$50M+',  label: 'Assets Under Management' },
+              { value: '10+',    label: 'Years of Industry Experience' },
+            ].map((stat) => (
               <div
-                key={item.step}
-                className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-6 py-7"
+                key={stat.label}
+                className="flex-1 py-10 sm:py-0 sm:px-12 first:sm:pl-0 last:sm:pr-0 border-b sm:border-b-0 border-[#ddd3c6] last:border-b-0"
               >
-                <p className="text-[11px] font-medium tracking-[0.24em] text-[#b5a899]">
-                  {item.step}
+                <p className="text-6xl md:text-7xl lg:text-8xl font-light tracking-[-0.03em] text-[#1f1a17] tabular-nums">
+                  {stat.value}
                 </p>
-                <h3 className="mt-2 text-[17px] font-semibold text-[#1f1a17]">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-[13px] leading-6 text-[#5b5147]">
-                  {item.description}
+                <p className="text-[10px] uppercase tracking-[0.28em] text-[#8a7b6d] mt-4">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-[#ddd3c6] mt-14" />
+        </div>
+      </section>
+
+      {/* ── S4: The Approach ──────────────────────────────────────────────── */}
+      <section className="bg-white py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-8">
+
+          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2 mb-16">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
+              Our Approach
+            </p>
+            <h2 className="text-2xl lg:text-3xl font-light text-[#1f1a17]">
+              The End-to-End Model
+            </h2>
+          </div>
+
+          <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-14">
+            {cycleSteps.map((step) => (
+              <div
+                key={step.step}
+                className="grid grid-cols-[2.5rem_1fr] lg:grid-cols-[2.5rem_11rem_1fr] gap-x-6 lg:gap-x-10 gap-y-1 py-9 border-b border-[#f0ebe4] last:border-b-0"
+              >
+                <p className="text-[2.6rem] font-thin text-[#e0d8d0] tabular-nums leading-none select-none row-span-2 lg:row-span-1 self-center">
+                  {step.step}
+                </p>
+                <p className="text-[15px] font-semibold text-[#1f1a17] self-center">
+                  {step.title}
+                </p>
+                <p className="col-start-2 lg:col-start-3 text-[13px] leading-[1.85] text-[#5b5147] max-w-[54ch]">
+                  {step.description}
                 </p>
               </div>
             ))}
           </div>
 
-          {/* Cycle arrow visual */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d]">
-            {["Source", "Buy", "Manage", "Maximise", "Resell", "Reinvest"].map(
-              (label, i, arr) => (
-                <span key={label} className="flex items-center gap-2">
-                  <span className="rounded-sm border border-[#ddd3c6] bg-white px-3 py-1">
-                    {label}
-                  </span>
-                  {i < arr.length - 1 && (
-                    <span className="text-[#c4b8ab]">→</span>
-                  )}
-                </span>
-              )
-            )}
-          </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Why PPM */}
-        <section className="mt-20">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Why PPM
-          </p>
-          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
-            What sets us apart
-          </h2>
-
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {differentiators.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-6 py-7"
-              >
-                <h3 className="text-[15px] font-semibold text-[#1f1a17]">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-[13px] leading-6 text-[#5b5147]">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* Full-width dark globe section — outside max-w-7xl container */}
+      {/* ── S5: Globe (overseas investors) ────────────────────────────────── */}
       <OverseasReachSection />
 
-      <div className="mx-auto max-w-7xl px-6">
-        {/* For Developers */}
-        <section className="mt-20">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Developer Services
-          </p>
-          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
-            Partnering with developers
-          </h2>
-          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-[#3d3530]">
-            For over a decade, PPM was the silent force behind some of
-            Melbourne&rsquo;s most successful residential launches. We understand
-            the pressures developers face — from presales targets to settlement
-            risk — and we deliver the results that make projects viable.
-          </p>
-
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {developerServices.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-6 py-7"
-              >
-                <h3 className="text-[15px] font-semibold text-[#1f1a17]">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-[13px] leading-6 text-[#5b5147]">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <Link
-              href="/contact"
-              className="inline-block border border-[#2f2a24] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24] transition hover:bg-[#2f2a24] hover:text-white"
-            >
-              Enquire as a Developer
-            </Link>
-          </div>
-        </section>
-
-        {/* Featured Projects */}
-        <section className="mt-20">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Our Track Record
-          </p>
-          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
-            Featured projects
-          </h2>
-          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-[#3d3530]">
-            A selection of the Melbourne residential developments we have
-            delivered. Further project details will be published as our brand
-            launches publicly.
-          </p>
-
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {featuredProjects.map((project) => (
-              <div
-                key={project.name}
-                className="overflow-hidden rounded-sm border border-[#ddd3c6] bg-[#fbf8f3]"
-              >
-                {/* Image placeholder */}
-                <div className="flex h-[160px] items-center justify-center bg-[#e8e0d5] text-[11px] uppercase tracking-widest text-[#b5a899]">
-                  Project Image
-                </div>
-                <div className="px-6 py-6">
-                  <span className="inline-block rounded-sm bg-[#2f2a24] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white">
-                    {project.status}
-                  </span>
-                  <h3 className="mt-3 text-[16px] font-semibold text-[#1f1a17]">
-                    {project.name}
-                  </h3>
-                  <p className="mt-1 text-[12px] text-[#8a7b6d]">
-                    {project.location}
-                  </p>
-                  <div className="mt-4 flex gap-4 text-[11px] text-[#5b5147]">
-                    <span>{project.type}</span>
-                    <span className="text-[#ddd3c6]">|</span>
-                    <span>{project.units}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Team */}
-        <section className="mt-20">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+      {/* ── S6: The People ────────────────────────────────────────────────── */}
+      <section className="bg-[#f6f2eb]">
+        <div className="mx-auto max-w-7xl px-8 pt-24 pb-0">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
             The People
           </p>
-          <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
+          <h2 className="mt-3 text-3xl lg:text-4xl font-light text-[#1f1a17]">
             Our Leadership
           </h2>
+        </div>
 
-          <div className="mt-8 grid gap-8 sm:grid-cols-2">
-            {team.map((member) => (
-              <div
-                key={member.name}
-                className="rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-6 py-7"
-              >
-                <div className="mb-5 h-[120px] w-[120px] overflow-hidden rounded-sm border border-[#ddd3c6] bg-[#e8e0d5]">
-                  {/* Placeholder — replaced when client supplies photos */}
-                  <div className="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-widest text-[#b5a899]">
-                    Photo
-                  </div>
-                </div>
-                <h3 className="text-[16px] font-semibold text-[#1f1a17]">
-                  {member.name}
-                </h3>
-                <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8a7b6d]">
-                  {member.role}
+        {team.map((member, i) => (
+          <div
+            key={member.name}
+            className="grid lg:grid-cols-2 mt-14 border-t border-[#ddd3c6] first:mt-10"
+          >
+            {/* Portrait placeholder — image bleeds edge-to-edge, no border-radius */}
+            <div
+              className={`relative min-h-[360px] lg:min-h-[480px] bg-[#e4dbd1] overflow-hidden ${
+                i % 2 === 1 ? 'lg:order-2' : ''
+              }`}
+            >
+              {/* Replace this div contents with <img> when client supplies photos */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ddd3c6]/40 to-[#c8b8a8]/20" />
+              <div className="absolute bottom-6 left-6">
+                <span className="text-[10px] uppercase tracking-widest text-[#b5a899]">
+                  Portrait — {member.name}
+                </span>
+              </div>
+            </div>
+
+            {/* Text */}
+            <div
+              className={`flex flex-col justify-center px-8 py-14 lg:px-14 xl:px-20 ${
+                i % 2 === 1 ? 'lg:order-1' : ''
+              }`}
+            >
+              <h3 className="text-[22px] font-light text-[#1f1a17]">{member.name}</h3>
+              <p className="mt-1.5 text-[10px] uppercase tracking-[0.26em] text-[#8a7b6d]">
+                {member.role}
+              </p>
+              <div className="mt-5 w-8 border-t border-[#ddd3c6]" />
+              <p className="mt-6 text-[13px] leading-[1.95] text-[#3d3530] max-w-[44ch]">
+                {member.bio}
+              </p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* ── S7: For Developers (dark) ─────────────────────────────────────── */}
+      <section className="bg-[#2f2a24] py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-8">
+          <div className="grid lg:grid-cols-[5fr_7fr] gap-16 lg:gap-24 lg:items-start">
+
+            {/* Heading */}
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d] mb-6">
+                Developer Services
+              </p>
+              <h2 className="text-3xl lg:text-[2.75rem] font-light leading-[1.2] text-white">
+                The team behind Melbourne&apos;s most successful launches.
+              </h2>
+            </div>
+
+            {/* Body + service list */}
+            <div>
+              <div className="space-y-5 text-[14px] leading-[1.9] text-[#9e8d7a]">
+                <p>
+                  For over a decade, PPM was the silent force behind some of
+                  Melbourne&apos;s most significant residential projects — managing
+                  campaigns from launch strategy to final settlement, with no public
+                  credit taken.
                 </p>
-                <p className="mt-4 text-[13px] leading-6 text-[#5b5147]">
-                  {member.description}
+                <p>
+                  We now offer that same capability directly. An independent agency
+                  with a qualified buyer network spanning local owner-occupiers, local
+                  investors, and overseas investors across Asia-Pacific — with
+                  transparent reporting from day one.
                 </p>
               </div>
+
+              <div className="mt-12">
+                {developerServices.map((service) => (
+                  <div key={service} className="py-5 border-t border-[#3d3530]">
+                    <p className="text-[13px] tracking-[0.05em] text-[#9e8d7a]">
+                      {service}
+                    </p>
+                  </div>
+                ))}
+                <div className="border-t border-[#3d3530]" />
+              </div>
+
+              <div className="mt-10">
+                <Link
+                  href="/contact"
+                  className="inline-block border border-white px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-[#2f2a24]"
+                >
+                  Partner With Us
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── S8: Track Record ──────────────────────────────────────────────── */}
+      <section className="bg-white py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-8">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
+            Our Track Record
+          </p>
+          <h2 className="mt-6 text-4xl lg:text-6xl font-light leading-[1.1] text-[#1f1a17] max-w-3xl">
+            $1.5 billion delivered across Southbank&nbsp;&middot; Docklands&nbsp;&middot; Richmond and beyond.
+          </h2>
+
+          <div className="mt-16">
+            {featuredProjects.map((project) => (
+              <div
+                key={project.location}
+                className="grid grid-cols-2 sm:grid-cols-3 py-5 border-t border-[#f0ebe4] text-[13px] text-[#5b5147]"
+              >
+                <span>{project.location}</span>
+                <span className="hidden sm:block">{project.type}</span>
+                <span className="text-right sm:text-right">{project.status}</span>
+              </div>
             ))}
-          </div>
-        </section>
-
-        {/* Next Steps / Contact */}
-        <section className="mt-20 rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-8 py-14">
-          <div className="text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Next Steps
-            </p>
-            <h2 className="mt-3 text-2xl font-light text-[#1f1a17]">
-              Ready to start your property journey?
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-[13px] leading-6 text-[#5b5147]">
-              Whether you are a buyer looking for off-the-plan opportunities, an
-              investor seeking portfolio growth, or a developer needing a trusted
-              sales partner — we would love to hear from you.
-            </p>
+            <div className="border-t border-[#f0ebe4]" />
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <Link
-              href="/contact"
-              className="block rounded-sm border border-[#ddd3c6] bg-white px-6 py-7 text-center transition hover:border-[#2f2a24]"
-            >
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a7b6d]">
-                I am a
-              </p>
-              <p className="mt-2 text-[17px] font-semibold text-[#1f1a17]">
-                Buyer or Investor
-              </p>
-              <p className="mt-2 text-[12px] leading-5 text-[#5b5147]">
-                Find the right off-the-plan property and grow your portfolio
-              </p>
-              <span className="mt-5 inline-block text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24]">
-                Enquire Now →
-              </span>
-            </Link>
+          <p className="mt-8 text-[12px] italic text-[#8a7b6d]">
+            Further project detail will be published as our brand launches publicly.
+          </p>
+        </div>
+      </section>
 
+      {/* ── S9: Closing CTA ───────────────────────────────────────────────── */}
+      <section className="bg-[#1c1814] py-32 lg:py-44">
+        <div className="mx-auto max-w-7xl px-8 text-center">
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#4a3f37]">
+            Next Steps
+          </p>
+          <h2 className="mt-6 text-4xl md:text-6xl lg:text-7xl font-light text-white leading-[1.06]">
+            Ready to begin?
+          </h2>
+          <p className="mt-6 text-[14px] text-[#8a7b6d] max-w-[40ch] mx-auto leading-[1.9]">
+            Whether you are a buyer, investor, or developer — the conversation starts here.
+          </p>
+          <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-10">
             <Link
               href="/contact"
-              className="block rounded-sm border border-[#ddd3c6] bg-white px-6 py-7 text-center transition hover:border-[#2f2a24]"
+              className="text-[12px] uppercase tracking-[0.22em] text-white border-b border-white/25 pb-0.5 transition hover:border-white"
             >
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a7b6d]">
-                I am a
-              </p>
-              <p className="mt-2 text-[17px] font-semibold text-[#1f1a17]">
-                Developer
-              </p>
-              <p className="mt-2 text-[12px] leading-5 text-[#5b5147]">
-                Partner with Melbourne&rsquo;s proven project marketing specialists
-              </p>
-              <span className="mt-5 inline-block text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24]">
-                Partner With Us →
-              </span>
+              I am a Buyer or Investor →
             </Link>
-
             <Link
               href="/contact"
-              className="block rounded-sm border border-[#ddd3c6] bg-white px-6 py-7 text-center transition hover:border-[#2f2a24]"
+              className="text-[12px] uppercase tracking-[0.22em] text-white border-b border-white/25 pb-0.5 transition hover:border-white"
             >
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#8a7b6d]">
-                General
-              </p>
-              <p className="mt-2 text-[17px] font-semibold text-[#1f1a17]">
-                Get in Touch
-              </p>
-              <p className="mt-2 text-[12px] leading-5 text-[#5b5147]">
-                Any questions or just want to learn more about what we do
-              </p>
-              <span className="mt-5 inline-block text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24]">
-                Contact Us →
-              </span>
+              I am a Developer →
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <Footer />
     </main>
-  );
+  )
 }
