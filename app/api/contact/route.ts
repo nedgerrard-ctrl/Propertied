@@ -12,10 +12,24 @@ export async function POST(request: Request) {
       email,
       phone,
       message,
-      budget,
-      preferredLocation,
+
+      // buyer fields
+      buyerType,
+      investorRegion,
+      minBudget,
+      maxBudget,
+      preferredLocations,
       propertyInterest,
-      investorType,
+      bedrooms,
+      bedroomRange,
+      bathrooms,
+      carSpaces,
+      minLandSize,
+      maxLandSize,
+      propertyTypes,
+      keywords,
+
+      // developer fields
       projectName,
       projectLocation,
       commissionStructureInterest,
@@ -42,7 +56,14 @@ export async function POST(request: Request) {
     }
 
     if (enquiryType === "buyer") {
-      if (!budget || !preferredLocation || !propertyInterest || !investorType) {
+      if (
+        !buyerType ||
+        !investorRegion ||
+        !minBudget ||
+        !maxBudget ||
+        !preferredLocations ||
+        !propertyInterest
+      ) {
         return NextResponse.json(
           {
             success: false,
@@ -73,10 +94,22 @@ export async function POST(request: Request) {
       email,
       phone,
       message: message || "",
-      budget: budget || "",
-      preferredLocation: preferredLocation || "",
+
+      buyerType: buyerType || "",
+      investorRegion: investorRegion || "",
+      minBudget: minBudget || "",
+      maxBudget: maxBudget || "",
+      preferredLocations: preferredLocations || "",
       propertyInterest: propertyInterest || "",
-      investorType: investorType || "",
+      bedrooms: bedrooms || "",
+      bedroomRange: Boolean(bedroomRange),
+      bathrooms: bathrooms || "",
+      carSpaces: carSpaces || "",
+      minLandSize: minLandSize || "",
+      maxLandSize: maxLandSize || "",
+      propertyTypes: Array.isArray(propertyTypes) ? propertyTypes : [],
+      keywords: keywords || "",
+
       projectName: projectName || "",
       projectLocation: projectLocation || "",
       commissionStructureInterest: commissionStructureInterest || "",
