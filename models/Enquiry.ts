@@ -34,24 +34,85 @@ const enquirySchema = new Schema(
     },
 
     // buyer / investor fields
-    budget: {
+    buyerType: {
+      type: String,
+      enum: ["owner-occupier", "investor", ""],
+      default: "",
+    },
+
+    investorRegion: {
+      type: String,
+      enum: ["local", "overseas", ""],
+      default: "",
+    },
+
+    minBudget: {
       type: String,
       trim: true,
       default: "",
     },
-    preferredLocation: {
+
+    maxBudget: {
       type: String,
       trim: true,
       default: "",
     },
+
+    preferredLocations: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     propertyInterest: {
       type: String,
       enum: ["off-plan", "established", ""],
       default: "",
     },
-    investorType: {
+
+    bedrooms: {
       type: String,
-      enum: ["local", "overseas", ""],
+      trim: true,
+      default: "",
+    },
+
+    bedroomRange: {
+      type: Boolean,
+      default: false,
+    },
+
+    bathrooms: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    carSpaces: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    minLandSize: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    maxLandSize: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    propertyTypes: {
+      type: [String],
+      default: [],
+    },
+
+    keywords: {
+      type: String,
+      trim: true,
       default: "",
     },
 
@@ -61,11 +122,13 @@ const enquirySchema = new Schema(
       trim: true,
       default: "",
     },
+
     projectLocation: {
       type: String,
       trim: true,
       default: "",
     },
+
     commissionStructureInterest: {
       type: String,
       trim: true,
