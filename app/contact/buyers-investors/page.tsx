@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9]{6,15}$/;
 
 type BuyerFormData = {
   enquiryType: "buyer";
@@ -11,18 +14,19 @@ type BuyerFormData = {
   investorRegion: "local" | "overseas" | "";
   name: string;
   email: string;
+  phoneCountryCode: string;
   phone: string;
   minBudget: string;
   maxBudget: string;
   preferredLocations: string;
   propertyInterest: "off-plan" | "established" | "";
-  bedrooms: string;
-  bedroomRange: boolean;
-  bathrooms: string;
-  carSpaces: string;
-  minLandSize: string;
-  maxLandSize: string;
-  propertyTypes: string[];
+  minBedrooms: string;
+  maxBedrooms: string;
+  minBathrooms: string;
+  maxBathrooms: string;
+  minCarSpaces: string;
+  maxCarSpaces: string;
+  propertyType: string;
   keywords: string;
   message: string;
 };
@@ -33,47 +37,53 @@ const initialFormData: BuyerFormData = {
   investorRegion: "",
   name: "",
   email: "",
+  phoneCountryCode: "+61",
   phone: "",
   minBudget: "",
   maxBudget: "",
   preferredLocations: "",
   propertyInterest: "",
-  bedrooms: "",
-  bedroomRange: false,
-  bathrooms: "",
-  carSpaces: "",
-  minLandSize: "",
-  maxLandSize: "",
-  propertyTypes: [],
+  minBedrooms: "",
+  maxBedrooms: "",
+  minBathrooms: "",
+  maxBathrooms: "",
+  minCarSpaces: "",
+  maxCarSpaces: "",
+  propertyType: "",
   keywords: "",
   message: "",
 };
 
-const propertyTypeOptions = [
-  "Apartment",
-  "Townhouse",
-  "House",
-  "Other"
-];
+const propertyTypeOptions = ["Apartment", "Townhouse", "House"];
+
 const budgetOptions = [
-  "Any",
-  "$300,000",
-  "$500,000",
-  "$700,000",
-  "$900,000",
-  "$1,200,000",
-  "$1,500,000",
-  "$2,000,000+",
+  { label: "Any", value: "" },
+  { label: "$300,000", value: "300000" },
+  { label: "$500,000", value: "500000" },
+  { label: "$700,000", value: "700000" },
+  { label: "$900,000", value: "900000" },
+  { label: "$1,200,000", value: "1200000" },
+  { label: "$1,500,000", value: "1500000" },
+  { label: "$2,000,000+", value: "2000000" },
 ];
 
-const landSizeOptions = [
-  "Any",
-  "200 sqm",
-  "300 sqm",
-  "400 sqm",
-  "500 sqm",
-  "700 sqm",
-  "1000 sqm+",
+const roomOptions = [
+  { label: "Any", value: "" },
+  { label: "Studio", value: "0" },
+  { label: "1", value: "1" },
+  { label: "2", value: "2" },
+  { label: "3", value: "3" },
+  { label: "4", value: "4" },
+  { label: "5+", value: "5" },
+];
+
+const bathroomCarOptions = [
+  { label: "Any", value: "" },
+  { label: "1", value: "1" },
+  { label: "2", value: "2" },
+  { label: "3", value: "3" },
+  { label: "4", value: "4" },
+  { label: "5+", value: "5" },
 ];
 
 function ContactTabs() {
@@ -103,94 +113,182 @@ function ContactTabs() {
   );
 }
 
-function SegmentedOptionGroup({
-  label,
-  value,
-  options,
-  onSelect,
-}: {
-  label: string;
-  value: string;
-  options: { label: string; value: string }[];
-  onSelect: (value: string) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <label className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-        {label}
-      </label>
+function getFilteredRangeOptions(
+  options: { label: string; value: string }[],
+  minValue: string
+) {
+  if (!minValue) return options;
 
-      <div className="flex flex-wrap overflow-hidden rounded-[18px] border border-[#cfc2b2] bg-[#f1ece4]">
-        {options.map((option) => {
-          const active = value === option.value;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onSelect(option.value)}
-              className={`min-w-[88px] border-r border-[#cfc2b2] px-6 py-4 text-[15px] font-semibold transition last:border-r-0 ${
-                active
-                  ? "bg-[#2f2a24] text-white"
-                  : "bg-[#f6f2eb] text-[#4b433c] hover:bg-[#ece5db]"
-              }`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+  return options.filter((option) => {
+    if (!option.value) return true;
+    return Number(option.value) >= Number(minValue);
+  });
 }
 
 export default function BuyersInvestorsContactPage() {
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    success: boolean;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    success: false,
+  });
 
   const showPropertyPreferences = formData.propertyInterest === "off-plan";
+
+  const filteredMaxBudgetOptions = useMemo(
+    () => getFilteredRangeOptions(budgetOptions, formData.minBudget),
+    [formData.minBudget]
+  );
+
+  const filteredMaxBedroomOptions = useMemo(
+    () => getFilteredRangeOptions(roomOptions, formData.minBedrooms),
+    [formData.minBedrooms]
+  );
+
+  const filteredMaxBathroomOptions = useMemo(
+    () => getFilteredRangeOptions(bathroomCarOptions, formData.minBathrooms),
+    [formData.minBathrooms]
+  );
+
+  const filteredMaxCarSpaceOptions = useMemo(
+    () => getFilteredRangeOptions(bathroomCarOptions, formData.minCarSpaces),
+    [formData.minCarSpaces]
+  );
 
   function handleChange(
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
     const { name, value } = event.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  function handleCheckboxToggle(type: string) {
     setFormData((prev) => {
-      const alreadySelected = prev.propertyTypes.includes(type);
+      const next = { ...prev, [name]: value };
 
-      return {
-        ...prev,
-        propertyTypes: alreadySelected
-          ? prev.propertyTypes.filter((item) => item !== type)
-          : [...prev.propertyTypes, type],
-      };
+      if (name === "minBudget" && next.maxBudget && Number(next.maxBudget) < Number(value)) {
+        next.maxBudget = "";
+      }
+
+      if (
+        name === "minBedrooms" &&
+        next.maxBedrooms &&
+        Number(next.maxBedrooms) < Number(value)
+      ) {
+        next.maxBedrooms = "";
+      }
+
+      if (
+        name === "minBathrooms" &&
+        next.maxBathrooms &&
+        Number(next.maxBathrooms) < Number(value)
+      ) {
+        next.maxBathrooms = "";
+      }
+
+      if (
+        name === "minCarSpaces" &&
+        next.maxCarSpaces &&
+        Number(next.maxCarSpaces) < Number(value)
+      ) {
+        next.maxCarSpaces = "";
+      }
+
+      return next;
     });
-  }
-
-  function handleSegmentedChange<K extends keyof BuyerFormData>(
-    field: K,
-    value: BuyerFormData[K]
-  ) {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-    setStatusMessage("");
-    setIsSuccess(false);
+
+    const normalizedPhone = formData.phone.replace(/\s|-/g, "").trim();
+
+    if (!EMAIL_REGEX.test(formData.email.trim())) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Email",
+        message: "Please enter a valid email address.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!PHONE_REGEX.test(normalizedPhone)) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Phone Number",
+        message: "Please enter a valid phone number.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (
+      formData.minBudget &&
+      formData.maxBudget &&
+      Number(formData.maxBudget) < Number(formData.minBudget)
+    ) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Budget Range",
+        message: "Maximum budget cannot be lower than minimum budget.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (
+      formData.minBedrooms &&
+      formData.maxBedrooms &&
+      Number(formData.maxBedrooms) < Number(formData.minBedrooms)
+    ) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Bedroom Range",
+        message: "Maximum bedrooms cannot be lower than minimum bedrooms.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (
+      formData.minBathrooms &&
+      formData.maxBathrooms &&
+      Number(formData.maxBathrooms) < Number(formData.minBathrooms)
+    ) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Bathroom Range",
+        message: "Maximum bathrooms cannot be lower than minimum bathrooms.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (
+      formData.minCarSpaces &&
+      formData.maxCarSpaces &&
+      Number(formData.maxCarSpaces) < Number(formData.minCarSpaces)
+    ) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid Car Space Range",
+        message: "Maximum car spaces cannot be lower than minimum car spaces.",
+        success: false,
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       const payload =
@@ -198,13 +296,13 @@ export default function BuyersInvestorsContactPage() {
           ? formData
           : {
               ...formData,
-              bedrooms: "",
-              bedroomRange: false,
-              bathrooms: "",
-              carSpaces: "",
-              minLandSize: "",
-              maxLandSize: "",
-              propertyTypes: [],
+              minBedrooms: "",
+              maxBedrooms: "",
+              minBathrooms: "",
+              maxBathrooms: "",
+              minCarSpaces: "",
+              maxCarSpaces: "",
+              propertyType: "",
               keywords: "",
             };
 
@@ -213,7 +311,10 @@ export default function BuyersInvestorsContactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          phone: normalizedPhone,
+        }),
       });
 
       const data = await response.json();
@@ -222,15 +323,23 @@ export default function BuyersInvestorsContactPage() {
         throw new Error(data.message || "Failed to submit form.");
       }
 
-      setIsSuccess(true);
-      setStatusMessage("Your buyer/investor enquiry has been submitted successfully.");
+      setFeedbackModal({
+        open: true,
+        title: "Enquiry Submitted",
+        message: "Your buyer/investor enquiry has been submitted successfully.",
+        success: true,
+      });
       setFormData(initialFormData);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Something went wrong.";
 
-      setIsSuccess(false);
-      setStatusMessage(message);
+      setFeedbackModal({
+        open: true,
+        title: "Submission Failed",
+        message,
+        success: false,
+      });
     } finally {
       setLoading(false);
     }
@@ -276,6 +385,7 @@ export default function BuyersInvestorsContactPage() {
                     onChange={handleChange}
                     placeholder="Enter your name"
                     required
+                    maxLength={100}
                     className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                   />
                 </div>
@@ -284,15 +394,35 @@ export default function BuyersInvestorsContactPage() {
                   <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                     Phone
                   </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number"
-                    required
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
-                  />
+                  <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
+                    <select
+                      name="phoneCountryCode"
+                      value={formData.phoneCountryCode}
+                      onChange={handleChange}
+                      required
+                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      <option value="+61">+61</option>
+                      <option value="+65">+65</option>
+                      <option value="+44">+44</option>
+                      <option value="+1">+1</option>
+                      <option value="+86">+86</option>
+                      <option value="+64">+64</option>
+                    </select>
+
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter your phone number"
+                      required
+                      maxLength={15}
+                      inputMode="numeric"
+                      pattern="[0-9\s-]+"
+                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -306,6 +436,7 @@ export default function BuyersInvestorsContactPage() {
                     onChange={handleChange}
                     placeholder="Enter your email"
                     required
+                    maxLength={120}
                     className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                   />
                 </div>
@@ -420,6 +551,7 @@ export default function BuyersInvestorsContactPage() {
                   onChange={handleChange}
                   placeholder="e.g. Hawthorn, Kew, Brunswick, South Yarra"
                   required
+                  maxLength={150}
                   className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                 />
               </div>
@@ -438,8 +570,8 @@ export default function BuyersInvestorsContactPage() {
                   >
                     <option value="">Select minimum budget</option>
                     {budgetOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                      <option key={option.label} value={option.value}>
+                        {option.label}
                       </option>
                     ))}
                   </select>
@@ -457,9 +589,9 @@ export default function BuyersInvestorsContactPage() {
                     className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
                   >
                     <option value="">Select maximum budget</option>
-                    {budgetOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                    {filteredMaxBudgetOptions.map((option) => (
+                      <option key={option.label} value={option.value}>
+                        {option.label}
                       </option>
                     ))}
                   </select>
@@ -478,94 +610,20 @@ export default function BuyersInvestorsContactPage() {
                   </p>
                 </div>
 
-                <SegmentedOptionGroup
-                  label="Bedrooms"
-                  value={formData.bedrooms}
-                  onSelect={(value) => handleSegmentedChange("bedrooms", value)}
-                  options={[
-                    { label: "Any", value: "any" },
-                    { label: "Studio+", value: "studio" },
-                    { label: "1+", value: "1" },
-                    { label: "2+", value: "2" },
-                    { label: "3+", value: "3" },
-                    { label: "4+", value: "4" },
-                    { label: "5+", value: "5" },
-                  ]}
-                />
-
-                <div className="flex items-center justify-between rounded-sm border border-[#d9cec0] px-4 py-4">
-                  <div>
-                    <p className="text-[14px] font-medium text-[#1f1a17]">
-                      Select bedroom range
-                    </p>
-                    <p className="text-[13px] text-[#7a7065]">
-                      Enable if the buyer wants flexibility in bedroom count.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        bedroomRange: !prev.bedroomRange,
-                      }))
-                    }
-                    className={`relative h-8 w-16 rounded-full transition ${
-                      formData.bedroomRange ? "bg-[#2f2a24]" : "bg-[#d7cec1]"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
-                        formData.bedroomRange ? "left-9" : "left-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                <SegmentedOptionGroup
-                  label="Bathrooms"
-                  value={formData.bathrooms}
-                  onSelect={(value) => handleSegmentedChange("bathrooms", value)}
-                  options={[
-                    { label: "Any", value: "any" },
-                    { label: "1+", value: "1" },
-                    { label: "2+", value: "2" },
-                    { label: "3+", value: "3" },
-                    { label: "4+", value: "4" },
-                    { label: "5+", value: "5" },
-                  ]}
-                />
-
-                <SegmentedOptionGroup
-                  label="Car Spaces"
-                  value={formData.carSpaces}
-                  onSelect={(value) => handleSegmentedChange("carSpaces", value)}
-                  options={[
-                    { label: "Any", value: "any" },
-                    { label: "1+", value: "1" },
-                    { label: "2+", value: "2" },
-                    { label: "3+", value: "3" },
-                    { label: "4+", value: "4" },
-                    { label: "5+", value: "5" },
-                  ]}
-                />
-
                 <div className="grid gap-8 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                      Min Land Size
+                      Min Bedrooms
                     </label>
                     <select
-                      name="minLandSize"
-                      value={formData.minLandSize}
+                      name="minBedrooms"
+                      value={formData.minBedrooms}
                       onChange={handleChange}
                       className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
                     >
-                      <option value="">Any</option>
-                      {landSizeOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
+                      {roomOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
                         </option>
                       ))}
                     </select>
@@ -573,18 +631,93 @@ export default function BuyersInvestorsContactPage() {
 
                   <div>
                     <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                      Max Land Size
+                      Max Bedrooms
                     </label>
                     <select
-                      name="maxLandSize"
-                      value={formData.maxLandSize}
+                      name="maxBedrooms"
+                      value={formData.maxBedrooms}
                       onChange={handleChange}
                       className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
                     >
-                      <option value="">Any</option>
-                      {landSizeOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
+                      {filteredMaxBedroomOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Min Bathrooms
+                    </label>
+                    <select
+                      name="minBathrooms"
+                      value={formData.minBathrooms}
+                      onChange={handleChange}
+                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      {bathroomCarOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Max Bathrooms
+                    </label>
+                    <select
+                      name="maxBathrooms"
+                      value={formData.maxBathrooms}
+                      onChange={handleChange}
+                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      {filteredMaxBathroomOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Min Car Spaces
+                    </label>
+                    <select
+                      name="minCarSpaces"
+                      value={formData.minCarSpaces}
+                      onChange={handleChange}
+                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      {bathroomCarOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Max Car Spaces
+                    </label>
+                    <select
+                      name="maxCarSpaces"
+                      value={formData.maxCarSpaces}
+                      onChange={handleChange}
+                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      {filteredMaxCarSpaceOptions.map((option) => (
+                        <option key={option.label} value={option.value}>
+                          {option.label}
                         </option>
                       ))}
                     </select>
@@ -596,23 +729,28 @@ export default function BuyersInvestorsContactPage() {
                     Property Type
                   </label>
 
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 md:grid-cols-3">
                     {propertyTypeOptions.map((type) => {
-                      const checked = formData.propertyTypes.includes(type);
+                      const selected = formData.propertyType === type;
 
                       return (
-                        <label
+                        <button
                           key={type}
-                          className="flex items-center gap-3 text-[15px] text-[#1f1a17]"
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              propertyType: type,
+                            }))
+                          }
+                          className={`rounded-sm border px-4 py-4 text-[14px] font-medium transition ${
+                            selected
+                              ? "border-[#5f5245] bg-[#2f2a24] text-white"
+                              : "border-[#d9cec0] bg-[#fdfbf8] text-[#1f1a17] hover:border-[#5f5245]"
+                          }`}
                         >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => handleCheckboxToggle(type)}
-                            className="h-4 w-4"
-                          />
-                          <span>{type}</span>
-                        </label>
+                          {type}
+                        </button>
                       );
                     })}
                   </div>
@@ -627,6 +765,7 @@ export default function BuyersInvestorsContactPage() {
                     name="keywords"
                     value={formData.keywords}
                     onChange={handleChange}
+                    maxLength={300}
                     placeholder="Air con, pool, garage, solar, ensuite..."
                     className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                   />
@@ -653,6 +792,7 @@ export default function BuyersInvestorsContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={6}
+                  maxLength={1000}
                   placeholder="Tell us a little about what you're looking for"
                   className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] text-[#1f1a17] outline-none resize-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                 />
@@ -668,19 +808,48 @@ export default function BuyersInvestorsContactPage() {
                 {loading ? "Submitting..." : "Send Enquiry"}
               </button>
             </div>
-
-            {statusMessage && (
-              <p
-                className={`text-center text-[13px] ${
-                  isSuccess ? "text-green-700" : "text-red-600"
-                }`}
-              >
-                {statusMessage}
-              </p>
-            )}
           </form>
         </div>
       </section>
+
+      {feedbackModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-md rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
+            <div
+              className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold ${
+                feedbackModal.success
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {feedbackModal.success ? "✓" : "!"}
+            </div>
+
+            <h3 className="text-xl font-medium text-[#1f1a17]">
+              {feedbackModal.title}
+            </h3>
+
+            <p className="mt-3 text-[14px] leading-7 text-[#6c6258]">
+              {feedbackModal.message}
+            </p>
+
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  setFeedbackModal((prev) => ({
+                    ...prev,
+                    open: false,
+                  }))
+                }
+                className="inline-flex min-w-[120px] items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>

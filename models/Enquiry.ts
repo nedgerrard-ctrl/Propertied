@@ -119,8 +119,8 @@ const enquirySchema = new Schema(
     },
 
     propertyTypes: {
-      type: [String],
-      default: [],
+      type: String,
+      default: "",
     },
 
     keywords: {
