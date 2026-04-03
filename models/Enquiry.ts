@@ -118,8 +118,9 @@ const enquirySchema = new Schema(
       default: "",
     },
 
-    propertyTypes: {
+    propertyType: {
       type: String,
+      trim: true,
       default: "",
     },
 

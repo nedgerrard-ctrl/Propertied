@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       maxBathrooms,
       minCarSpaces,
       maxCarSpaces,
-      propertyTypes,
+      propertyType,
       keywords,
 
       // developer
@@ -65,7 +65,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isNonEmptyString(name) || !isNonEmptyString(email) || !isNonEmptyString(phoneCountryCode) || !isNonEmptyString(phone)) {
+    if (
+      !isNonEmptyString(name) ||
+      !isNonEmptyString(email) ||
+      !isNonEmptyString(phoneCountryCode) ||
+      !isNonEmptyString(phone)
+    ) {
       return NextResponse.json(
         { success: false, message: "Please fill in all required fields." },
         { status: 400 }
@@ -94,6 +99,7 @@ export async function POST(request: Request) {
       [phone, 20],
       [message, 1000],
       [preferredLocations, 150],
+      [propertyType, 100],
       [keywords, 300],
       [projectName, 120],
       [projectLocation, 120],
@@ -106,7 +112,10 @@ export async function POST(request: Request) {
 
     if (hasInvalidLength) {
       return NextResponse.json(
-        { success: false, message: "One or more fields exceed the maximum allowed length." },
+        {
+          success: false,
+          message: "One or more fields exceed the maximum allowed length.",
+        },
         { status: 400 }
       );
     }
@@ -121,7 +130,10 @@ export async function POST(request: Request) {
         !isNonEmptyString(propertyInterest)
       ) {
         return NextResponse.json(
-          { success: false, message: "Please fill in all required buyer/investor fields." },
+          {
+            success: false,
+            message: "Please fill in all required buyer/investor fields.",
+          },
           { status: 400 }
         );
       }
@@ -129,9 +141,16 @@ export async function POST(request: Request) {
       const minBudgetValue = toNumberOrNull(minBudget);
       const maxBudgetValue = toNumberOrNull(maxBudget);
 
-      if (minBudgetValue !== null && maxBudgetValue !== null && maxBudgetValue < minBudgetValue) {
+      if (
+        minBudgetValue !== null &&
+        maxBudgetValue !== null &&
+        maxBudgetValue < minBudgetValue
+      ) {
         return NextResponse.json(
-          { success: false, message: "Maximum budget cannot be lower than minimum budget." },
+          {
+            success: false,
+            message: "Maximum budget cannot be lower than minimum budget.",
+          },
           { status: 400 }
         );
       }
@@ -149,7 +168,10 @@ export async function POST(request: Request) {
         maxBedroomsValue < minBedroomsValue
       ) {
         return NextResponse.json(
-          { success: false, message: "Maximum bedrooms cannot be lower than minimum bedrooms." },
+          {
+            success: false,
+            message: "Maximum bedrooms cannot be lower than minimum bedrooms.",
+          },
           { status: 400 }
         );
       }
@@ -160,7 +182,11 @@ export async function POST(request: Request) {
         maxBathroomsValue < minBathroomsValue
       ) {
         return NextResponse.json(
-          { success: false, message: "Maximum bathrooms cannot be lower than minimum bathrooms." },
+          {
+            success: false,
+            message:
+              "Maximum bathrooms cannot be lower than minimum bathrooms.",
+          },
           { status: 400 }
         );
       }
@@ -171,7 +197,11 @@ export async function POST(request: Request) {
         maxCarSpacesValue < minCarSpacesValue
       ) {
         return NextResponse.json(
-          { success: false, message: "Maximum car spaces cannot be lower than minimum car spaces." },
+          {
+            success: false,
+            message:
+              "Maximum car spaces cannot be lower than minimum car spaces.",
+          },
           { status: 400 }
         );
       }
@@ -184,7 +214,10 @@ export async function POST(request: Request) {
         !isNonEmptyString(commissionStructureInterest)
       ) {
         return NextResponse.json(
-          { success: false, message: "Please fill in all required developer fields." },
+          {
+            success: false,
+            message: "Please fill in all required developer fields.",
+          },
           { status: 400 }
         );
       }
@@ -204,19 +237,22 @@ export async function POST(request: Request) {
       investorRegion: typeof investorRegion === "string" ? investorRegion : "",
       minBudget: typeof minBudget === "string" ? minBudget : "",
       maxBudget: typeof maxBudget === "string" ? maxBudget : "",
-      preferredLocations: typeof preferredLocations === "string" ? preferredLocations.trim() : "",
-      propertyInterest: typeof propertyInterest === "string" ? propertyInterest : "",
+      preferredLocations:
+        typeof preferredLocations === "string" ? preferredLocations.trim() : "",
+      propertyInterest:
+        typeof propertyInterest === "string" ? propertyInterest : "",
       minBedrooms: typeof minBedrooms === "string" ? minBedrooms : "",
       maxBedrooms: typeof maxBedrooms === "string" ? maxBedrooms : "",
       minBathrooms: typeof minBathrooms === "string" ? minBathrooms : "",
       maxBathrooms: typeof maxBathrooms === "string" ? maxBathrooms : "",
       minCarSpaces: typeof minCarSpaces === "string" ? minCarSpaces : "",
       maxCarSpaces: typeof maxCarSpaces === "string" ? maxCarSpaces : "",
-      propertyTypes: Array.isArray(propertyTypes) ? propertyTypes : [],
+      propertyType: typeof propertyType === "string" ? propertyType.trim() : "",
       keywords: typeof keywords === "string" ? keywords.trim() : "",
 
       projectName: typeof projectName === "string" ? projectName.trim() : "",
-      projectLocation: typeof projectLocation === "string" ? projectLocation.trim() : "",
+      projectLocation:
+        typeof projectLocation === "string" ? projectLocation.trim() : "",
       commissionStructureInterest:
         typeof commissionStructureInterest === "string"
           ? commissionStructureInterest.trim()

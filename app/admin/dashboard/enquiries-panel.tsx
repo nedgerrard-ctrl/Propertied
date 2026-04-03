@@ -29,8 +29,7 @@ type Enquiry = {
   maxBathrooms: string;
   minCarSpaces: string;
   maxCarSpaces: string;
-  propertyTypes?: string[] | string;
-  propertyType?: string; // fallback in case older/newer payloads differ
+  propertyType: string;
   keywords: string;
 
   // developer fields
@@ -124,22 +123,6 @@ function getSummaryLabel(enquiry: Enquiry) {
   return "General Contact";
 }
 
-function getPropertyTypes(enquiry: Enquiry) {
-  if (Array.isArray(enquiry.propertyTypes)) {
-    return enquiry.propertyTypes.filter(Boolean).join(", ");
-  }
-
-  if (typeof enquiry.propertyTypes === "string" && enquiry.propertyTypes.trim()) {
-    return enquiry.propertyTypes.trim();
-  }
-
-  if (typeof enquiry.propertyType === "string" && enquiry.propertyType.trim()) {
-    return enquiry.propertyType.trim();
-  }
-
-  return "";
-}
-
 async function patchStatus(id: string, status: EnquiryStatus) {
   const res = await fetch(`/api/admin/enquiries/${id}`, {
     method: "PATCH",
@@ -178,7 +161,11 @@ function InlineStatusSelect({
       }`}
     >
       {STATUS_OPTIONS.map((s) => (
-        <option key={s} value={s} className="bg-white normal-case text-neutral-900">
+        <option
+          key={s}
+          value={s}
+          className="bg-white normal-case text-neutral-900"
+        >
           {STATUS_LABEL[s]}
         </option>
       ))}
@@ -195,7 +182,9 @@ function DetailPanel({
   onClose: () => void;
   onStatusUpdate: (id: string, status: EnquiryStatus) => void;
 }) {
-  const [pendingStatus, setPendingStatus] = useState<EnquiryStatus>(enquiry.status);
+  const [pendingStatus, setPendingStatus] = useState<EnquiryStatus>(
+    enquiry.status
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -217,8 +206,6 @@ function DetailPanel({
 
     setSaving(false);
   }
-
-  const propertyTypes = getPropertyTypes(enquiry);
 
   return (
     <>
@@ -266,7 +253,10 @@ function DetailPanel({
                 <dt className="w-28 shrink-0 text-neutral-400">Phone</dt>
                 <dd className="font-medium text-neutral-900">
                   <a
-                    href={`tel:${formatPhone(enquiry.phoneCountryCode, enquiry.phone).replace(/\s+/g, "")}`}
+                    href={`tel:${formatPhone(
+                      enquiry.phoneCountryCode,
+                      enquiry.phone
+                    ).replace(/\s+/g, "")}`}
                     className="hover:underline"
                   >
                     {formatPhone(enquiry.phoneCountryCode, enquiry.phone)}
@@ -395,7 +385,7 @@ function DetailPanel({
                   <div className="flex gap-3">
                     <dt className="w-28 shrink-0 text-neutral-400">Property Type</dt>
                     <dd className="font-medium text-neutral-900">
-                      {propertyTypes || "—"}
+                      {enquiry.propertyType || "—"}
                     </dd>
                   </div>
 
