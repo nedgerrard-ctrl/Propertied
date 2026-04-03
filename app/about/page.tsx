@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import OverseasReachSection from "../components/OverseasReachSection";
 
 export default function AboutPage() {
   const cycleSteps = [
@@ -315,7 +316,12 @@ export default function AboutPage() {
             ))}
           </div>
         </section>
+      </div>
 
+      {/* Full-width dark globe section — outside max-w-7xl container */}
+      <OverseasReachSection />
+
+      <div className="mx-auto max-w-7xl px-6">
         {/* For Developers */}
         <section className="mt-20">
           <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
