@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, model } from "mongoose";
+import { Schema, models, model } from "mongoose";
 
 const enquirySchema = new Schema(
   {
@@ -12,6 +12,7 @@ const enquirySchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: 100,
     },
 
     email: {
@@ -19,18 +20,28 @@ const enquirySchema = new Schema(
       required: true,
       trim: true,
       lowercase: true,
+      maxlength: 120,
+    },
+
+    phoneCountryCode: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 6,
     },
 
     phone: {
       type: String,
       required: true,
       trim: true,
+      maxlength: 20,
     },
 
     message: {
       type: String,
       trim: true,
       default: "",
+      maxlength: 1000,
     },
 
     // buyer / investor fields
@@ -62,6 +73,7 @@ const enquirySchema = new Schema(
       type: String,
       trim: true,
       default: "",
+      maxlength: 150,
     },
 
     propertyInterest: {
@@ -70,36 +82,37 @@ const enquirySchema = new Schema(
       default: "",
     },
 
-    bedrooms: {
+    minBedrooms: {
       type: String,
       trim: true,
       default: "",
     },
 
-    bedroomRange: {
-      type: Boolean,
-      default: false,
-    },
-
-    bathrooms: {
+    maxBedrooms: {
       type: String,
       trim: true,
       default: "",
     },
 
-    carSpaces: {
+    minBathrooms: {
       type: String,
       trim: true,
       default: "",
     },
 
-    minLandSize: {
+    maxBathrooms: {
       type: String,
       trim: true,
       default: "",
     },
 
-    maxLandSize: {
+    minCarSpaces: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    maxCarSpaces: {
       type: String,
       trim: true,
       default: "",
@@ -114,6 +127,7 @@ const enquirySchema = new Schema(
       type: String,
       trim: true,
       default: "",
+      maxlength: 300,
     },
 
     // developer fields
@@ -121,18 +135,21 @@ const enquirySchema = new Schema(
       type: String,
       trim: true,
       default: "",
+      maxlength: 120,
     },
 
     projectLocation: {
       type: String,
       trim: true,
       default: "",
+      maxlength: 120,
     },
 
     commissionStructureInterest: {
       type: String,
       trim: true,
       default: "",
+      maxlength: 150,
     },
 
     status: {
