@@ -31,16 +31,24 @@ export default async function BlogPostPage({
   const post = getBlogPost(slug)
   if (!post) notFound()
 
-  // Article index for the issue-number display
   const postIndex = blogPosts.findIndex((p) => p.slug === slug) + 1
 
   return (
     <main className="min-h-screen w-full bg-white text-[#1f1a17]">
       <Navbar />
 
-      {/* ── Editorial header — matches the dark #0a0806 of the listing hero ── */}
-      <header className="bg-[#0a0806] overflow-hidden">
+      {/* ── Editorial header ──────────────────────────────────────────────── */}
+      <header className="bg-[#0a0806]">
         <div className="mx-auto max-w-7xl px-8 pt-28 pb-16">
+
+          {/* Back link — top of the header so it's the first thing seen */}
+          <Link
+            href="/blog"
+            className="group inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.22em] text-[#4a3f37] transition hover:text-[#8a7b6d] mb-10"
+          >
+            <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+            <span>All Articles</span>
+          </Link>
 
           {/* Metadata row */}
           <div className="flex items-baseline justify-between border-b border-[#2d2218] pb-6">
@@ -48,9 +56,7 @@ export default async function BlogPostPage({
               {post.category}
             </p>
             <div className="flex items-center gap-6">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
-                {post.date}
-              </p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">{post.date}</p>
               <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
                 No.&nbsp;{String(postIndex).padStart(2, '0')}
               </p>
@@ -62,7 +68,7 @@ export default async function BlogPostPage({
             {post.title}
           </h1>
 
-          {/* Description / deck */}
+          {/* Deck / description */}
           <p className="mt-7 max-w-[54ch] text-[14px] leading-[1.9] text-[#8a7b6d]">
             {post.description}
           </p>
@@ -73,48 +79,42 @@ export default async function BlogPostPage({
       </header>
 
       {/* ── Featured image ────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-8 -mt-0">
-        <div className="overflow-hidden border border-[#e8e2d9]">
+      <div className="mx-auto max-w-5xl px-8 mt-10">
+        <div className="overflow-hidden">
           <img
             src={post.image}
             alt={post.title}
-            className="h-[340px] md:h-[440px] w-full object-cover"
+            className="h-[300px] md:h-[420px] w-full object-cover"
           />
         </div>
       </div>
 
       {/* ── Article body ──────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-3xl px-8 py-16">
-
-        {/* Back link */}
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:text-[#1f1a17] mb-14 group"
-        >
-          <span className="transition group-hover:-translate-x-0.5">←</span>
-          <span>All Articles</span>
-        </Link>
-
-        <article className="space-y-10">
+      <div className="mx-auto max-w-2xl px-8 py-14">
+        <article>
           {post.content.map((section, i) => (
-            <div key={i} className={section.heading ? '' : 'border-l-2 border-[#e8e2d9] pl-6'}>
+            <div key={i} className="mb-9">
               {section.heading && (
-                <h2 className="text-[18px] font-semibold text-[#1f1a17] mb-4 tracking-[-0.01em]">
+                <h2 className="text-[17px] font-semibold text-[#1f1a17] mb-3 tracking-[-0.01em]">
                   {section.heading}
                 </h2>
               )}
-              <p className="text-[15px] leading-[1.95] text-[#3d3530]">
+              <p className={`leading-[1.95] text-[#3d3530] ${
+                i === 0 && !section.heading
+                  ? 'text-[16px] text-[#2a2420]'  // lead paragraph — slightly larger + darker
+                  : 'text-[14.5px]'
+              }`}>
                 {section.body}
               </p>
             </div>
           ))}
         </article>
 
-        {/* Divider */}
-        <div className="mt-16 h-px bg-gradient-to-r from-[#c8a96e]/40 via-[#e8e2d9] to-transparent" />
+        {/* Amber divider */}
+        <div className="mt-6 h-px bg-gradient-to-r from-[#c8a96e]/50 via-[#e8e2d9] to-transparent" />
       </div>
 
-      {/* ── End CTA — dark, matches the hero tone ─────────────────────────── */}
+      {/* ── End CTA ───────────────────────────────────────────────────────── */}
       <section className="bg-[#0a0806] py-24">
         <div className="mx-auto max-w-7xl px-8">
           <div className="grid md:grid-cols-[3fr_2fr] gap-10 md:items-center">
