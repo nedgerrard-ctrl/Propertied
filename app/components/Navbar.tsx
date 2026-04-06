@@ -21,7 +21,6 @@ const PRIMARY_LINKS = [
   { href: '/developer',   label: 'Developers' },
   { href: '/blog',        label: 'Blog' },
   { href: '/testimonial', label: 'Testimonials' },
-  { href: '#',            label: 'Projects' },   // placeholder — muted
 ]
 
 const UTIL_LINKS = [
