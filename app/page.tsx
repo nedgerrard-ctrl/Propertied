@@ -1,153 +1,340 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import HeroCarousel from "./components/HeroCarousel";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { Cormorant_Garamond } from 'next/font/google'
+import Link from 'next/link'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 
-export default function Home() {
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display: 'swap',
+})
 
-  const bannerImages = [
-    "/images/house1.png",
-    "/images/house2.png",
-    "/images/house3.png",
-    "/images/house4.png",
-  ];
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+const stats = [
+  { value: '10+',        unit: 'Years',      label: 'Industry Experience' },
+  { value: '$1.5B+',     unit: '',           label: 'Projects Delivered' },
+  { value: 'End-to-end', unit: '',           label: 'Source · Buy · Manage · Resell' },
+]
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
-  };
+const services = [
+  {
+    href:     '/about',
+    label:    'About Us',
+    sub:      'Our story & team',
+    index:    '01',
+  },
+  {
+    href:     '/buyers',
+    label:    'For Buyers',
+    sub:      'Off-plan & established',
+    index:    '02',
+  },
+  {
+    href:     '/developer',
+    label:    'For Developers',
+    sub:      'Partnership enquiries',
+    index:    '03',
+  },
+  {
+    href:     '/blog',
+    label:    'Blog & Insights',
+    sub:      'Market perspectives',
+    index:    '04',
+  },
+  {
+    href:     '/testimonial',
+    label:    'Testimonials',
+    sub:      'Client perspectives',
+    index:    '05',
+  },
+  {
+    href:     '/contact',
+    label:    'Contact',
+    sub:      'Start a conversation',
+    index:    '06',
+  },
+]
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) =>
-      prev === 0 ? bannerImages.length - 1 : prev - 1
-    );
-  };
+// ─── Sections ─────────────────────────────────────────────────────────────────
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
-  useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrentSlide((prev) => (prev + 1) % bannerImages.length);
-  }, 5000);
-
-  return () => clearInterval(interval);
-  }, [currentSlide, bannerImages.length]);
-
-  const stats = [
-    {
-      value: "10+ Years",
-      label: "Industry Experience",
-      icon: (
-        <svg viewBox="0 0 64 64" className="h-16 w-16 fill-[#2f2a24]">
-          <path d="M14 28.5 27 18l13 10.5V50a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V28.5Zm8 17.5h10V34H22v12Zm22-25h10a4 4 0 0 1 4 4v25a2 2 0 0 1-2 2H44V21Zm6 8h4v4h-4v-4Zm0 8h4v4h-4v-4Zm0 8h4v4h-4v-4Z" />
-        </svg>
-      ),
-    },
-    {
-      value: "$1.5B+",
-      label: "Project Delivered",
-      icon: (
-        <svg viewBox="0 0 64 64" className="h-16 w-16 fill-[#2f2a24]">
-          <rect x="8" y="26" width="10" height="28" rx="3" />
-          <rect x="27" y="14" width="10" height="40" rx="3" />
-          <rect x="46" y="20" width="10" height="34" rx="3" />
-        </svg>
-      ),
-    },
-    {
-      value: "End-to-end",
-      label: "Source, Buy, Manage & Resell",
-      icon: (
-        <svg viewBox="0 0 64 64" className="h-16 w-16 fill-[#2f2a24]">
-          <path d="M18 12h16v8l12-12-12-12v8H14a6 6 0 0 0-6 6v18h10V18a6 6 0 0 1 6-6Zm28 34H30v-8L18 50l12 12v-8h20a6 6 0 0 0 6-6V30H46v10a6 6 0 0 1-6 6Zm10-24h-8v-8l-12 12 12 12v-8h10V18a6 6 0 0 0-6-6H34v10h12a6 6 0 0 1 6 6v-6ZM8 42h8v8l12-12-12-12v8H6v12a6 6 0 0 0 6 6h18V42H14a6 6 0 0 1-6-6v6Z" />
-        </svg>
-      ),
-    },
-  ];
-
-  const cards = [
-    { title: "About Us", subtitle: "View Company Details", image: "/images/house1.png", href: "/about" },
-    { title: "Portfolio Services", subtitle: "View More", image: "/images/house2.png", href: "#" },
-    { title: "Blog & Insights", subtitle: "Read Articles", image: "/images/house1.png", href: "/blog" },
-    { title: "For Developers", subtitle: "Discover Partnerships", image: "/images/house2.png", href: "#" },
-    { title: "For Buyers", subtitle: "Explore Buyer Options", image: "/images/house1.png", href: "/buyers" },
-    { title: "Testimonials", subtitle: "See Client Feedback", image: "/images/house2.png", href: "#" },
-  ];
+function VideoHero() {
+  const ref = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.6], [0.55, 0.85])
+  const textY          = useTransform(scrollYProgress, [0, 1],   [0, 80])
+  const textOpacity    = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
   return (
-    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
-      <Navbar />
+    <section ref={ref} className="relative h-screen w-full overflow-hidden">
+      {/* Video */}
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src="/real%20estate%20cinematic%20video.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <HeroCarousel />
+      {/* Overlay */}
+      <motion.div
+        style={{ opacity: overlayOpacity }}
+        className="absolute inset-0 bg-[#0a0806]"
+      />
 
-        <section className="mt-20 grid gap-12 md:grid-cols-3">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] px-8 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+      {/* Amber left rule */}
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 h-[120px] w-px bg-gradient-to-b from-transparent via-[#c8a96e] to-transparent" />
+
+      {/* Hero copy */}
+      <motion.div
+        style={{ y: textY, opacity: textOpacity }}
+        className="absolute inset-0 flex flex-col justify-center px-12 md:px-20 max-w-7xl mx-auto"
+      >
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="text-[10px] uppercase tracking-[0.38em] text-[#8a7b6d] mb-6"
+        >
+          Property Project Marketing
+        </motion.p>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className={`${cormorant.className} text-5xl md:text-7xl lg:text-[5.5rem] font-light leading-[1.08] text-white max-w-3xl`}
+        >
+          Melbourne&rsquo;s
+          <br />
+          <em className="italic text-[#c8a96e]">end-to-end</em>
+          <br />
+          property partner.
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.8 }}
+          className="mt-8 max-w-[42ch] text-[13.5px] leading-[1.9] text-[#9e8d7a]"
+        >
+          We source, market, and manage residential property — connecting
+          developers with qualified local and overseas buyers at every stage
+          of the property lifecycle.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 1.1 }}
+          className="mt-10 flex flex-wrap gap-4"
+        >
+          <Link
+            href="/buyers"
+            className="border border-[#c8a96e] px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
+          >
+            View Properties
+          </Link>
+          <Link
+            href="/contact"
+            className="border border-white/20 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#9e8d7a] transition hover:border-white/40 hover:text-white"
+          >
+            Get in Touch
+          </Link>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll cue */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.8, duration: 1 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      >
+        <span className="text-[9px] uppercase tracking-[0.32em] text-[#4a3f37]">Scroll</span>
+        <motion.span
+          animate={{ y: [0, 6, 0] }}
+          transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+          className="block h-4 w-px bg-[#c8a96e]/60"
+        />
+      </motion.div>
+    </section>
+  )
+}
+
+function StatsStrip() {
+  return (
+    <section className="bg-[#0f0c0a] border-b border-white/[0.06]">
+      <div className="mx-auto max-w-7xl px-8">
+        <div className="grid grid-cols-1 divide-y divide-white/[0.06] md:grid-cols-3 md:divide-x md:divide-y-0">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: i * 0.1 }}
+              className="flex flex-col justify-center px-10 py-12"
             >
-              <div className="mb-5 flex justify-center">{stat.icon}</div>
-              <h2 className="text-[34px] font-semibold tracking-[-0.02em] text-[#1f1a17]">
-                {stat.value}
-              </h2>
-              <p className="mt-2 text-[12px] font-medium uppercase tracking-[0.18em] text-[#6b6055]">
-                {stat.label}
+              <p className={`${cormorant.className} text-[2.6rem] font-light leading-none text-white`}>
+                {s.value}
+                {s.unit && (
+                  <span className="ml-1 text-[1.4rem] text-[#c8a96e]">{s.unit}</span>
+                )}
               </p>
-            </div>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.26em] text-[#6b5e54]">
+                {s.label}
+              </p>
+            </motion.div>
           ))}
-        </section>
-
-        <section className="mt-20">
-          <div className="mb-10 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Explore More
-            </p>
-            <h2 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
-              Discover our premium services and insights
-            </h2>
-          </div>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card) => (
-              <a
-                key={card.title}
-                href={card.href}
-                className="group overflow-hidden rounded-sm border border-[#dfd4c7] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
-              >
-                <div className="m-4 overflow-hidden rounded-sm bg-[#e3dbd0]">
-                  <div className="m-3 h-[105px] overflow-hidden">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                </div>
-
-                <div className="px-5 pb-6">
-                  <h3 className="text-[22px] font-semibold text-[#1f1a17] transition group-hover:text-[#5f5245]">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 text-[13px] text-[#6c6258]">
-                    {card.subtitle}
-                  </p>
-                  <span className="mt-5 inline-block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#2f2a24]">
-                    Learn More
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
+        </div>
       </div>
+    </section>
+  )
+}
 
+function EthosSection() {
+  return (
+    <section className="bg-[#0a0806] py-36 px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid md:grid-cols-[1fr_2fr] gap-16 md:items-start">
+          {/* Label column */}
+          <div className="md:pt-3">
+            <div className="h-px w-12 bg-[#c8a96e] mb-6" />
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54]">
+              Our Ethos
+            </p>
+          </div>
+
+          {/* Copy column */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-10%' }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className={`${cormorant.className} text-4xl md:text-5xl lg:text-[3.4rem] font-light leading-[1.2] text-neutral-100`}>
+              We believe property investment should be simple, transparent, and built for the long term.
+            </h2>
+            <p className="mt-8 max-w-[55ch] text-[13.5px] leading-[2] text-[#8a7b6d]">
+              PPM manages the full property lifecycle on behalf of investors — from sourcing
+              new developments and matching them with qualified buyers, to ongoing portfolio
+              management and resale through our sister company, Online Property Services.
+            </p>
+            <Link
+              href="/about"
+              className="mt-10 inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition hover:gap-4"
+            >
+              <span>Our Story</span>
+              <span>→</span>
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ServicesGrid() {
+  return (
+    <section className="bg-[#0f0c0a] py-28 px-8 border-t border-white/[0.06]">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 flex items-end justify-between">
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54]">
+            Explore
+          </p>
+          <div className="h-px flex-1 mx-10 bg-white/[0.06]" />
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((svc, i) => (
+            <motion.div
+              key={svc.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-8%' }}
+              transition={{ duration: 0.75, delay: i * 0.07 }}
+            >
+              <Link
+                href={svc.href}
+                className="group flex flex-col border-b border-white/[0.06] px-2 py-10 transition hover:bg-white/[0.02]"
+              >
+                <span className="text-[9px] uppercase tracking-[0.28em] text-[#3d3530] mb-6">
+                  {svc.index}
+                </span>
+                <h3 className={`${cormorant.className} text-[1.9rem] font-light text-neutral-200 leading-none mb-3 transition group-hover:text-white`}>
+                  {svc.label}
+                </h3>
+                <p className="text-[10.5px] uppercase tracking-[0.18em] text-[#6b5e54] transition group-hover:text-[#8a7b6d]">
+                  {svc.sub}
+                </p>
+                <span className="mt-6 text-[#c8a96e] text-[11px] tracking-widest opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0">
+                  →
+                </span>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function CtaBanner() {
+  return (
+    <section className="bg-[#0a0806] border-t border-white/[0.06] py-28 px-8">
+      <div className="mx-auto max-w-7xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9 }}
+        >
+          <p className="text-[10px] uppercase tracking-[0.34em] text-[#6b5e54] mb-6">
+            Ready to begin?
+          </p>
+          <h2 className={`${cormorant.className} text-4xl md:text-5xl font-light text-neutral-100 leading-snug mb-10`}>
+            Start your property journey with PPM.
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+            <Link
+              href="/contact"
+              className="border border-[#c8a96e] px-10 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
+            >
+              Get in Touch
+            </Link>
+            <Link
+              href="/buyers"
+              className="border border-neutral-800 px-10 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-neutral-600 hover:text-neutral-200"
+            >
+              View Properties
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function Home() {
+  return (
+    <main className="w-full bg-[#0a0806]">
+      <Navbar />
+      <VideoHero />
+      <StatsStrip />
+      <EthosSection />
+      <ServicesGrid />
+      <CtaBanner />
       <Footer />
     </main>
-  );
+  )
 }

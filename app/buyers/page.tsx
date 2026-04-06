@@ -1,53 +1,45 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { projects, type Project } from "@/lib/projects-data";
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Cormorant_Garamond } from 'next/font/google'
+import Link from 'next/link'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import { projects, type Project } from '@/lib/projects-data'
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display: 'swap',
+})
 
-function buildBuyerEnquiryHref(project: Project) {
-  const params = new URLSearchParams({
-    projectName: project.name,
-    suburb: project.suburb,
-    state: project.state,
-    propertyType: project.type,
-    propertyInterest: "off-plan",
-    bedrooms: project.bedrooms,
-    priceFrom: project.priceFrom,
-  });
+// ─── Detail slide-over ────────────────────────────────────────────────────────
 
-  return `/contact/buyers-investors?${params.toString()}`;
-}
-
-// ── Project detail slide-over ────────────────────────────────────────────────
-
-function ProjectDetailPanel({
-  project,
-  onClose,
-}: {
-  project: Project;
-  onClose: () => void;
-}) {
+function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-black/30" onClick={onClose} />
-      <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-lg flex-col overflow-y-auto bg-[#fbf8f3] shadow-2xl">
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Panel */}
+      <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-lg flex-col overflow-y-auto bg-[#0f0c0a] border-l border-white/[0.08] shadow-2xl">
+
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#e3d8ca] px-7 py-6">
+        <div className="flex items-start justify-between border-b border-white/[0.08] px-8 py-7">
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#8a7b6d]">
-              {project.suburb}, {project.state} &nbsp;·&nbsp; {project.type}
+            <p className="text-[9px] uppercase tracking-[0.28em] text-[#6b5e54]">
+              {project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}
             </p>
-            <h2 className="mt-1.5 text-2xl font-semibold text-[#1f1a17]">
+            <h2 className={`${cormorant.className} mt-2 text-[1.85rem] font-light text-white leading-tight`}>
               {project.name}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="mt-0.5 rounded p-1.5 text-[#8a7b6d] hover:bg-[#e3d8ca] hover:text-[#1f1a17]"
+            className="mt-1 p-1.5 text-[#4a3f37] hover:text-white transition"
             aria-label="Close"
           >
             <svg viewBox="0 0 20 20" className="h-5 w-5 fill-current">
@@ -57,284 +49,258 @@ function ProjectDetailPanel({
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 flex-col gap-7 px-7 py-7">
+        <div className="flex flex-1 flex-col gap-8 px-8 py-8">
+
           {/* Image */}
-          <div className="overflow-hidden rounded-sm bg-[#e3dbd0]">
-            <img
-              src={project.image}
-              alt={project.name}
-              className="h-52 w-full object-cover"
-            />
+          <div className="overflow-hidden">
+            <img src={project.image} alt={project.name} className="h-56 w-full object-cover" />
           </div>
 
           {/* Quick stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Bedrooms", value: project.bedrooms },
-              { label: "Price", value: project.priceFrom },
-              { label: "Status", value: project.status },
+              { label: 'Bedrooms',  value: project.bedrooms  },
+              { label: 'Price',     value: project.priceFrom },
+              { label: 'Status',    value: project.status    },
             ].map((s) => (
-              <div
-                key={s.label}
-                className="rounded-sm border border-[#e3d8ca] bg-white px-4 py-3 text-center"
-              >
-                <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#8a7b6d]">
-                  {s.label}
-                </p>
-                <p className="mt-1 text-[13px] font-semibold text-[#1f1a17]">
-                  {s.value}
-                </p>
+              <div key={s.label} className="border border-white/[0.08] bg-white/[0.03] px-4 py-4 text-center">
+                <p className="text-[9px] uppercase tracking-[0.22em] text-[#6b5e54]">{s.label}</p>
+                <p className="mt-2 text-[13px] font-medium text-neutral-200">{s.value}</p>
               </div>
             ))}
           </div>
 
+          {/* Amber rule */}
+          <div className="h-px bg-gradient-to-r from-[#c8a96e]/50 via-[#c8a96e]/20 to-transparent" />
+
           {/* Description */}
           <section>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a7b6d]">
-              About This Project
-            </p>
-            <p className="text-[13px] leading-7 text-[#4a4038]">
-              {project.description}
-            </p>
+            <p className="mb-4 text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">About This Project</p>
+            <p className="text-[13px] leading-[2] text-[#8a7b6d]">{project.description}</p>
           </section>
 
-          <hr className="border-[#e3d8ca]" />
+          <div className="h-px bg-white/[0.06]" />
 
           {/* Highlights */}
           <section>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a7b6d]">
-              Key Highlights
-            </p>
-            <ul className="space-y-2">
+            <p className="mb-4 text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">Key Highlights</p>
+            <ul className="space-y-3">
               {project.highlights.map((h) => (
-                <li key={h} className="flex items-start gap-3 text-[13px] text-[#4a4038]">
-                  <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a7b6d]" />
+                <li key={h} className="flex items-start gap-3 text-[13px] text-[#9e8d7a]">
+                  <span className="mt-[7px] h-1 w-1 shrink-0 bg-[#c8a96e]" />
                   {h}
                 </li>
               ))}
             </ul>
           </section>
 
-          <hr className="border-[#e3d8ca]" />
-
           {/* CTA */}
           <Link
-            href={buildBuyerEnquiryHref(project)}
-            className="flex w-full items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
+            href="/contact"
+            className="mt-2 flex w-full items-center justify-center border border-[#c8a96e] px-6 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
           >
             Enquire About This Project
           </Link>
         </div>
       </aside>
     </>
-  );
+  )
 }
 
-// ── Project card ─────────────────────────────────────────────────────────────
+// ─── Project card ─────────────────────────────────────────────────────────────
 
-function ProjectCard({
-  project,
-  onViewDetails,
-}: {
-  project: Project;
-  onViewDetails: (p: Project) => void;
-}) {
+function ProjectCard({ project, onViewDetails }: { project: Project; onViewDetails: (p: Project) => void }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-sm border border-[#dfd4c7] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-8%' }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="group flex flex-col border-t border-white/[0.08] bg-transparent"
+    >
       {/* Image */}
-      <div className="relative overflow-hidden bg-[#e3dbd0]">
+      <div className="relative overflow-hidden">
         <img
           src={project.image}
           alt={project.name}
-          className="h-52 w-full object-cover"
+          className="h-56 w-full object-cover transition duration-700 group-hover:scale-[1.03]"
         />
-        <span
-          className={`absolute right-3 top-3 rounded-sm px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] ${
-            project.status === "Current"
-              ? "bg-emerald-100 text-emerald-800"
-              : "bg-amber-100 text-amber-800"
-          }`}
-        >
+        {/* Status badge */}
+        <span className={[
+          'absolute right-4 top-4 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+          project.status === 'Current'
+            ? 'bg-[#c8a96e] text-[#0a0806]'
+            : 'bg-white/10 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
+        ].join(' ')}>
           {project.status}
         </span>
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
-        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#8a7b6d]">
-          {project.suburb}, {project.state} &nbsp;·&nbsp; {project.type}
+      <div className="flex flex-1 flex-col pt-6 pb-8">
+        <p className="text-[9px] uppercase tracking-[0.24em] text-[#6b5e54]">
+          {project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}
         </p>
-        <h3 className="mt-2 text-xl font-semibold text-[#1f1a17]">
+        <h3 className={`${cormorant.className} mt-2.5 text-[1.7rem] font-light leading-tight text-neutral-100 transition group-hover:text-white`}>
           {project.name}
         </h3>
 
-        {/* Quick info */}
-        <div className="mt-4 flex gap-5 text-[12px] text-[#6c6258]">
-          <span>
-            <span className="font-medium text-[#1f1a17]">{project.bedrooms}</span> bed
-          </span>
-          <span className="font-medium text-[#1f1a17]">{project.priceFrom}</span>
+        <div className="mt-3 flex gap-5 text-[11px] text-[#6b5e54]">
+          <span><span className="text-neutral-400">{project.bedrooms}</span> bed</span>
+          <span className="text-neutral-400">{project.priceFrom}</span>
         </div>
 
-        {/* Excerpt */}
-        <p className="mt-4 flex-1 text-[13px] leading-6 text-[#6c6258] line-clamp-3">
+        <p className="mt-4 flex-1 text-[12.5px] leading-[1.9] text-[#6b5e54] line-clamp-2">
           {project.description}
         </p>
 
-        {/* Actions */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-7 flex gap-3">
           <button
             onClick={() => onViewDetails(project)}
-            className="flex-1 rounded-sm border border-[#cfc2b2] px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
+            className="flex-1 border border-white/[0.12] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-white/30 hover:text-neutral-200"
           >
             View Details
           </button>
           <Link
-            href={buildBuyerEnquiryHref(project)}
-            className="flex-1 rounded-sm bg-[#2f2a24] px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"
+            href="/contact"
+            className="flex-1 border border-[#c8a96e] px-4 py-2.5 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
           >
             Enquire
           </Link>
         </div>
       </div>
-    </article>
-  );
+    </motion.article>
+  )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BuyersPage() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   return (
-    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+    <main className="w-full min-h-screen bg-[#0a0806] text-neutral-200">
       <Navbar />
 
-      {/* ── Hero ── */}
-      <section className="border-b border-[#e3d8ca] bg-[#fbf8f3]">
-        <div className="mx-auto max-w-7xl px-6 py-20 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            For Buyers
-          </p>
-          <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-light text-[#1f1a17] md:text-5xl">
-            Find your next property with PPM
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-[#6c6258]">
-            Whether you are an investor building a portfolio or searching for your
-            first home, we source, guide, and support you through every step of
-            the buying process.
-          </p>
-          <div className="mt-10">
-            <Link
-              href="/contact/buyers-investors"
-              className="inline-flex items-center gap-2 rounded-sm bg-[#2f2a24] px-9 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#1f1a17]"
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="pt-44 pb-16 px-8 md:px-14 max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2 }}
+        >
+          <p className="text-[10px] uppercase tracking-[0.36em] text-[#6b5e54] mb-4">For Buyers</p>
+          <div className="grid md:grid-cols-[3fr_2fr] gap-12 md:items-end">
+            <h1 className={`${cormorant.className} text-5xl md:text-6xl lg:text-[4.2rem] font-light leading-[1.1] text-white`}>
+              Find your next<br />
+              <em className="italic text-[#c8a96e]">Melbourne</em> property.
+            </h1>
+            <p className="text-[13.5px] leading-[2] text-[#8a7b6d] md:pb-2">
+              Whether you are building an investment portfolio or searching
+              for your first home, we source, guide, and support you through
+              every step of the buying process.
+            </p>
+          </div>
+          <div className="mt-10 h-px w-full bg-neutral-800" />
+        </motion.div>
+      </section>
+
+      {/* ── Who we work with ─────────────────────────────────────────────────── */}
+      <section className="px-8 md:px-14 py-20 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54] mb-16">Who We Work With</p>
+
+          <div className="grid md:grid-cols-2 gap-px bg-white/[0.06]">
+            {/* Investors */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.85 }}
+              className="bg-[#0a0806] p-10 md:p-12"
             >
-              Register Interest
-            </Link>
+              <span className="text-[9px] uppercase tracking-[0.28em] text-[#c8a96e] mb-6 block">01</span>
+              <h2 className={`${cormorant.className} text-[2rem] font-light text-white mb-5`}>For Investors</h2>
+              <p className="text-[13px] leading-[2] text-[#8a7b6d] mb-8">
+                PPM provides access to off-the-plan and established investment
+                opportunities across Melbourne, selected for yield potential,
+                capital growth fundamentals, and developer quality. Our
+                end-to-end model means we source your property, manage it,
+                and advise on the right time to resell — all under one roof.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  'Access to exclusive off-the-plan developments',
+                  'Independent advice — not tied to any single developer',
+                  'FIRB guidance for overseas buyers',
+                  'Portfolio management via Online Property Services',
+                  'Resale timing and reinvestment strategy advice',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-[12.5px] text-[#8a7b6d]">
+                    <span className="mt-[8px] h-px w-3 shrink-0 bg-[#c8a96e]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Owner-Occupiers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.85, delay: 0.1 }}
+              className="bg-[#0a0806] p-10 md:p-12"
+            >
+              <span className="text-[9px] uppercase tracking-[0.28em] text-[#c8a96e] mb-6 block">02</span>
+              <h2 className={`${cormorant.className} text-[2rem] font-light text-white mb-5`}>For Owner-Occupiers</h2>
+              <p className="text-[13px] leading-[2] text-[#8a7b6d] mb-8">
+                Buying your own home is one of the most significant decisions
+                you will make. PPM gives you access to quality developments
+                before they reach the broader market, with independent guidance
+                throughout — from shortlisting and contract review through to
+                settlement. We work for you, not the developer.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  'New builds and off-the-plan apartments and townhouses',
+                  'Lock in today\'s price — settle on completion',
+                  'New build warranty on all fixtures and fittings',
+                  'Modern energy ratings and high-spec inclusions',
+                  'Guided support from enquiry through to settlement',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-[12.5px] text-[#8a7b6d]">
+                    <span className="mt-[8px] h-px w-3 shrink-0 bg-[#c8a96e]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-6 py-16">
-
-        {/* ── Investor vs Owner-Occupier ── */}
-        <section>
-          <div className="mb-10 text-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-              Who We Work With
-            </p>
-            <h2 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
-              Tailored guidance for every buyer
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Investors */}
-            <div className="rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] px-8 py-9">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-sm bg-[#2f2a24]">
-                <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
-                  <path d="M3 13h2v8H3v-8Zm4-4h2v12H7V9Zm4-4h2v16h-2V5Zm4 2h2v14h-2V7Zm4-4h2v18h-2V3Z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1f1a17]">For Investors</h3>
-              <p className="mt-3 text-[13px] leading-7 text-[#5b5147]">
-                PPM provides access to off-the-plan and established investment
-                opportunities across Melbourne, selected for yield potential,
-                capital growth fundamentals, and developer quality. Our
-                end-to-end model means we can source your property, manage it
-                through Online Property Services, and advise on the right time
-                to resell — all under one roof.
-              </p>
-              <ul className="mt-5 space-y-2.5">
-                {[
-                  "Access to exclusive off-the-plan developments",
-                  "Independent advice — not tied to any single developer",
-                  "FIRB guidance for overseas buyers",
-                  "Ongoing portfolio management via Online Property Services",
-                  "Advice on resale timing and reinvestment strategy",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-[13px] text-[#4a4038]">
-                    <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a7b6d]" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Owner-Occupiers */}
-            <div className="rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] px-8 py-9">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-sm bg-[#2f2a24]">
-                <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5Z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1f1a17]">For Owner-Occupiers</h3>
-              <p className="mt-3 text-[13px] leading-7 text-[#5b5147]">
-                Buying your own home is one of the most significant decisions
-                you will make. PPM gives you access to quality developments
-                before they reach the broader market, with independent guidance
-                throughout the purchase process — from shortlisting and contract
-                review coordination through to settlement. We work for you, not
-                the developer.
-              </p>
-              <ul className="mt-5 space-y-2.5">
-                {[
-                  "Access to new builds and off-the-plan apartments and townhouses",
-                  "Lock in today's price — settle on completion",
-                  "New build warranty on all fixtures and fittings",
-                  "Modern energy ratings and high-spec inclusions",
-                  "Guided support from enquiry through to settlement",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-[13px] text-[#4a4038]">
-                    <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a7b6d]" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Current Projects ── */}
-        <section className="mt-20">
-          <div className="mb-10 flex items-end justify-between">
+      {/* ── Projects ─────────────────────────────────────────────────────────── */}
+      <section className="px-8 md:px-14 py-24 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-end justify-between mb-16">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
+              <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54] mb-3">
                 Featured &amp; Current
               </p>
-              <h2 className="mt-3 text-3xl font-light text-[#1f1a17] md:text-4xl">
-                Available projects
+              <h2 className={`${cormorant.className} text-[2.2rem] font-light text-white`}>
+                Available Projects
               </h2>
             </div>
             <Link
-              href="/contact/buyers-investors"
-              className="hidden shrink-0 border border-[#2f2a24] px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24] transition hover:bg-[#2f2a24] hover:text-white sm:inline-block"
+              href="/contact"
+              className="hidden sm:inline-block border border-white/[0.12] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#8a7b6d] transition hover:border-[#c8a96e] hover:text-[#c8a96e]"
             >
               Register Interest
             </Link>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+          <div className="grid sm:grid-cols-2 gap-x-10 gap-y-6">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -343,29 +309,49 @@ export default function BuyersPage() {
               />
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Register Interest CTA ── */}
-        <section className="mt-20 rounded-sm border border-[#e3d8ca] bg-[#2f2a24] px-8 py-14 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#c4b49f]">
-            Get In Touch
-          </p>
-          <h2 className="mx-auto mt-4 max-w-xl text-3xl font-light text-white">
-            Ready to start your property search?
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-[14px] leading-7 text-[#c4b49f]">
-            Register your interest and one of our advisers will be in touch to
-            discuss your goals, budget, and the opportunities currently
-            available.
-          </p>
-          <Link
-            href="/contact/buyers-investors"
-            className="mt-8 inline-flex items-center gap-2 rounded-sm bg-white px-9 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1f1a17] transition hover:bg-[#f0e8dd]"
+      {/* ── CTA ──────────────────────────────────────────────────────────────── */}
+      <section className="border-t border-white/[0.06] py-28 px-8 md:px-14">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9 }}
+            className="grid md:grid-cols-[3fr_2fr] gap-12 md:items-center"
           >
-            Register Interest
-          </Link>
-        </section>
-      </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.34em] text-[#6b5e54] mb-5">
+                Ready to Begin?
+              </p>
+              <h2 className={`${cormorant.className} text-4xl md:text-5xl font-light text-white leading-snug mb-6`}>
+                Start your property search with PPM.
+              </h2>
+              <p className="text-[13.5px] leading-[2] text-[#8a7b6d] max-w-[48ch]">
+                Register your interest and one of our advisers will be in touch
+                to discuss your goals, budget, and the opportunities currently
+                available.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4 md:items-start">
+              <Link
+                href="/contact"
+                className="border border-[#c8a96e] px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
+              >
+                Register Interest
+              </Link>
+              <Link
+                href="/about"
+                className="border border-neutral-800 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-neutral-600 hover:text-neutral-200"
+              >
+                About PPM
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       <Footer />
 
@@ -377,5 +363,5 @@ export default function BuyersPage() {
         />
       )}
     </main>
-  );
+  )
 }
