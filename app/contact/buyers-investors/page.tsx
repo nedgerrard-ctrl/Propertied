@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -220,7 +220,7 @@ function formatFileSize(fileSize: number) {
   return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function BuyersInvestorsContactPage() {
+function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1103,5 +1103,13 @@ export default function BuyersInvestorsContactPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function BuyersInvestorsContactPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-[#f4f1ea]" />}>
+      <BuyersInvestorsContactContent />
+    </Suspense>
   );
 }
