@@ -15,15 +15,15 @@ const FloatingDust = dynamic(() => import('../components/FloatingDust'), {
 // ─── Network graph data ───────────────────────────────────────────────────────
 
 const NODES: Array<{ pos: [number, number, number]; size: number; color: string }> = [
-  { pos: [0,     0,    0   ], size: 0.18, color: '#c8a96e' }, // PPM — centre
-  { pos: [2.2,   0.5,  0.3 ], size: 0.10, color: '#8a7b6d' }, // Developer A
-  { pos: [1.8,  -1.1,  0.7 ], size: 0.10, color: '#8a7b6d' }, // Developer B
-  { pos: [2.0,   1.3, -0.6 ], size: 0.08, color: '#8a7b6d' }, // Developer C
-  { pos: [-2.0,  0.8,  0.5 ], size: 0.09, color: '#a08060' }, // Buyer A
-  { pos: [-1.7, -0.7,  1.0 ], size: 0.09, color: '#a08060' }, // Buyer B
-  { pos: [-1.9,  0.2, -0.9 ], size: 0.09, color: '#a08060' }, // Buyer C
-  { pos: [0.0,   2.0,  0.6 ], size: 0.08, color: '#9e8d7a' }, // Management
-  { pos: [0.2,  -1.9, -0.4 ], size: 0.08, color: '#9e8d7a' }, // Resale
+  { pos: [0,     0,    0   ], size: 0.24, color: '#c8a96e' }, // PPM — centre
+  { pos: [2.2,   0.5,  0.3 ], size: 0.14, color: '#8a7b6d' }, // Developer A
+  { pos: [1.8,  -1.1,  0.7 ], size: 0.14, color: '#8a7b6d' }, // Developer B
+  { pos: [2.0,   1.3, -0.6 ], size: 0.11, color: '#8a7b6d' }, // Developer C
+  { pos: [-2.0,  0.8,  0.5 ], size: 0.12, color: '#a08060' }, // Buyer A
+  { pos: [-1.7, -0.7,  1.0 ], size: 0.12, color: '#a08060' }, // Buyer B
+  { pos: [-1.9,  0.2, -0.9 ], size: 0.12, color: '#a08060' }, // Buyer C
+  { pos: [0.0,   2.0,  0.6 ], size: 0.11, color: '#9e8d7a' }, // Management
+  { pos: [0.2,  -1.9, -0.4 ], size: 0.11, color: '#9e8d7a' }, // Resale
 ]
 
 const EDGES: [number, number][] = [

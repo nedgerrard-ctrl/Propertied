@@ -53,7 +53,7 @@ function DustParticles({ count }: { count: number }) {
   return (
     <points ref={ref} geometry={geometry}>
       <pointsMaterial
-        size={0.022}
+        size={0.030}
         color="#c8a96e"
         transparent
         opacity={0.38}
@@ -70,7 +70,7 @@ function DustParticles({ count }: { count: number }) {
  * always imported via next/dynamic with ssr: false.
  */
 export default function FloatingDust() {
-  const count = window.innerWidth < 768 ? 55 : 130
+  const count = window.innerWidth < 768 ? 72 : 170
 
   return (
     <div className="absolute inset-0 pointer-events-none" aria-hidden="true">

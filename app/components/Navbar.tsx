@@ -11,8 +11,6 @@ const WAKE_ZONE_PX   = 30
 const SLEEP_DELAY_MS = 3500
 /** Scroll delta (px) required before we react to direction */
 const SCROLL_DEAD_PX = 4
-/** Luminance threshold below which we treat the page as "dark" */
-const DARK_THRESHOLD = 0.35
 
 // ─── Link data ────────────────────────────────────────────────────────────────
 
@@ -37,7 +35,6 @@ export default function Navbar() {
   const pathname = usePathname()
 
   const [visible,    setVisible]    = useState(false)
-  const [isDark,     setIsDark]     = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mounted,    setMounted]    = useState(false)
 
@@ -51,25 +48,6 @@ export default function Navbar() {
   const isActive = (href: string) =>
     href !== '#' &&
     (href === '/' ? pathname === '/' : pathname.startsWith(href))
-
-  // ── Background luminance sampling ─────────────────────────────────────────
-
-  const sampleBackground = useCallback(() => {
-    const stack: Element[] =
-      typeof document.elementsFromPoint === 'function'
-        ? document.elementsFromPoint(window.innerWidth / 2, 80)
-        : ([document.elementFromPoint(window.innerWidth / 2, 80)].filter(Boolean) as Element[])
-
-    const pageEl = stack.find((el) => !el.closest('header'))
-    if (!pageEl) return
-
-    const raw  = window.getComputedStyle(pageEl).backgroundColor
-    const nums = raw.match(/[\d.]+/g)
-    if (!nums || nums.length < 3) return
-
-    const [r, g, b] = nums.map(Number)
-    setIsDark((0.299 * r + 0.587 * g + 0.114 * b) / 255 < DARK_THRESHOLD)
-  }, [])
 
   // ── Sleep / wake ──────────────────────────────────────────────────────────
 
@@ -87,10 +65,10 @@ export default function Navbar() {
   }, [clearSleep])
 
   const wake = useCallback(() => {
-    sampleBackground(); setVisible(true); scheduleSleep()
-  }, [sampleBackground, scheduleSleep])
+    setVisible(true); scheduleSleep()
+  }, [scheduleSleep])
 
-  // ── Lifecycle effects (identical logic to before) ─────────────────────────
+  // ── Lifecycle effects ─────────────────────────────────────────────────────
 
   useEffect(() => {
     setMounted(true)
@@ -99,7 +77,7 @@ export default function Navbar() {
     if (isMobileRef.current) {
       setVisible(true)
     } else {
-      sampleBackground(); setVisible(true)
+      setVisible(true)
       const t = setTimeout(() => setVisible(false), SLEEP_DELAY_MS)
       return () => clearTimeout(t)
     }
@@ -115,8 +93,8 @@ export default function Navbar() {
     return () => window.removeEventListener('mousemove', onMove)
   }, [wake])
 
-  const onNavEnter = useCallback(() => { if (!isMobileRef.current) clearSleep() }, [clearSleep])
-  const onNavLeave = useCallback(() => { if (!isMobileRef.current) scheduleSleep() }, [scheduleSleep])
+  const onNavEnter = useCallback(() => { if (!isMobileRef.current) clearSleep()     }, [clearSleep])
+  const onNavLeave = useCallback(() => { if (!isMobileRef.current) scheduleSleep()  }, [scheduleSleep])
 
   useEffect(() => {
     const onScroll = () => {
@@ -143,16 +121,15 @@ export default function Navbar() {
     mobileOpenRef.current = false; setMobileOpen(false); scheduleSleep()
   }, [scheduleSleep])
 
-  // ─── Palette tokens ───────────────────────────────────────────────────────
+  // ─── Palette tokens — always dark ────────────────────────────────────────
 
-  const bg        = isDark ? 'bg-[#0f0c0a]/90 backdrop-blur-md  border-b border-white/[0.06]'
-                           : 'bg-white/95      backdrop-blur-sm  border-b border-[#e8e2d9]'
-  const logoColor = isDark ? 'text-white' : 'text-[#1f1a17]'
-  const subColor  = isDark ? 'text-[#6b5e54]' : 'text-[#a09080]'
-  const linkBase  = isDark ? 'text-[#9e8d7a] hover:text-white' : 'text-[#6b5e54] hover:text-[#1f1a17]'
-  const linkActive= isDark ? 'text-white' : 'text-[#1f1a17]'
-  const sepColor  = isDark ? 'bg-white/10' : 'bg-[#e8e2d9]'
-  const barColor  = isDark ? 'bg-[#e8d8c4]' : 'bg-[#2f2a24]'
+  const bg         = 'bg-[#0f0c0a]/90 backdrop-blur-md border-b border-white/[0.06]'
+  const logoColor  = 'text-white'
+  const subColor   = 'text-[#6b5e54]'
+  const linkBase   = 'text-[#9e8d7a] hover:text-white'
+  const linkActive = 'text-white'
+  const sepColor   = 'bg-white/10'
+  const barColor   = 'bg-[#e8d8c4]'
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -173,9 +150,7 @@ export default function Navbar() {
         {/* Logo — PPM mark + full name below */}
         <Link href="/" className="group flex items-center gap-3 shrink-0">
           {/* Amber left accent */}
-          <span className={`block h-7 w-0.5 transition-opacity ${
-            isDark ? 'bg-[#c8a96e]' : 'bg-[#c8a96e]'
-          }`} />
+          <span className="block h-7 w-0.5 bg-[#c8a96e]" />
           <span>
             <span className={`block text-[13px] font-bold uppercase tracking-[0.22em] leading-none transition ${logoColor} group-hover:opacity-70`}>
               PPM
@@ -199,7 +174,7 @@ export default function Navbar() {
                 href={link.href}
                 className={[
                   'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition',
-                  placeholder ? `${isDark ? 'text-[#3d3530]' : 'text-[#ccc0b4]'} cursor-default pointer-events-none` :
+                  placeholder ? 'text-[#3d3530] cursor-default pointer-events-none' :
                     active ? linkActive : linkBase,
                 ].join(' ')}
                 tabIndex={placeholder ? -1 : undefined}
@@ -227,9 +202,7 @@ export default function Navbar() {
                   href={link.href}
                   className={[
                     'ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition',
-                    isDark
-                      ? 'border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]'
-                      : 'border-[#1f1a17] text-[#1f1a17] hover:bg-[#1f1a17] hover:text-white',
+                    'border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]',
                   ].join(' ')}
                 >
                   {link.label}
@@ -286,7 +259,7 @@ export default function Navbar() {
         {/* Amber accent rule at top of drawer */}
         <div className="h-px bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/40 to-transparent" />
 
-        <nav className={`flex flex-col px-8 pb-4 pt-2 ${isDark ? 'bg-[#0f0c0a]' : 'bg-white'}`}>
+        <nav className="flex flex-col px-8 pb-4 pt-2 bg-[#0f0c0a]">
           {[...PRIMARY_LINKS, ...UTIL_LINKS].map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
@@ -300,15 +273,14 @@ export default function Navbar() {
                 aria-disabled={placeholder}
                 className={[
                   'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
-                  'border-b transition',
-                  isDark ? 'border-white/[0.06]' : 'border-[#f0ebe4]',
+                  'border-b border-white/[0.06] transition',
                   placeholder
-                    ? `${isDark ? 'text-[#2d2218]' : 'text-[#d4c8bc]'} pointer-events-none cursor-default`
+                    ? 'text-[#2d2218] pointer-events-none cursor-default'
                     : isCta
                     ? 'text-[#c8a96e]'
                     : active
-                    ? isDark ? 'text-white' : 'text-[#1f1a17]'
-                    : isDark ? 'text-[#9e8d7a]' : 'text-[#6b5e54]',
+                    ? 'text-white'
+                    : 'text-[#9e8d7a]',
                 ].join(' ')}
                 onClick={placeholder ? undefined : closeMobile}
               >
