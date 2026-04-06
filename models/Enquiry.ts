@@ -1,5 +1,40 @@
 import { Schema, models, model } from "mongoose";
 
+const legalDocumentSchema = new Schema(
+  {
+    originalName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+    },
+    storedName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 255,
+    },
+    fileType: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
+    },
+    fileSize: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    fileUrl: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 500,
+    },
+  },
+  { _id: false }
+);
+
 const enquirySchema = new Schema(
   {
     enquiryType: {
@@ -129,6 +164,11 @@ const enquirySchema = new Schema(
       trim: true,
       default: "",
       maxlength: 300,
+    },
+
+    legalDocuments: {
+      type: [legalDocumentSchema],
+      default: [],
     },
 
     // developer fields

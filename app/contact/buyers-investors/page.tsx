@@ -1,12 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
+
+const ALLOWED_DOCUMENT_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+];
+
+const MAX_DOCUMENTS = 3;
+const MAX_DOCUMENT_SIZE_BYTES = 5 * 1024 * 1024;
+
+type SelectedLegalDocument = {
+  file: File;
+  previewId: string;
+};
 
 type BuyerFormData = {
   enquiryType: "buyer";
@@ -125,8 +142,94 @@ function getFilteredRangeOptions(
   });
 }
 
+function parseBedroomRange(rawBedrooms: string) {
+  const cleaned = rawBedrooms.trim();
+
+  if (!cleaned) {
+    return {
+      minBedrooms: "",
+      maxBedrooms: "",
+    };
+  }
+
+  const rangeMatch = cleaned.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)/i);
+  if (rangeMatch) {
+    return {
+      minBedrooms: rangeMatch[1],
+      maxBedrooms: rangeMatch[2],
+    };
+  }
+
+  const singleMatch = cleaned.match(/(\d+)/);
+  if (singleMatch) {
+    return {
+      minBedrooms: singleMatch[1],
+      maxBedrooms: singleMatch[1],
+    };
+  }
+
+  return {
+    minBedrooms: "",
+    maxBedrooms: "",
+  };
+}
+
+function buildPrefilledFormData(searchParams: URLSearchParams): Partial<BuyerFormData> {
+  const projectName = searchParams.get("projectName")?.trim() ?? "";
+  const suburb = searchParams.get("suburb")?.trim() ?? "";
+  const state = searchParams.get("state")?.trim() ?? "";
+  const propertyType = searchParams.get("propertyType")?.trim() ?? "";
+  const propertyInterest = searchParams.get("propertyInterest")?.trim() ?? "";
+  const bedrooms = searchParams.get("bedrooms")?.trim() ?? "";
+  const priceFrom = searchParams.get("priceFrom")?.trim() ?? "";
+
+  const preferredLocations = [suburb, state].filter(Boolean).join(", ");
+
+  const keywordParts = [projectName, bedrooms, priceFrom].filter(Boolean);
+  const keywords = keywordParts.join(" • ");
+
+  const messageLines = [
+    projectName ? `I am enquiring about ${projectName}.` : "",
+    preferredLocations ? `Location: ${preferredLocations}` : "",
+    propertyType ? `Property type: ${propertyType}` : "",
+    bedrooms ? `Bedrooms: ${bedrooms}` : "",
+    priceFrom ? `Guide price: ${priceFrom}` : "",
+  ].filter(Boolean);
+
+  const safePropertyInterest =
+    propertyInterest === "off-plan" || propertyInterest === "established"
+      ? propertyInterest
+      : "";
+
+  const safePropertyType = propertyTypeOptions.includes(propertyType)
+    ? propertyType
+    : "";
+
+  const { minBedrooms, maxBedrooms } = parseBedroomRange(bedrooms);
+
+  return {
+    preferredLocations,
+    propertyInterest: safePropertyInterest as BuyerFormData["propertyInterest"],
+    propertyType: safePropertyType,
+    minBedrooms,
+    maxBedrooms,
+    keywords,
+    message: messageLines.join("\n"),
+  };
+}
+
+function formatFileSize(fileSize: number) {
+  if (fileSize < 1024) return `${fileSize} B`;
+  if (fileSize < 1024 * 1024) return `${(fileSize / 1024).toFixed(1)} KB`;
+  return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function BuyersInvestorsContactPage() {
+  const searchParams = useSearchParams();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
+  const [selectedDocuments, setSelectedDocuments] = useState<SelectedLegalDocument[]>([]);
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
@@ -139,6 +242,26 @@ export default function BuyersInvestorsContactPage() {
     message: "",
     success: false,
   });
+
+  useEffect(() => {
+    const hasPrefillParams =
+      searchParams.get("projectName") ||
+      searchParams.get("suburb") ||
+      searchParams.get("state") ||
+      searchParams.get("propertyType") ||
+      searchParams.get("propertyInterest") ||
+      searchParams.get("bedrooms") ||
+      searchParams.get("priceFrom");
+
+    if (!hasPrefillParams) return;
+
+    const prefilled = buildPrefilledFormData(searchParams);
+
+    setFormData((prev) => ({
+      ...prev,
+      ...prefilled,
+    }));
+  }, [searchParams]);
 
   const showPropertyPreferences = formData.propertyInterest === "off-plan";
 
@@ -200,6 +323,63 @@ export default function BuyersInvestorsContactPage() {
 
       return next;
     });
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) return;
+
+    if (selectedDocuments.length + files.length > MAX_DOCUMENTS) {
+      setFeedbackModal({
+        open: true,
+        title: "Too Many Files",
+        message: `You can upload up to ${MAX_DOCUMENTS} legal documents.`,
+        success: false,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const invalidTypeFile = files.find(
+      (file) => !ALLOWED_DOCUMENT_TYPES.includes(file.type)
+    );
+
+    if (invalidTypeFile) {
+      setFeedbackModal({
+        open: true,
+        title: "Invalid File Type",
+        message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed.",
+        success: false,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const oversizedFile = files.find((file) => file.size > MAX_DOCUMENT_SIZE_BYTES);
+
+    if (oversizedFile) {
+      setFeedbackModal({
+        open: true,
+        title: "File Too Large",
+        message: "Each legal document must be 5MB or smaller.",
+        success: false,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const nextDocuments = files.map((file) => ({
+      file,
+      previewId: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+    }));
+
+    setSelectedDocuments((prev) => [...prev, ...nextDocuments]);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function handleRemoveDocument(previewId: string) {
+    setSelectedDocuments((prev) => prev.filter((doc) => doc.previewId !== previewId));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -306,15 +486,19 @@ export default function BuyersInvestorsContactPage() {
               keywords: "",
             };
 
+      const multipartData = new FormData();
+
+      Object.entries(payload).forEach(([key, value]) => {
+        multipartData.append(key, value);
+      });
+
+      selectedDocuments.forEach((document) => {
+        multipartData.append("legalDocuments", document.file);
+      });
+
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...payload,
-          phone: normalizedPhone,
-        }),
+        body: multipartData,
       });
 
       const data = await response.json();
@@ -330,6 +514,8 @@ export default function BuyersInvestorsContactPage() {
         success: true,
       });
       setFormData(initialFormData);
+      setSelectedDocuments([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Something went wrong.";
@@ -443,70 +629,80 @@ export default function BuyersInvestorsContactPage() {
               </div>
             </section>
 
-            <section className="space-y-8">
+            <section className="space-y-10 border-t border-[#e3d8ca] pt-10">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a7b6d]">
+                <h2 className="text-2xl font-light text-[#1f1a17]">
                   Buyer Profile
+                </h2>
+                <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
+                  Help us understand your buying goals so we can recommend
+                  suitable opportunities.
                 </p>
               </div>
 
-              <div>
-                <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Buyer Type
-                </label>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="buyerType"
-                      value="owner-occupier"
-                      checked={formData.buyerType === "owner-occupier"}
-                      onChange={handleChange}
-                      required
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Owner Occupier</span>
+              <div className="grid gap-8 md:grid-cols-2">
+                <div>
+                  <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                    Buyer Type
                   </label>
-
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="buyerType"
-                      value="investor"
-                      checked={formData.buyerType === "investor"}
-                      onChange={handleChange}
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Investor</span>
-                  </label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      { label: "Owner-Occupier", value: "owner-occupier" },
+                      { label: "Investor", value: "investor" },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className={`cursor-pointer border px-4 py-4 text-center text-[12px] font-semibold uppercase tracking-[0.12em] transition ${
+                          formData.buyerType === option.value
+                            ? "border-[#5f5245] bg-[#2f2a24] text-white"
+                            : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="buyerType"
+                          value={option.value}
+                          checked={formData.buyerType === option.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                          required
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Local / Overseas
-                </label>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="investorRegion"
-                      value="local"
-                      checked={formData.investorRegion === "local"}
-                      onChange={handleChange}
-                      required
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Local</span>
+                <div>
+                  <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                    Buyer Region
                   </label>
-
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="investorRegion"
-                      value="overseas"
-                      checked={formData.investorRegion === "overseas"}
-                      onChange={handleChange}
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Overseas</span>
-                  </label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      { label: "Local", value: "local" },
+                      { label: "Overseas", value: "overseas" },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className={`cursor-pointer border px-4 py-4 text-center text-[12px] font-semibold uppercase tracking-[0.12em] transition ${
+                          formData.investorRegion === option.value
+                            ? "border-[#5f5245] bg-[#2f2a24] text-white"
+                            : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="investorRegion"
+                          value={option.value}
+                          checked={formData.investorRegion === option.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                          required
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -514,29 +710,31 @@ export default function BuyersInvestorsContactPage() {
                 <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                   Property Interest
                 </label>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="propertyInterest"
-                      value="off-plan"
-                      checked={formData.propertyInterest === "off-plan"}
-                      onChange={handleChange}
-                      required
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Off-plan</span>
-                  </label>
-
-                  <label className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#d9cec0] px-4 py-4">
-                    <input
-                      type="radio"
-                      name="propertyInterest"
-                      value="established"
-                      checked={formData.propertyInterest === "established"}
-                      onChange={handleChange}
-                    />
-                    <span className="text-[14px] text-[#1f1a17]">Established</span>
-                  </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { label: "Off-the-Plan", value: "off-plan" },
+                    { label: "Established", value: "established" },
+                  ].map((option) => (
+                    <label
+                      key={option.value}
+                      className={`cursor-pointer border px-4 py-4 text-center text-[12px] font-semibold uppercase tracking-[0.12em] transition ${
+                        formData.propertyInterest === option.value
+                          ? "border-[#5f5245] bg-[#2f2a24] text-white"
+                          : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="propertyInterest"
+                        value={option.value}
+                        checked={formData.propertyInterest === option.value}
+                        onChange={handleChange}
+                        className="sr-only"
+                        required
+                      />
+                      {option.label}
+                    </label>
+                  ))}
                 </div>
               </div>
 
@@ -724,62 +922,112 @@ export default function BuyersInvestorsContactPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                    Property Type
-                  </label>
-
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {propertyTypeOptions.map((type) => {
-                      const selected = formData.propertyType === type;
-
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              propertyType: type,
-                            }))
-                          }
-                          className={`rounded-sm border px-4 py-4 text-[14px] font-medium transition ${
-                            selected
-                              ? "border-[#5f5245] bg-[#2f2a24] text-white"
-                              : "border-[#d9cec0] bg-[#fdfbf8] text-[#1f1a17] hover:border-[#5f5245]"
-                          }`}
-                        >
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Property Type
+                    </label>
+                    <select
+                      name="propertyType"
+                      value={formData.propertyType}
+                      onChange={handleChange}
+                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    >
+                      <option value="">Select property type</option>
+                      {propertyTypeOptions.map((type) => (
+                        <option key={type} value={type}>
                           {type}
-                        </button>
-                      );
-                    })}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div>
 
-                <div>
-                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                    Keywords
-                  </label>
-                  <input
-                    type="text"
-                    name="keywords"
-                    value={formData.keywords}
-                    onChange={handleChange}
-                    maxLength={300}
-                    placeholder="Air con, pool, garage, solar, ensuite..."
-                    className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
-                  />
-                  <p className="mt-2 text-[13px] text-[#7a7065]">
-                    Add specific property features to your search.
-                  </p>
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                      Keywords / Notes
+                    </label>
+                    <input
+                      type="text"
+                      name="keywords"
+                      value={formData.keywords}
+                      onChange={handleChange}
+                      placeholder="e.g. city views, north-facing, low body corp"
+                      maxLength={300}
+                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                    />
+                  </div>
                 </div>
               </section>
             )}
 
-            <section className="space-y-8 border-t border-[#e3d8ca] pt-10">
+            <section className="space-y-6 border-t border-[#e3d8ca] pt-10">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a7b6d]">
-                  Additional Notes
+                <h2 className="text-2xl font-light text-[#1f1a17]">
+                  Legal Documents
+                </h2>
+                <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
+                  Upload supporting legal documents. Files are stored in
+                  <span className="font-medium"> public/uploads/legal-documents/</span>.
+                  Maximum {MAX_DOCUMENTS} files, 5MB each.
+                </p>
+              </div>
+
+              <div className="rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-5">
+                <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  Upload Legal Documents
+                </label>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
+                  onChange={handleFileChange}
+                  className="block w-full text-[13px] text-[#5b5147] file:mr-4 file:rounded-sm file:border-0 file:bg-[#2f2a24] file:px-4 file:py-2.5 file:text-[11px] file:font-semibold file:uppercase file:tracking-[0.16em] file:text-white hover:file:bg-[#1f1a17]"
+                />
+
+                <p className="mt-3 text-[12px] text-[#8a7b6d]">
+                  Accepted: PDF, DOC, DOCX, JPG, PNG
+                </p>
+
+                {selectedDocuments.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {selectedDocuments.map((document) => (
+                      <div
+                        key={document.previewId}
+                        className="flex items-center justify-between gap-4 rounded-sm border border-[#e3d8ca] bg-white px-4 py-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-medium text-[#1f1a17]">
+                            {document.file.name}
+                          </p>
+                          <p className="mt-1 text-[12px] text-[#8a7b6d]">
+                            {document.file.type || "Unknown type"} · {formatFileSize(document.file.size)}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDocument(document.previewId)}
+                          className="shrink-0 rounded-sm border border-[#d7cabc] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-6 border-t border-[#e3d8ca] pt-10">
+              <div>
+                <h2 className="text-2xl font-light text-[#1f1a17]">
+                  Additional Information
+                </h2>
+                <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
+                  Share any extra details that will help us understand what you
+                  are looking for.
                 </p>
               </div>
 
@@ -793,65 +1041,71 @@ export default function BuyersInvestorsContactPage() {
                   onChange={handleChange}
                   rows={6}
                   maxLength={1000}
-                  placeholder="Tell us a little about what you're looking for"
-                  className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] text-[#1f1a17] outline-none resize-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  placeholder="Tell us more about your property goals, timeframe, and any specific requirements."
+                  className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] leading-7 text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
                 />
               </div>
             </section>
 
-            <div className="flex justify-center pt-2">
+            <div className="border-t border-[#e3d8ca] pt-8">
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-w-[220px] items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17] disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-sm bg-[#2f2a24] px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#1f1a17] disabled:opacity-60"
               >
-                {loading ? "Submitting..." : "Send Enquiry"}
+                {loading ? "Submitting..." : "Submit Enquiry"}
               </button>
             </div>
           </form>
         </div>
       </section>
 
+      <Footer />
+
       {feedbackModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-md rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
+          <div className="w-full max-w-md rounded-sm bg-white p-8 text-center shadow-2xl">
             <div
-              className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold ${
-                feedbackModal.success
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
+                feedbackModal.success ? "bg-emerald-100" : "bg-red-100"
               }`}
             >
-              {feedbackModal.success ? "✓" : "!"}
+              {feedbackModal.success ? (
+                <svg viewBox="0 0 20 20" className="h-7 w-7 fill-emerald-600">
+                  <path
+                    fillRule="evenodd"
+                    d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.312a1 1 0 0 1-1.42-.003l-3.75-3.812a1 1 0 1 1 1.425-1.404l3.04 3.09 6.54-6.597a1 1 0 0 1 1.41 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 20 20" className="h-7 w-7 fill-red-600">
+                  <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.53-10.97a.75.75 0 0 0-1.06-1.06L10 8.44 7.53 5.97a.75.75 0 0 0-1.06 1.06L8.94 9.5l-2.47 2.47a.75.75 0 1 0 1.06 1.06L10 10.56l2.47 2.47a.75.75 0 0 0 1.06-1.06L11.06 9.5l2.47-2.47Z" />
+                </svg>
+              )}
             </div>
 
-            <h3 className="text-xl font-medium text-[#1f1a17]">
+            <h3 className="mt-5 text-2xl font-light text-[#1f1a17]">
               {feedbackModal.title}
             </h3>
-
             <p className="mt-3 text-[14px] leading-7 text-[#6c6258]">
               {feedbackModal.message}
             </p>
 
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={() =>
-                  setFeedbackModal((prev) => ({
-                    ...prev,
-                    open: false,
-                  }))
-                }
-                className="inline-flex min-w-[120px] items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
-              >
-                OK
-              </button>
-            </div>
+            <button
+              onClick={() =>
+                setFeedbackModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
+              className="mt-8 w-full rounded-sm bg-[#2f2a24] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
-
-      <Footer />
     </main>
   );
 }

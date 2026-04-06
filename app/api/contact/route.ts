@@ -1,9 +1,31 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
+
+const ALLOWED_DOCUMENT_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+];
+
+const MAX_DOCUMENTS = 3;
+const MAX_DOCUMENT_SIZE_BYTES = 5 * 1024 * 1024;
+
+type SavedLegalDocument = {
+  originalName: string;
+  storedName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+};
 
 function isNonEmptyString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0;
@@ -24,39 +46,87 @@ function toNumberOrNull(value: string) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+function sanitizeFilename(name: string) {
+  const ext = path.extname(name);
+  const base = path.basename(name, ext);
+
+  const safeBase = base
+    .replace(/[^a-zA-Z0-9-_ ]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+
+  const safeExt = ext.replace(/[^a-zA-Z0-9.]/g, "").toLowerCase();
+
+  return `${safeBase || "document"}${safeExt}`;
+}
+
+async function saveLegalDocument(file: File): Promise<SavedLegalDocument> {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const safeOriginalName = sanitizeFilename(file.name);
+  const uniquePrefix = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
+  const storedName = `${uniquePrefix}-${safeOriginalName}`;
+
+  const uploadDir = path.join(
+    process.cwd(),
+    "public",
+    "uploads",
+    "legal-documents"
+  );
+
+  await fs.mkdir(uploadDir, { recursive: true });
+
+  const filePath = path.join(uploadDir, storedName);
+  await fs.writeFile(filePath, buffer);
+
+  return {
+    originalName: file.name,
+    storedName,
+    fileType: file.type,
+    fileSize: file.size,
+    fileUrl: `/uploads/legal-documents/${storedName}`,
+  };
+}
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const {
-      enquiryType,
-      name,
-      email,
-      phoneCountryCode,
-      phone,
-      message,
+    const enquiryType = String(formData.get("enquiryType") ?? "");
+    const name = String(formData.get("name") ?? "");
+    const email = String(formData.get("email") ?? "");
+    const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "");
+    const phone = String(formData.get("phone") ?? "");
+    const message = String(formData.get("message") ?? "");
 
-      // buyer
-      buyerType,
-      investorRegion,
-      minBudget,
-      maxBudget,
-      preferredLocations,
-      propertyInterest,
-      minBedrooms,
-      maxBedrooms,
-      minBathrooms,
-      maxBathrooms,
-      minCarSpaces,
-      maxCarSpaces,
-      propertyType,
-      keywords,
+    // buyer
+    const buyerType = String(formData.get("buyerType") ?? "");
+    const investorRegion = String(formData.get("investorRegion") ?? "");
+    const minBudget = String(formData.get("minBudget") ?? "");
+    const maxBudget = String(formData.get("maxBudget") ?? "");
+    const preferredLocations = String(formData.get("preferredLocations") ?? "");
+    const propertyInterest = String(formData.get("propertyInterest") ?? "");
+    const minBedrooms = String(formData.get("minBedrooms") ?? "");
+    const maxBedrooms = String(formData.get("maxBedrooms") ?? "");
+    const minBathrooms = String(formData.get("minBathrooms") ?? "");
+    const maxBathrooms = String(formData.get("maxBathrooms") ?? "");
+    const minCarSpaces = String(formData.get("minCarSpaces") ?? "");
+    const maxCarSpaces = String(formData.get("maxCarSpaces") ?? "");
+    const propertyType = String(formData.get("propertyType") ?? "");
+    const keywords = String(formData.get("keywords") ?? "");
 
-      // developer
-      projectName,
-      projectLocation,
-      commissionStructureInterest,
-    } = body;
+    // developer
+    const projectName = String(formData.get("projectName") ?? "");
+    const projectLocation = String(formData.get("projectLocation") ?? "");
+    const commissionStructureInterest = String(
+      formData.get("commissionStructureInterest") ?? ""
+    );
+
+    const uploadedFiles = formData
+      .getAll("legalDocuments")
+      .filter((item): item is File => item instanceof File && item.size > 0);
 
     if (!["general", "developer", "buyer"].includes(enquiryType)) {
       return NextResponse.json(
@@ -118,6 +188,48 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       );
+    }
+
+    if (uploadedFiles.length > MAX_DOCUMENTS) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `You can upload up to ${MAX_DOCUMENTS} legal documents.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    for (const file of uploadedFiles) {
+      if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Each legal document must be 5MB or smaller.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!validateMaxLength(file.name, 200)) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "One or more uploaded filenames are too long.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     if (enquiryType === "buyer") {
@@ -223,6 +335,10 @@ export async function POST(request: Request) {
       }
     }
 
+    const savedLegalDocuments = await Promise.all(
+      uploadedFiles.map((file) => saveLegalDocument(file))
+    );
+
     await connectDB();
 
     const enquiry = await Enquiry.create({
@@ -231,32 +347,27 @@ export async function POST(request: Request) {
       email: email.trim(),
       phoneCountryCode: phoneCountryCode.trim(),
       phone: normalizedPhone,
-      message: typeof message === "string" ? message.trim() : "",
+      message: message.trim(),
 
-      buyerType: typeof buyerType === "string" ? buyerType : "",
-      investorRegion: typeof investorRegion === "string" ? investorRegion : "",
-      minBudget: typeof minBudget === "string" ? minBudget : "",
-      maxBudget: typeof maxBudget === "string" ? maxBudget : "",
-      preferredLocations:
-        typeof preferredLocations === "string" ? preferredLocations.trim() : "",
-      propertyInterest:
-        typeof propertyInterest === "string" ? propertyInterest : "",
-      minBedrooms: typeof minBedrooms === "string" ? minBedrooms : "",
-      maxBedrooms: typeof maxBedrooms === "string" ? maxBedrooms : "",
-      minBathrooms: typeof minBathrooms === "string" ? minBathrooms : "",
-      maxBathrooms: typeof maxBathrooms === "string" ? maxBathrooms : "",
-      minCarSpaces: typeof minCarSpaces === "string" ? minCarSpaces : "",
-      maxCarSpaces: typeof maxCarSpaces === "string" ? maxCarSpaces : "",
-      propertyType: typeof propertyType === "string" ? propertyType.trim() : "",
-      keywords: typeof keywords === "string" ? keywords.trim() : "",
+      buyerType,
+      investorRegion,
+      minBudget,
+      maxBudget,
+      preferredLocations: preferredLocations.trim(),
+      propertyInterest,
+      minBedrooms,
+      maxBedrooms,
+      minBathrooms,
+      maxBathrooms,
+      minCarSpaces,
+      maxCarSpaces,
+      propertyType: propertyType.trim(),
+      keywords: keywords.trim(),
+      legalDocuments: savedLegalDocuments,
 
-      projectName: typeof projectName === "string" ? projectName.trim() : "",
-      projectLocation:
-        typeof projectLocation === "string" ? projectLocation.trim() : "",
-      commissionStructureInterest:
-        typeof commissionStructureInterest === "string"
-          ? commissionStructureInterest.trim()
-          : "",
+      projectName: projectName.trim(),
+      projectLocation: projectLocation.trim(),
+      commissionStructureInterest: commissionStructureInterest.trim(),
     });
 
     return NextResponse.json(

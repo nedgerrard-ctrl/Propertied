@@ -6,6 +6,22 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { projects, type Project } from "@/lib/projects-data";
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function buildBuyerEnquiryHref(project: Project) {
+  const params = new URLSearchParams({
+    projectName: project.name,
+    suburb: project.suburb,
+    state: project.state,
+    propertyType: project.type,
+    propertyInterest: "off-plan",
+    bedrooms: project.bedrooms,
+    priceFrom: project.priceFrom,
+  });
+
+  return `/contact/buyers-investors?${params.toString()}`;
+}
+
 // ── Project detail slide-over ────────────────────────────────────────────────
 
 function ProjectDetailPanel({
@@ -103,7 +119,7 @@ function ProjectDetailPanel({
 
           {/* CTA */}
           <Link
-            href="/contact"
+            href={buildBuyerEnquiryHref(project)}
             className="flex w-full items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
           >
             Enquire About This Project
@@ -174,7 +190,7 @@ function ProjectCard({
             View Details
           </button>
           <Link
-            href="/contact"
+            href={buildBuyerEnquiryHref(project)}
             className="flex-1 rounded-sm bg-[#2f2a24] px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"
           >
             Enquire
@@ -210,7 +226,7 @@ export default function BuyersPage() {
           </p>
           <div className="mt-10">
             <Link
-              href="/contact"
+              href="/contact/buyers-investors"
               className="inline-flex items-center gap-2 rounded-sm bg-[#2f2a24] px-9 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#1f1a17]"
             >
               Register Interest
@@ -311,7 +327,7 @@ export default function BuyersPage() {
               </h2>
             </div>
             <Link
-              href="/contact"
+              href="/contact/buyers-investors"
               className="hidden shrink-0 border border-[#2f2a24] px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24] transition hover:bg-[#2f2a24] hover:text-white sm:inline-block"
             >
               Register Interest
@@ -343,7 +359,7 @@ export default function BuyersPage() {
             available.
           </p>
           <Link
-            href="/contact"
+            href="/contact/buyers-investors"
             className="mt-8 inline-flex items-center gap-2 rounded-sm bg-white px-9 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1f1a17] transition hover:bg-[#f0e8dd]"
           >
             Register Interest

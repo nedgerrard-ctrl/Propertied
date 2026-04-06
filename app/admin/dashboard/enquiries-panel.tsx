@@ -6,6 +6,14 @@ type EnquiryStatus = "qualified" | "in-progress" | "closed";
 type EnquiryType = "general" | "developer" | "buyer";
 type PropertyInterest = "off-plan" | "established" | "";
 
+type LegalDocument = {
+  originalName: string;
+  storedName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+};
+
 type Enquiry = {
   _id: string;
   enquiryType: EnquiryType;
@@ -16,7 +24,6 @@ type Enquiry = {
   phone: string;
   message: string;
 
-  // buyer / investor fields
   buyerType: "owner-occupier" | "investor" | "";
   investorRegion: "local" | "overseas" | "";
   minBudget: string;
@@ -31,8 +38,8 @@ type Enquiry = {
   maxCarSpaces: string;
   propertyType: string;
   keywords: string;
+  legalDocuments: LegalDocument[];
 
-  // developer fields
   projectName: string;
   projectLocation: string;
   commissionStructureInterest: string;
@@ -85,6 +92,12 @@ function formatPhone(countryCode?: string, phone?: string) {
   const safePhone = phone?.trim() ?? "";
   const safeCode = countryCode?.trim() ?? "";
   return [safeCode, safePhone].filter(Boolean).join(" ");
+}
+
+function formatFileSize(fileSize: number) {
+  if (fileSize < 1024) return `${fileSize} B`;
+  if (fileSize < 1024 * 1024) return `${(fileSize / 1024).toFixed(1)} KB`;
+  return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function getEnquiryTypeLabel(type: EnquiryType) {
@@ -400,6 +413,56 @@ function DetailPanel({
             </>
           )}
 
+          {enquiry.legalDocuments?.length > 0 && (
+            <>
+              <hr className="border-neutral-100" />
+
+              <section>
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  Legal Documents
+                </p>
+
+                <div className="space-y-3">
+                  {enquiry.legalDocuments.map((document, index) => (
+                    <div
+                      key={`${document.storedName}-${index}`}
+                      className="rounded border border-neutral-200 bg-neutral-50 px-4 py-3"
+                    >
+                      <p className="truncate text-[13px] font-medium text-neutral-900">
+                        {document.originalName}
+                      </p>
+                      <p className="mt-1 text-[12px] text-neutral-500">
+                        {document.fileType} · {formatFileSize(document.fileSize)}
+                      </p>
+                      <p className="mt-1 break-all text-[11px] text-neutral-400">
+                        {document.fileUrl}
+                      </p>
+
+                      <div className="mt-3 flex gap-2">
+                        <a
+                          href={document.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded border border-neutral-200 bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          Open
+                        </a>
+
+                        <a
+                          href={document.fileUrl}
+                          download={document.originalName}
+                          className="rounded border border-neutral-200 bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
           {enquiry.enquiryType === "developer" && (
             <>
               <hr className="border-neutral-100" />
@@ -710,6 +773,7 @@ export default function EnquiriesPanel() {
                 <th className="px-5 py-3">Phone</th>
                 <th className="px-5 py-3">Source</th>
                 <th className="px-5 py-3">Summary</th>
+                <th className="px-5 py-3">Docs</th>
                 <th className="px-5 py-3">Status</th>
               </tr>
             </thead>
@@ -736,6 +800,9 @@ export default function EnquiriesPanel() {
                   <td className="px-5 py-3.5 text-neutral-600">{getSourceLabel(e)}</td>
                   <td className="px-5 py-3.5 capitalize text-neutral-600">
                     {getSummaryLabel(e)}
+                  </td>
+                  <td className="px-5 py-3.5 text-neutral-600">
+                    {e.legalDocuments?.length ?? 0}
                   </td>
                   <td className="px-5 py-3.5">
                     <InlineStatusSelect enquiry={e} onStatusUpdate={handleStatusUpdate} />
