@@ -1,5 +1,6 @@
 'use client'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -68,11 +69,13 @@ const team = [
   {
     name: 'Ned Gerrard',
     role: 'Co-Founder & Director',
+    image: '/images/Ned Gerrard_ai_placeholder.png',
     bio: 'With a background in management consulting, accounting, and marketing, Ned brings strategic discipline to every engagement — from developer feasibility to long-term client strategy. He built PPM into Melbourne\'s silent engine for over a decade before bringing the brand to market.',
   },
   {
     name: 'Joan Alcock',
     role: 'Director & Officer in Effective Control',
+    image: '/images/Joan Alcock_ai_placeholder.png',
     bio: 'Ranked nationally in the Top 2% of sales professionals, Joan holds the agency licence and leads all client relationships. Multi-award winning, her approach is direct, experienced, and entirely client-first.',
   },
 ]
@@ -231,19 +234,19 @@ export default function AboutPage() {
             key={member.name}
             className="grid lg:grid-cols-2 mt-14 border-t border-[#ddd3c6] first:mt-10"
           >
-            {/* Portrait placeholder — image bleeds edge-to-edge, no border-radius */}
+            {/* Portrait */}
             <div
               className={`relative min-h-[360px] lg:min-h-[480px] bg-[#e4dbd1] overflow-hidden ${
                 i % 2 === 1 ? 'lg:order-2' : ''
               }`}
             >
-              {/* Replace this div contents with <img> when client supplies photos */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ddd3c6]/40 to-[#c8b8a8]/20" />
-              <div className="absolute bottom-6 left-6">
-                <span className="text-[10px] uppercase tracking-widest text-[#b5a899]">
-                  Portrait — {member.name}
-                </span>
-              </div>
+              <Image
+                src={member.image}
+                alt={member.name}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
 
             {/* Text */}
