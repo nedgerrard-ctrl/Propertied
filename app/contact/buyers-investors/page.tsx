@@ -185,9 +185,6 @@ function buildPrefilledFormData(searchParams: URLSearchParams): Partial<BuyerFor
 
   const preferredLocations = [suburb, state].filter(Boolean).join(", ");
 
-  const keywordParts = [projectName, bedrooms, priceFrom].filter(Boolean);
-  const keywords = keywordParts.join(" • ");
-
   const messageLines = [
     projectName ? `I am enquiring about ${projectName}.` : "",
     preferredLocations ? `Location: ${preferredLocations}` : "",
@@ -213,7 +210,6 @@ function buildPrefilledFormData(searchParams: URLSearchParams): Partial<BuyerFor
     propertyType: safePropertyType,
     minBedrooms,
     maxBedrooms,
-    keywords,
     message: messageLines.join("\n"),
   };
 }
