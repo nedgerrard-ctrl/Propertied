@@ -1,119 +1,154 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import { blogPosts, getBlogPost } from "@/lib/blog-data";
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Navbar from '../../components/Navbar'
+import Footer from '../../components/Footer'
+import { blogPosts, getBlogPost } from '@/lib/blog-data'
 
 export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }));
+  return blogPosts.map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }) {
-  const { slug } = await params;
-  const post = getBlogPost(slug);
-  if (!post) return {};
+  const { slug } = await params
+  const post = getBlogPost(slug)
+  if (!post) return {}
   return {
     title: `${post.title} | PPM`,
     description: post.description,
-  };
+  }
 }
 
 export default async function BlogPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }) {
-  const { slug } = await params;
-  const post = getBlogPost(slug);
+  const { slug } = await params
+  const post = getBlogPost(slug)
+  if (!post) notFound()
 
-  if (!post) notFound();
+  // Article index for the issue-number display
+  const postIndex = blogPosts.findIndex((p) => p.slug === slug) + 1
 
   return (
-    <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
+    <main className="min-h-screen w-full bg-white text-[#1f1a17]">
       <Navbar />
 
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        {/* Back link */}
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:text-[#1f1a17]"
-        >
-          <span>←</span> All Articles
-        </Link>
+      {/* ── Editorial header — matches the dark #0a0806 of the listing hero ── */}
+      <header className="bg-[#0a0806] overflow-hidden">
+        <div className="mx-auto max-w-7xl px-8 pt-28 pb-16">
 
-        {/* Hero image */}
-        <div className="mt-8 overflow-hidden rounded-sm border border-[#ddd3c6]">
+          {/* Metadata row */}
+          <div className="flex items-baseline justify-between border-b border-[#2d2218] pb-6">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
+              {post.category}
+            </p>
+            <div className="flex items-center gap-6">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
+                {post.date}
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
+                No.&nbsp;{String(postIndex).padStart(2, '0')}
+              </p>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h1 className="mt-10 text-4xl md:text-5xl lg:text-[3.8rem] font-light leading-[1.1] text-white max-w-4xl">
+            {post.title}
+          </h1>
+
+          {/* Description / deck */}
+          <p className="mt-7 max-w-[54ch] text-[14px] leading-[1.9] text-[#8a7b6d]">
+            {post.description}
+          </p>
+
+          {/* Amber rule */}
+          <div className="mt-10 h-px w-full bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/30 to-transparent" />
+        </div>
+      </header>
+
+      {/* ── Featured image ────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-5xl px-8 -mt-0">
+        <div className="overflow-hidden border border-[#e8e2d9]">
           <img
             src={post.image}
             alt={post.title}
-            className="h-[360px] w-full object-cover"
+            className="h-[340px] md:h-[440px] w-full object-cover"
           />
         </div>
+      </div>
 
-        {/* Article header */}
-        <header className="mt-8">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#8a7b6d]">
-            {post.category} &nbsp;·&nbsp; {post.date}
-          </p>
-          <h1 className="mt-3 text-3xl font-light leading-snug text-[#1f1a17] md:text-4xl">
-            {post.title}
-          </h1>
-          <p className="mt-4 text-[14px] leading-7 text-[#5b5147]">
-            {post.description}
-          </p>
-          <div className="mt-6 border-t border-[#ddd3c6]" />
-        </header>
+      {/* ── Article body ──────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-3xl px-8 py-16">
 
-        {/* Article body */}
-        <article className="mt-8 space-y-7">
+        {/* Back link */}
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:text-[#1f1a17] mb-14 group"
+        >
+          <span className="transition group-hover:-translate-x-0.5">←</span>
+          <span>All Articles</span>
+        </Link>
+
+        <article className="space-y-10">
           {post.content.map((section, i) => (
-            <div key={i}>
+            <div key={i} className={section.heading ? '' : 'border-l-2 border-[#e8e2d9] pl-6'}>
               {section.heading && (
-                <h2 className="mb-3 text-[17px] font-semibold text-[#1f1a17]">
+                <h2 className="text-[18px] font-semibold text-[#1f1a17] mb-4 tracking-[-0.01em]">
                   {section.heading}
                 </h2>
               )}
-              <p className="text-[14px] leading-7 text-[#3d3530]">
+              <p className="text-[15px] leading-[1.95] text-[#3d3530]">
                 {section.body}
               </p>
             </div>
           ))}
         </article>
 
-        {/* CTA */}
-        <div className="mt-14 rounded-sm border border-[#ddd3c6] bg-[#fbf8f3] px-8 py-10 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Speak to the Team
-          </p>
-          <h2 className="mt-3 text-xl font-light text-[#1f1a17]">
-            Ready to take the next step?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-[13px] leading-6 text-[#5b5147]">
-            Whether you have a question about a specific development or want to
-            understand your options, we are happy to help.
-          </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/contact"
-              className="inline-block border border-[#2f2a24] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#2f2a24] transition hover:bg-[#2f2a24] hover:text-white"
-            >
-              Get in Touch
-            </Link>
-            <Link
-              href="/blog"
-              className="inline-block border border-[#c4b8ab] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#5b5147] transition hover:border-[#2f2a24] hover:text-[#1f1a17]"
-            >
-              More Articles
-            </Link>
+        {/* Divider */}
+        <div className="mt-16 h-px bg-gradient-to-r from-[#c8a96e]/40 via-[#e8e2d9] to-transparent" />
+      </div>
+
+      {/* ── End CTA — dark, matches the hero tone ─────────────────────────── */}
+      <section className="bg-[#0a0806] py-24">
+        <div className="mx-auto max-w-7xl px-8">
+          <div className="grid md:grid-cols-[3fr_2fr] gap-10 md:items-center">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
+                Speak to the Team
+              </p>
+              <h2 className="mt-4 text-3xl md:text-4xl font-light text-white leading-snug">
+                Ready to take the next step?
+              </h2>
+              <p className="mt-5 max-w-[44ch] text-[13px] leading-[1.9] text-[#8a7b6d]">
+                Whether you have a question about a specific development or want to understand
+                your options, we are happy to help.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row md:flex-col gap-4 md:items-start">
+              <Link
+                href="/contact"
+                className="inline-flex items-center border border-[#c8a96e] px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
+              >
+                Get in Touch
+              </Link>
+              <Link
+                href="/blog"
+                className="inline-flex items-center border border-[#2d2218] px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-[#8a7b6d] hover:text-white"
+              >
+                More Articles
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <Footer />
     </main>
-  );
+  )
 }
