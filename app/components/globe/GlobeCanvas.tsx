@@ -83,7 +83,7 @@ export default function GlobeCanvas() {
 
         {/* Soft warm glow — lower intensity than a typical "tech demo" */}
         {!isMobile && (
-          <EffectComposer disableNormalPass>
+          <EffectComposer enableNormalPass={false}>
             <Bloom
               luminanceThreshold={0.3}
               mipmapBlur
