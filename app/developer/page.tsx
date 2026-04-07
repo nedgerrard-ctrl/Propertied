@@ -99,6 +99,7 @@ function NetworkEdge({
 
   useFrame(({ clock }) => {
     const mat = line.material as THREE.LineBasicMaterial
+    // eslint-disable-next-line react-hooks/immutability
     mat.opacity = 0.04 + 0.18 * Math.abs(Math.sin(clock.getElapsedTime() * 0.55 + phase))
   })
 
@@ -175,6 +176,7 @@ const processSteps = [
 
 export default function DevelopersPage() {
   const [mounted, setMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), [])
 
   return (
