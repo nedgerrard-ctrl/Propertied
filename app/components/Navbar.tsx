@@ -262,7 +262,7 @@ export default function Navbar() {
           {[...PRIMARY_LINKS, ...UTIL_LINKS].map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
-            const isCta       = 'cta' in link && link.cta
+            const isCta       = 'cta' in link && !!(link as { cta?: unknown }).cta
 
             return (
               <Link
