@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import OverseasReachSection from '../components/OverseasReachSection'
 
-const FloatingDust = dynamic(() => import('../components/FloatingDust'), {
+const Threads = dynamic(() => import('../components/ui/Threads'), {
   ssr: false,
   loading: () => null,
 })
@@ -89,7 +89,14 @@ export default function AboutPage() {
 
       {/* ── S1: Opening Statement ─────────────────────────────────────────── */}
       <section className="relative min-h-[88vh] bg-[#1c1814] flex flex-col justify-center overflow-hidden">
-        <FloatingDust />
+        <div className="absolute inset-0 z-0">
+          <Threads
+            color={[0.722, 0.584, 0.392]}
+            amplitude={1.8}
+            distance={0.3}
+            enableMouseInteraction
+          />
+        </div>
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-8 py-24">
           <div className="flex items-baseline justify-between">
