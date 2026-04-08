@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
+import SpotlightCard from "../components/ui/SpotlightCard";
+import Waves from "../components/ui/Waves";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,12 +18,10 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkSession() {
       const session = await getSession();
-
       if (session?.user?.role === "admin") {
         router.push("/admin/dashboard");
       }
     }
-
     checkSession();
   }, [router]);
 
@@ -61,116 +60,166 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f4f1ea] text-[#2f2923]">
+    <div className="flex min-h-screen">
       <Navbar />
+      {/* ── Left brand panel ── */}
+      <div className="relative hidden lg:flex lg:w-[46%] flex-col justify-between bg-[#2f2923] px-14 py-12 overflow-hidden">
+        {/* Waves animation background */}
+        <Waves
+          lineColor="rgba(184, 148, 100, 0.18)"
+          backgroundColor="transparent"
+          waveSpeedX={0.03}
+          waveSpeedY={0.004}
+          waveAmpX={28}
+          waveAmpY={14}
+          xGap={24}
+          yGap={40}
+          friction={0.93}
+          tension={0.004}
+          maxCursorMove={80}
+        />
 
-      <section className="flex min-h-[calc(100vh-170px)] items-center justify-center px-6 py-14">
-        <div className="w-full max-w-[620px] rounded-[28px] border border-[#d8d0c4] bg-[#fbfaf7] shadow-[0_10px_30px_rgba(47,41,35,0.06)]">
-          <div className="px-8 pb-10 pt-10 sm:px-14">
-            <div className="mb-10 text-center">
-              <p className="text-[12px] font-medium uppercase tracking-[0.28em] text-[#9a8f83]">
-                Property Project Marketing
-              </p>
-              <h1 className="mt-5 text-4xl font-medium tracking-tight text-[#2f2923] sm:text-5xl">
-                Sign in
-              </h1>
-              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-[#6e655c] sm:text-base">
-                Access your account to continue to your portal.
-              </p>
+        {/* Warm ambient glow */}
+        <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-[#b89464]/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-32 -right-16 h-[400px] w-[400px] rounded-full bg-[#b89464]/8 blur-[100px]" />
+
+        {/* Top: wordmark */}
+        <div className="relative z-10">
+          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#b89464]">
+            Admin Portal
+          </p>
+          <h1 className="mt-4 text-[2.6rem] font-medium leading-[1.1] tracking-tight text-[#f4f1ea]">
+            Property<br />Project<br />Marketing
+          </h1>
+        </div>
+
+        {/* Middle: decorative rule + quote */}
+        <div className="relative z-10">
+          <div className="mb-8 h-px w-16 bg-[#b89464]" />
+          <p className="max-w-xs text-[15px] leading-7 text-[#9a8f83]">
+            Melbourne&rsquo;s specialist in off-the-plan and established residential property — serving a $50M+ managed portfolio.
+          </p>
+        </div>
+
+        {/* Bottom: footer note */}
+        <div className="relative z-10">
+          <p className="text-[12px] text-[#5c5248]">
+            &copy; {new Date().getFullYear()} PPM Pty Ltd &mdash; All rights reserved
+          </p>
+        </div>
+      </div>
+
+      {/* ── Right form panel ── */}
+      <SpotlightCard
+        className="flex flex-1 flex-col items-center justify-center bg-[#f4f1ea] px-6 py-14"
+        spotlightColor="rgba(184, 148, 100, 0.22)"
+      >
+        <div className="w-full max-w-[440px]">
+          {/* Mobile-only wordmark */}
+          <div className="mb-10 lg:hidden">
+            <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#9a8f83]">
+              Property Project Marketing
+            </p>
+          </div>
+
+          {/* Heading */}
+          <div className="mb-10">
+            <h2 className="text-[2rem] font-medium tracking-tight text-[#2f2923] sm:text-[2.4rem]">
+              Sign in
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#6e655c]">
+              Access your portal to manage enquiries and leads.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-[13px] font-medium text-[#4d453d]"
+              >
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="admin@ppm.com.au"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10"
+                required
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-[#4d453d]"
-                >
-                  Email address
-                </label>
-                <div className="rounded-2xl border border-[#8e857a] bg-[#fbfaf7] px-4 py-3">
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="hello@propertyprojectmarketing.com.au"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-transparent text-[15px] text-[#2f2923] outline-none placeholder:text-[#a49a8d]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-[#4d453d]"
+                  className="text-[13px] font-medium text-[#4d453d]"
                 >
                   Password
                 </label>
-                <div className="rounded-2xl border border-[#8e857a] bg-[#fbfaf7] px-4 py-3">
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-transparent text-[15px] text-[#2f2923] outline-none placeholder:text-[#a49a8d]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-[#6e655c] underline underline-offset-4 hover:text-[#2f2923]"
+                  className="text-[12px] text-[#8a7f74] underline underline-offset-4 transition hover:text-[#2f2923]"
                 >
                   Forgot password?
                 </Link>
               </div>
-
-              {error ? (
-                <div className="rounded-2xl border border-[#d4b7b0] bg-[#f7e9e6] px-4 py-3 text-sm text-[#8a3d31]">
-                  {error}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-2xl border border-[#2f2923] bg-[#2f2923] px-4 py-3 text-base font-medium text-[#fbfaf7] transition hover:bg-[#453d35] hover:border-[#453d35] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Signing in..." : "Continue"}
-              </button>
-            </form>
-
-            <div className="my-8 flex items-center gap-4">
-              <div className="h-px flex-1 bg-[#ddd5c8]" />
-              <span className="text-sm font-medium uppercase tracking-[0.18em] text-[#8f867a]">
-                Portal access
-              </span>
-              <div className="h-px flex-1 bg-[#ddd5c8]" />
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10"
+                required
+              />
             </div>
 
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-[#d8d0c4] bg-[#f7f3ec] px-5 py-4 text-sm text-[#6e655c]">
-                Use your registered email and password to sign in.
+            {error && (
+              <div className="rounded-xl border border-[#d4b7b0] bg-[#f7e9e6] px-4 py-3 text-[13px] text-[#8a3d31]">
+                {error}
               </div>
-              <div className="rounded-2xl border border-[#d8d0c4] bg-[#f7f3ec] px-5 py-4 text-sm text-[#6e655c]">
-                Access will depend on your account role and permissions.
-              </div>
-            </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-1 w-full rounded-xl bg-[#2f2923] px-4 py-3.5 text-[15px] font-medium text-[#f4f1ea] transition hover:bg-[#3d342c] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? "Signing in…" : "Continue"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-8 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#ddd5c8]" />
+            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#a49a8d]">
+              Secure access
+            </span>
+            <div className="h-px flex-1 bg-[#ddd5c8]" />
           </div>
 
-          <div className="border-t border-[#ddd5c8] bg-[#f3eee6] px-8 py-6 text-center sm:px-14">
-            <p className="text-sm leading-6 text-[#7a7166]">
-              By continuing, you agree to our Terms of Use and Privacy Policy.
+          {/* Info notes */}
+          <div className="space-y-2.5 text-[13px] text-[#7a7166]">
+            <p className="flex items-start gap-2">
+              <span className="mt-0.5 text-[#b89464]">—</span>
+              Use your registered admin email and password.
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="mt-0.5 text-[#b89464]">—</span>
+              Access level is determined by your account role.
             </p>
           </div>
-        </div>
-      </section>
 
-      <Footer />
-    </main>
+          {/* Bottom note */}
+          <p className="mt-10 text-[12px] text-[#a49a8d]">
+            By continuing, you agree to our Terms of Use and Privacy Policy.
+          </p>
+        </div>
+      </SpotlightCard>
+    </div>
   );
 }
