@@ -5,9 +5,6 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[0-9]{6,15}$/;
-
 type DeveloperFormData = {
   enquiryType: "developer";
   name: string;
@@ -19,6 +16,8 @@ type DeveloperFormData = {
   commissionStructureInterest: string;
   message: string;
 };
+
+type DeveloperFieldErrors = Partial<Record<keyof DeveloperFormData, string>>;
 
 const initialFormData: DeveloperFormData = {
   enquiryType: "developer",
@@ -59,8 +58,39 @@ function ContactTabs() {
   );
 }
 
+function getUnderlineInputClass(hasError: boolean) {
+  return `w-full border-b bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#cfc2b2] focus:border-[#5f5245]"
+  }`;
+}
+
+function getSelectInputClass(hasError: boolean) {
+  return `w-full border-b bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#cfc2b2] focus:border-[#5f5245]"
+  }`;
+}
+
+function getTextareaClass(hasError: boolean) {
+  return `w-full rounded-sm border bg-[#fdfbf8] px-4 py-4 text-[14px] leading-7 text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] resize-none ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#d9cec0] focus:border-[#5f5245]"
+  }`;
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+
+  return <p className="mt-3 text-[14px] text-[#dc2626]">{message}</p>;
+}
+
 export default function DevelopersContactPage() {
   const [formData, setFormData] = useState<DeveloperFormData>(initialFormData);
+  const [fieldErrors, setFieldErrors] = useState<DeveloperFieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
@@ -78,36 +108,18 @@ export default function DevelopersContactPage() {
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
     const { name, value } = event.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-
-    const normalizedPhone = formData.phone.replace(/\s|-/g, "").trim();
-
-    if (!EMAIL_REGEX.test(formData.email.trim())) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Email",
-        message: "Please enter a valid email address.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (!PHONE_REGEX.test(normalizedPhone)) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Phone Number",
-        message: "Please enter a valid phone number.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
+    setFieldErrors({});
 
     try {
       const response = await fetch("/api/contact", {
@@ -115,16 +127,20 @@ export default function DevelopersContactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-          phone: normalizedPhone,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit form.");
+        setFieldErrors(data.fieldErrors ?? {});
+        setFeedbackModal({
+          open: true,
+          title: "Submission Failed",
+          message: data.message || "Please correct the highlighted fields.",
+          success: false,
+        });
+        return;
       }
 
       setFeedbackModal({
@@ -134,14 +150,12 @@ export default function DevelopersContactPage() {
         success: true,
       });
       setFormData(initialFormData);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Something went wrong.";
-
+      setFieldErrors({});
+    } catch {
       setFeedbackModal({
         open: true,
         title: "Submission Failed",
-        message,
+        message: "Something went wrong.",
         success: false,
       });
     } finally {
@@ -169,7 +183,7 @@ export default function DevelopersContactPage() {
         </div>
 
         <div className="mx-auto mt-12 max-w-4xl rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-12">
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} noValidate className="space-y-8">
             <div className="space-y-8">
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
@@ -180,10 +194,12 @@ export default function DevelopersContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
+                  placeholder="Enter your full name"
                   maxLength={100}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  className={getUnderlineInputClass(Boolean(fieldErrors.name))}
                 />
+                <FieldError message={fieldErrors.name} />
               </div>
 
               <div>
@@ -191,33 +207,40 @@ export default function DevelopersContactPage() {
                   Phone
                 </label>
                 <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
-                  <select
-                    name="phoneCountryCode"
-                    value={formData.phoneCountryCode}
-                    onChange={handleChange}
-                    required
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
-                  >
-                    <option value="+61">+61</option>
-                    <option value="+65">+65</option>
-                    <option value="+44">+44</option>
-                    <option value="+1">+1</option>
-                    <option value="+86">+86</option>
-                    <option value="+64">+64</option>
-                  </select>
+                  <div>
+                    <select
+                      name="phoneCountryCode"
+                      value={formData.phoneCountryCode}
+                      onChange={handleChange}
+                      aria-invalid={Boolean(fieldErrors.phoneCountryCode)}
+                      className={getSelectInputClass(
+                        Boolean(fieldErrors.phoneCountryCode)
+                      )}
+                    >
+                      <option value="+61">+61</option>
+                      <option value="+65">+65</option>
+                      <option value="+44">+44</option>
+                      <option value="+1">+1</option>
+                      <option value="+86">+86</option>
+                      <option value="+64">+64</option>
+                    </select>
+                    <FieldError message={fieldErrors.phoneCountryCode} />
+                  </div>
 
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number"
-                    required
-                    maxLength={15}
-                    inputMode="numeric"
-                    pattern="[0-9\s-]+"
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
-                  />
+                  <div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter your phone number"
+                      maxLength={20}
+                      inputMode="numeric"
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      className={getUnderlineInputClass(Boolean(fieldErrors.phone))}
+                    />
+                    <FieldError message={fieldErrors.phone} />
+                  </div>
                 </div>
               </div>
 
@@ -230,10 +253,12 @@ export default function DevelopersContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
+                  placeholder="Enter your email address"
                   maxLength={120}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  className={getUnderlineInputClass(Boolean(fieldErrors.email))}
                 />
+                <FieldError message={fieldErrors.email} />
               </div>
 
               <div>
@@ -245,10 +270,12 @@ export default function DevelopersContactPage() {
                   name="projectName"
                   value={formData.projectName}
                   onChange={handleChange}
-                  required
+                  placeholder="Enter project name"
                   maxLength={120}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
+                  aria-invalid={Boolean(fieldErrors.projectName)}
+                  className={getUnderlineInputClass(Boolean(fieldErrors.projectName))}
                 />
+                <FieldError message={fieldErrors.projectName} />
               </div>
 
               <div>
@@ -260,10 +287,14 @@ export default function DevelopersContactPage() {
                   name="projectLocation"
                   value={formData.projectLocation}
                   onChange={handleChange}
-                  required
+                  placeholder="Enter project location"
                   maxLength={120}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
+                  aria-invalid={Boolean(fieldErrors.projectLocation)}
+                  className={getUnderlineInputClass(
+                    Boolean(fieldErrors.projectLocation)
+                  )}
                 />
+                <FieldError message={fieldErrors.projectLocation} />
               </div>
 
               <div>
@@ -275,11 +306,14 @@ export default function DevelopersContactPage() {
                   name="commissionStructureInterest"
                   value={formData.commissionStructureInterest}
                   onChange={handleChange}
-                  placeholder="e.g. project marketing / sales representation"
-                  required
+                  placeholder="Describe your commission structure interest"
                   maxLength={150}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] outline-none"
+                  aria-invalid={Boolean(fieldErrors.commissionStructureInterest)}
+                  className={getUnderlineInputClass(
+                    Boolean(fieldErrors.commissionStructureInterest)
+                  )}
                 />
+                <FieldError message={fieldErrors.commissionStructureInterest} />
               </div>
 
               <div>
@@ -291,10 +325,12 @@ export default function DevelopersContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={6}
-                  placeholder="Tell us more about your project or requirements"
                   maxLength={1000}
-                  className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] outline-none resize-none"
+                  placeholder="Share any extra details about the project or partnership."
+                  aria-invalid={Boolean(fieldErrors.message)}
+                  className={getTextareaClass(Boolean(fieldErrors.message))}
                 />
+                <FieldError message={fieldErrors.message} />
               </div>
             </div>
 
@@ -302,53 +338,42 @@ export default function DevelopersContactPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-w-[220px] items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17] disabled:opacity-60"
+                className="inline-flex min-w-[220px] items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Submitting..." : "Send Enquiry"}
+                {loading ? "Submitting..." : "Submit Enquiry"}
               </button>
             </div>
           </form>
         </div>
       </section>
 
-      {feedbackModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-md rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
-            <div
-              className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold ${
-                feedbackModal.success
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {feedbackModal.success ? "✓" : "!"}
-            </div>
-
-            <h3 className="text-xl font-medium text-[#1f1a17]">
+      {feedbackModal.open ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/30 px-6">
+          <div className="w-full max-w-md rounded-sm bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-medium text-[#1f1a17]">
               {feedbackModal.title}
             </h3>
-
-            <p className="mt-3 text-[14px] leading-7 text-[#6c6258]">
+            <p className="mt-3 text-[14px] leading-6 text-[#6c6258]">
               {feedbackModal.message}
             </p>
-
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-end">
               <button
-                type="button"
                 onClick={() =>
-                  setFeedbackModal((prev) => ({
-                    ...prev,
+                  setFeedbackModal({
                     open: false,
-                  }))
+                    title: "",
+                    message: "",
+                    success: false,
+                  })
                 }
-                className="inline-flex min-w-[120px] items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
+                className="rounded-sm bg-[#2f2a24] px-5 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white"
               >
-                OK
+                Close
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       <Footer />
     </main>
