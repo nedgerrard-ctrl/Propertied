@@ -34,7 +34,7 @@ const initialFormData: DeveloperFormData = {
 
 function ContactTabs() {
   return (
-    <div className="mt-10 flex flex-wrap justify-center gap-4">
+    <div className="mt-24 flex flex-wrap justify-center gap-4 px-6">
       <Link
         href="/contact"
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"

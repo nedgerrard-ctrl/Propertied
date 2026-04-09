@@ -105,7 +105,7 @@ const bathroomCarOptions = [
 
 function ContactTabs() {
   return (
-    <div className="mt-10 flex flex-wrap justify-center gap-4">
+    <div className="mt-24 flex flex-wrap justify-center gap-4 px-6">
       <Link
         href="/contact"
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
@@ -962,9 +962,9 @@ function BuyersInvestorsContactContent() {
                   Legal Documents
                 </h2>
                 <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
-                  Upload supporting legal documents. Files are stored in
-                  <span className="font-medium"> public/uploads/legal-documents/</span>.
-                  Maximum {MAX_DOCUMENTS} files, 5MB each.
+                  Upload supporting legal documents. Maximum {MAX_DOCUMENTS} files, 5MB each.
+                  {/* Files are stored in
+                  <span className="font-medium"> public/uploads/legal-documents/</span>. */}
                 </p>
               </div>
 
