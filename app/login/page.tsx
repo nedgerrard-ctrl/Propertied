@@ -8,10 +8,25 @@ import SpotlightCard from "../components/ui/SpotlightCard";
 import Waves from "../components/ui/Waves";
 import Navbar from "../components/Navbar";
 
+type LoginFieldErrors = {
+  email?: string;
+  password?: string;
+};
+
+function getFieldClass(hasError: boolean) {
+  return [
+    "w-full rounded-xl bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d]",
+    hasError
+      ? "border border-[#dc2626] focus:border-[#dc2626] focus:ring-2 focus:ring-[#dc2626]/10"
+      : "border border-[#c8bfb4] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10",
+  ].join(" ");
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,43 +43,71 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const validationResponse = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    if (!result || result.error) {
+      const validationData = await validationResponse.json();
+
+      if (!validationResponse.ok) {
+        setFieldErrors(validationData.fieldErrors ?? {});
+        setError(validationData.message || "Please correct the highlighted fields.");
+        setLoading(false);
+        return;
+      }
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (!result || result.error) {
+        setLoading(false);
+        setError("Invalid email or password.");
+        setFieldErrors({
+          password: "Invalid email or password.",
+        });
+        return;
+      }
+
+      const session = await getSession();
+      const role = session?.user?.role;
+
+      if (role === "admin") {
+        window.location.href = "/admin/dashboard";
+        return;
+      }
+
+      if (role === "client") {
+        window.location.href = "/client/dashboard";
+        return;
+      }
+
       setLoading(false);
-      setError("Invalid email or password.");
-      return;
+      setError("Your account does not have a valid role.");
+    } catch {
+      setLoading(false);
+      setError("Something went wrong. Please try again.");
     }
-
-    const session = await getSession();
-    const role = session?.user?.role;
-
-    if (role === "admin") {
-      window.location.href = "/admin/dashboard";
-      return;
-    }
-
-    if (role === "client") {
-      window.location.href = "/client/dashboard";
-      return;
-    }
-
-    setLoading(false);
-    setError("Your account does not have a valid role.");
   }
 
   return (
     <div className="flex min-h-screen">
       <Navbar />
-      {/* ── Left brand panel ── */}
-      <div className="relative hidden lg:flex lg:w-[46%] flex-col justify-between bg-[#2f2923] px-14 py-12 overflow-hidden">
-        {/* Waves animation background */}
+
+      <div className="relative hidden overflow-hidden bg-[#2f2923] px-14 py-12 lg:flex lg:w-[46%] flex-col justify-between">
         <Waves
           lineColor="rgba(184, 148, 100, 0.18)"
           backgroundColor="transparent"
@@ -79,29 +122,30 @@ export default function LoginPage() {
           maxCursorMove={80}
         />
 
-        {/* Warm ambient glow */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-[#b89464]/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#b89464]/10 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-32 -right-16 h-[400px] w-[400px] rounded-full bg-[#b89464]/8 blur-[100px]" />
 
-        {/* Top: wordmark */}
         <div className="relative z-10">
           <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#b89464]">
             Admin Portal
           </p>
           <h1 className="mt-4 text-[2.6rem] font-medium leading-[1.1] tracking-tight text-[#f4f1ea]">
-            Property<br />Project<br />Marketing
+            Property
+            <br />
+            Project
+            <br />
+            Marketing
           </h1>
         </div>
 
-        {/* Middle: decorative rule + quote */}
         <div className="relative z-10">
           <div className="mb-8 h-px w-16 bg-[#b89464]" />
           <p className="max-w-xs text-[15px] leading-7 text-[#9a8f83]">
-            Melbourne&rsquo;s specialist in off-the-plan and established residential property — serving a $50M+ managed portfolio.
+            Melbourne&rsquo;s specialist in off-the-plan and established residential
+            property — serving a $50M+ managed portfolio.
           </p>
         </div>
 
-        {/* Bottom: footer note */}
         <div className="relative z-10">
           <p className="text-[12px] text-[#5c5248]">
             &copy; {new Date().getFullYear()} PPM Pty Ltd &mdash; All rights reserved
@@ -109,20 +153,17 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ── Right form panel ── */}
       <SpotlightCard
         className="flex flex-1 flex-col items-center justify-center bg-[#f4f1ea] px-6 py-14"
         spotlightColor="rgba(184, 148, 100, 0.22)"
       >
         <div className="w-full max-w-[440px]">
-          {/* Mobile-only wordmark */}
           <div className="mb-10 lg:hidden">
             <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#9a8f83]">
               Property Project Marketing
             </p>
           </div>
 
-          {/* Heading */}
           <div className="mb-10">
             <h2 className="text-[2rem] font-medium tracking-tight text-[#2f2923] sm:text-[2.4rem]">
               Sign in
@@ -132,8 +173,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
               <label
                 htmlFor="email"
@@ -146,10 +186,18 @@ export default function LoginPage() {
                 type="email"
                 placeholder="admin@ppm.com.au"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10"
-                required
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, email: "" }));
+                }}
+                aria-invalid={Boolean(fieldErrors.email)}
+                className={getFieldClass(Boolean(fieldErrors.email))}
               />
+              {fieldErrors.email ? (
+                <p className="mt-3 text-[14px] text-[#dc2626]">
+                  {fieldErrors.email}
+                </p>
+              ) : null}
             </div>
 
             <div>
@@ -167,22 +215,31 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
+
               <input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10"
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                aria-invalid={Boolean(fieldErrors.password)}
+                className={getFieldClass(Boolean(fieldErrors.password))}
               />
+              {fieldErrors.password ? (
+                <p className="mt-3 text-[14px] text-[#dc2626]">
+                  {fieldErrors.password}
+                </p>
+              ) : null}
             </div>
 
-            {error && (
+            {error && !fieldErrors.email && !fieldErrors.password ? (
               <div className="rounded-xl border border-[#d4b7b0] bg-[#f7e9e6] px-4 py-3 text-[13px] text-[#8a3d31]">
                 {error}
               </div>
-            )}
+            ) : null}
 
             <button
               type="submit"
@@ -193,7 +250,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-8 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#ddd5c8]" />
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#a49a8d]">
@@ -202,7 +258,6 @@ export default function LoginPage() {
             <div className="h-px flex-1 bg-[#ddd5c8]" />
           </div>
 
-          {/* Info notes */}
           <div className="space-y-2.5 text-[13px] text-[#7a7166]">
             <p className="flex items-start gap-2">
               <span className="mt-0.5 text-[#b89464]">—</span>
@@ -214,7 +269,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Bottom note */}
           <p className="mt-10 text-[12px] text-[#a49a8d]">
             By continuing, you agree to our Terms of Use and Privacy Policy.
           </p>

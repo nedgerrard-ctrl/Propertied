@@ -212,7 +212,7 @@ export default function DevelopersPage() {
 
           <div className="mt-12 flex flex-wrap gap-5">
             <Link
-              href="/contact"
+              href="/contact/developers"
               className="inline-flex items-center border border-[#c8a96e] px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#1c1814]"
             >
               Partner With Us
@@ -415,7 +415,7 @@ export default function DevelopersPage() {
           </p>
           <div className="mt-14">
             <Link
-              href="/contact"
+              href="/contact/developers"
               className="text-[12px] uppercase tracking-[0.22em] text-white border-b border-white/25 pb-0.5 transition hover:border-white"
             >
               Contact Us →
