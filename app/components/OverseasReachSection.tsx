@@ -80,7 +80,7 @@ export default function OverseasReachSection() {
 
             <div className="mt-8">
               <Link
-                href="/contact"
+                href="/contact/buyers-investors"
                 className="inline-block border border-[#c8a96e] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#13100d]"
               >
                 Start Your Journey
