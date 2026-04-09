@@ -25,40 +25,58 @@ const stats = [
 
 const services = [
   {
-    href:     '/about',
-    label:    'About Us',
-    sub:      'Our story & team',
-    index:    '01',
+    href:    '/buyers',
+    label:   'For Buyers',
+    sub:     'Off-plan & established',
+    index:   '01',
+    image:   '/images/For buyers.jpg',
+    desc:    'Access curated off-the-plan and established properties across Melbourne — guided from enquiry through to settlement.',
+    accent:  false,
   },
   {
-    href:     '/buyers',
-    label:    'For Buyers',
-    sub:      'Off-plan & established',
-    index:    '02',
+    href:    '/about',
+    label:   'About Us',
+    sub:     'Our story & team',
+    index:   '02',
+    image:   '/images/aboutus.png',
+    desc:    'A decade of delivering end-to-end property services across Melbourne.',
+    accent:  false,
   },
   {
-    href:     '/developer',
-    label:    'For Developers',
-    sub:      'Partnership enquiries',
-    index:    '03',
+    href:    '/developer',
+    label:   'For Developers',
+    sub:     'Partnership enquiries',
+    index:   '03',
+    image:   '/images/For developers.jpg',
+    desc:    'We connect your project with qualified local and overseas buyers through our established network.',
+    accent:  false,
   },
   {
-    href:     '/blog',
-    label:    'Blog & Insights',
-    sub:      'Market perspectives',
-    index:    '04',
+    href:    '/testimonial',
+    label:   'Testimonials',
+    sub:     'Client perspectives',
+    index:   '04',
+    image:   null,
+    desc:    'Hear from buyers, investors, and developers who have worked with PPM.',
+    accent:  false,
   },
   {
-    href:     '/testimonial',
-    label:    'Testimonials',
-    sub:      'Client perspectives',
-    index:    '05',
+    href:    '/blog',
+    label:   'Blog & Insights',
+    sub:     'Market perspectives',
+    index:   '05',
+    image:   '/images/For blog.jpg',
+    desc:    'Analysis and perspectives on the Melbourne property market.',
+    accent:  false,
   },
   {
-    href:     '/contact',
-    label:    'Contact',
-    sub:      'Start a conversation',
-    index:    '06',
+    href:    '/contact',
+    label:   'Contact',
+    sub:     'Start a conversation',
+    index:   '06',
+    image:   null,
+    desc:    null,
+    accent:  true,
   },
 ]
 
@@ -246,38 +264,68 @@ function ServicesGrid() {
   return (
     <section className="bg-[#0f0c0a] py-28 px-8 border-t border-white/[0.06]">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 flex items-end justify-between">
-          <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54]">
+        <div className="mb-14 flex items-center gap-8">
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54] shrink-0">
             Explore
           </p>
-          <div className="h-px flex-1 mx-10 bg-white/[0.06]" />
+          <div className="h-px flex-1 bg-white/[0.06]" />
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+        {/* Masonry — CSS columns */}
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
           {services.map((svc, i) => (
             <motion.div
               key={svc.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-8%' }}
-              transition={{ duration: 0.75, delay: i * 0.07 }}
+              viewport={{ once: true, margin: '-6%' }}
+              transition={{ duration: 0.75, delay: i * 0.08 }}
+              className="break-inside-avoid mb-4"
             >
               <Link
                 href={svc.href}
-                className="group flex flex-col border-b border-white/[0.06] px-2 py-10 transition hover:bg-white/[0.02]"
+                className={`group relative flex flex-col overflow-hidden transition-all duration-500 ${
+                  svc.accent
+                    ? 'border border-[#c8a96e]/30 bg-[#c8a96e]/[0.04] hover:bg-[#c8a96e]/[0.08] hover:border-[#c8a96e]/60'
+                    : 'border border-white/[0.06] bg-[#0a0806] hover:border-white/[0.12] hover:bg-white/[0.02]'
+                }`}
               >
-                <span className="text-[9px] uppercase tracking-[0.28em] text-[#3d3530] mb-6">
-                  {svc.index}
-                </span>
-                <h3 className={`${cormorant.className} text-[1.9rem] font-light text-neutral-200 leading-none mb-3 transition group-hover:text-white`}>
-                  {svc.label}
-                </h3>
-                <p className="text-[10.5px] uppercase tracking-[0.18em] text-[#6b5e54] transition group-hover:text-[#8a7b6d]">
-                  {svc.sub}
-                </p>
-                <span className="mt-6 text-[#c8a96e] text-[11px] tracking-widest opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0">
-                  →
-                </span>
+                {/* Image header — only for cards that have one */}
+                {svc.image && (
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={svc.image}
+                      alt={svc.label}
+                      className="h-48 w-full object-cover grayscale opacity-60 transition-all duration-700 group-hover:grayscale-0 group-hover:opacity-80 group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-transparent to-transparent" />
+                  </div>
+                )}
+
+                {/* Card body */}
+                <div className="flex flex-1 flex-col p-7">
+                  <span className={`text-[9px] uppercase tracking-[0.28em] mb-5 ${svc.accent ? 'text-[#c8a96e]/50' : 'text-[#3d3530]'}`}>
+                    {svc.index}
+                  </span>
+
+                  <h3 className={`${cormorant.className} text-[1.9rem] font-light leading-none mb-2 transition group-hover:text-white ${svc.accent ? 'text-[#c8a96e]' : 'text-neutral-200'}`}>
+                    {svc.label}
+                  </h3>
+
+                  <p className={`text-[10px] uppercase tracking-[0.18em] mb-4 transition ${svc.accent ? 'text-[#c8a96e]/60 group-hover:text-[#c8a96e]/90' : 'text-[#6b5e54] group-hover:text-[#8a7b6d]'}`}>
+                    {svc.sub}
+                  </p>
+
+                  {svc.desc && (
+                    <p className="text-[12.5px] leading-[1.85] text-[#5a4f47] group-hover:text-[#6b5e54] transition mt-1 mb-5">
+                      {svc.desc}
+                    </p>
+                  )}
+
+                  <span className={`mt-auto text-[11px] tracking-widest -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 ${svc.accent ? 'text-[#c8a96e]' : 'text-[#c8a96e]'}`}>
+                    →
+                  </span>
+                </div>
               </Link>
             </motion.div>
           ))}
