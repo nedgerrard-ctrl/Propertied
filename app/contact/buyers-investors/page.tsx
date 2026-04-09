@@ -80,8 +80,8 @@ const initialFormData: BuyerFormData = {
 
 const propertyTypeOptions = ["Apartment", "Townhouse", "House"];
 
-const budgetOptions = [
-  { label: "Any", value: "" },
+const minBudgetOptions = [
+  { label: "Any", value: "0" },
   { label: "$300,000", value: "300000" },
   { label: "$500,000", value: "500000" },
   { label: "$700,000", value: "700000" },
@@ -89,7 +89,18 @@ const budgetOptions = [
   { label: "$1,200,000", value: "1200000" },
   { label: "$1,500,000", value: "1500000" },
   { label: "$2,000,000+", value: "2000000" },
-];
+]
+
+const maxBudgetOptions = [
+  { label: "Any", value: "2147483647" },
+  { label: "$300,000", value: "300000" },
+  { label: "$500,000", value: "500000" },
+  { label: "$700,000", value: "700000" },
+  { label: "$900,000", value: "900000" },
+  { label: "$1,200,000", value: "1200000" },
+  { label: "$1,500,000", value: "1500000" },
+  { label: "$2,000,000+", value: "2000000" },
+]
 
 const roomOptions = [
   { label: "Any", value: "" },
@@ -303,7 +314,7 @@ function BuyersInvestorsContactContent() {
   const showPropertyPreferences = formData.propertyInterest === "off-plan";
 
   const filteredMaxBudgetOptions = useMemo(
-    () => getFilteredRangeOptions(budgetOptions, formData.minBudget),
+    () => getFilteredRangeOptions(maxBudgetOptions, formData.minBudget),
     [formData.minBudget]
   );
 
@@ -757,8 +768,8 @@ function BuyersInvestorsContactContent() {
                     aria-invalid={Boolean(fieldErrors.minBudget)}
                     className={getBoxInputClass(Boolean(fieldErrors.minBudget))}
                   >
-                    <option value="">Select minimum budget</option>
-                    {budgetOptions.map((option) => (
+                    <option value=" ">Select minimum budget</option>
+                    {minBudgetOptions.map((option) => (
                       <option key={option.label} value={option.value}>
                         {option.label}
                       </option>
@@ -778,7 +789,7 @@ function BuyersInvestorsContactContent() {
                     aria-invalid={Boolean(fieldErrors.maxBudget)}
                     className={getBoxInputClass(Boolean(fieldErrors.maxBudget))}
                   >
-                    <option value="">Select maximum budget</option>
+                    <option value=" ">Select maximum budget</option>
                     {filteredMaxBudgetOptions.map((option) => (
                       <option key={option.label} value={option.value}>
                         {option.label}

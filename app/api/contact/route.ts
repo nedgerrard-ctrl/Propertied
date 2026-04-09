@@ -332,6 +332,10 @@ export async function POST(request: Request) {
         buyerFieldErrors.propertyInterest = "Select property interest";
       }
 
+      if (propertyInterest === "off-plan" && !isNonEmptyString(propertyType)) {
+        buyerFieldErrors.propertyType = "Select a property type";
+      }
+
       if (Object.keys(buyerFieldErrors).length > 0) {
         return badRequest(
           "Please correct the highlighted buyer/investor fields.",
