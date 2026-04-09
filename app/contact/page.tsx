@@ -5,9 +5,6 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[0-9]{6,15}$/;
-
 type ContactFormData = {
   enquiryType: "general";
   name: string;
@@ -16,6 +13,8 @@ type ContactFormData = {
   phone: string;
   message: string;
 };
+
+type FieldErrors = Partial<Record<keyof ContactFormData, string>>;
 
 const initialFormData: ContactFormData = {
   enquiryType: "general",
@@ -53,8 +52,18 @@ function ContactTabs() {
   );
 }
 
+function getInputClass(hasError: boolean) {
+  return [
+    "w-full bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186]",
+    hasError
+      ? "border-b border-[#dc2626] focus:border-[#dc2626]"
+      : "border-b border-[#cfc2b2] focus:border-[#5f5245]",
+  ].join(" ");
+}
+
 export default function ContactPage() {
   const [formData, setFormData] = useState<ContactFormData>(initialFormData);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
@@ -77,35 +86,17 @@ export default function ContactPage() {
       ...prev,
       [name]: value,
     }));
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-
-    const normalizedPhone = formData.phone.replace(/\s|-/g, "").trim();
-
-    if (!EMAIL_REGEX.test(formData.email.trim())) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Email",
-        message: "Please enter a valid email address.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (!PHONE_REGEX.test(normalizedPhone)) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Phone Number",
-        message: "Please enter a valid phone number.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
+    setFieldErrors({});
 
     try {
       const response = await fetch("/api/contact", {
@@ -113,15 +104,13 @@ export default function ContactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-          phone: normalizedPhone,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        setFieldErrors(data.fieldErrors ?? {});
         throw new Error(data.message || "Failed to submit form.");
       }
 
@@ -132,6 +121,7 @@ export default function ContactPage() {
         success: true,
       });
       setFormData(initialFormData);
+      setFieldErrors({});
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Something went wrong.";
@@ -167,7 +157,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mx-auto mt-12 max-w-4xl rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-12">
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} noValidate className="space-y-8">
             <div className="space-y-8">
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
@@ -179,10 +169,15 @@ export default function ContactPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter your name"
-                  required
                   maxLength={100}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  className={getInputClass(Boolean(fieldErrors.name))}
                 />
+                {fieldErrors.name ? (
+                  <p className="mt-3 text-[14px] text-[#dc2626]">
+                    {fieldErrors.name}
+                  </p>
+                ) : null}
               </div>
 
               <div>
@@ -190,33 +185,51 @@ export default function ContactPage() {
                   Phone
                 </label>
                 <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
-                  <select
-                    name="phoneCountryCode"
-                    value={formData.phoneCountryCode}
-                    onChange={handleChange}
-                    required
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none"
-                  >
-                    <option value="+61">+61</option>
-                    <option value="+65">+65</option>
-                    <option value="+44">+44</option>
-                    <option value="+1">+1</option>
-                    <option value="+86">+86</option>
-                    <option value="+64">+64</option>
-                  </select>
+                  <div>
+                    <select
+                      name="phoneCountryCode"
+                      value={formData.phoneCountryCode}
+                      onChange={handleChange}
+                      aria-invalid={Boolean(fieldErrors.phoneCountryCode)}
+                      className={[
+                        "w-full bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none",
+                        fieldErrors.phoneCountryCode
+                          ? "border-b border-[#dc2626]"
+                          : "border-b border-[#cfc2b2]",
+                      ].join(" ")}
+                    >
+                      <option value="+61">+61</option>
+                      <option value="+65">+65</option>
+                      <option value="+44">+44</option>
+                      <option value="+1">+1</option>
+                      <option value="+86">+86</option>
+                      <option value="+64">+64</option>
+                    </select>
+                    {fieldErrors.phoneCountryCode ? (
+                      <p className="mt-3 text-[14px] text-[#dc2626]">
+                        {fieldErrors.phoneCountryCode}
+                      </p>
+                    ) : null}
+                  </div>
 
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number"
-                    required
-                    maxLength={15}
-                    inputMode="numeric"
-                    pattern="[0-9\s-]+"
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
-                  />
+                  <div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter your phone number"
+                      maxLength={15}
+                      inputMode="numeric"
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      className={getInputClass(Boolean(fieldErrors.phone))}
+                    />
+                    {fieldErrors.phone ? (
+                      <p className="mt-3 text-[14px] text-[#dc2626]">
+                        {fieldErrors.phone}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -230,10 +243,15 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  required
                   maxLength={120}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  className={getInputClass(Boolean(fieldErrors.email))}
                 />
+                {fieldErrors.email ? (
+                  <p className="mt-3 text-[14px] text-[#dc2626]">
+                    {fieldErrors.email}
+                  </p>
+                ) : null}
               </div>
 
               <div>
@@ -247,8 +265,19 @@ export default function ContactPage() {
                   placeholder="Tell us a little about what you're looking for"
                   rows={6}
                   maxLength={1000}
-                  className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-4 text-[14px] text-[#1f1a17] outline-none resize-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  aria-invalid={Boolean(fieldErrors.message)}
+                  className={[
+                    "w-full rounded-sm bg-[#fdfbf8] p-4 text-[14px] text-[#1f1a17] outline-none resize-none transition placeholder:text-[#9c9186]",
+                    fieldErrors.message
+                      ? "border border-[#dc2626] focus:border-[#dc2626]"
+                      : "border border-[#d9cec0] focus:border-[#5f5245]",
+                  ].join(" ")}
                 />
+                {fieldErrors.message ? (
+                  <p className="mt-3 text-[14px] text-[#dc2626]">
+                    {fieldErrors.message}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -258,51 +287,40 @@ export default function ContactPage() {
                 disabled={loading}
                 className="inline-flex min-w-[220px] items-center justify-center rounded-sm bg-[#2f2a24] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Submitting..." : "Send Enquiry"}
+                {loading ? "Submitting..." : "Submit Enquiry"}
               </button>
             </div>
           </form>
         </div>
       </section>
 
-      {feedbackModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-md rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
-            <div
-              className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold ${
-                feedbackModal.success
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {feedbackModal.success ? "✓" : "!"}
-            </div>
-
-            <h3 className="text-xl font-medium text-[#1f1a17]">
+      {feedbackModal.open ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/30 px-6">
+          <div className="w-full max-w-md rounded-sm bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-medium text-[#1f1a17]">
               {feedbackModal.title}
             </h3>
-
-            <p className="mt-3 text-[14px] leading-7 text-[#6c6258]">
+            <p className="mt-3 text-[14px] leading-6 text-[#6c6258]">
               {feedbackModal.message}
             </p>
-
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-end">
               <button
-                type="button"
                 onClick={() =>
-                  setFeedbackModal((prev) => ({
-                    ...prev,
+                  setFeedbackModal({
                     open: false,
-                  }))
+                    title: "",
+                    message: "",
+                    success: false,
+                  })
                 }
-                className="inline-flex min-w-[120px] items-center justify-center rounded-sm bg-[#2f2a24] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#1f1a17]"
+                className="rounded-sm bg-[#2f2a24] px-5 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white"
               >
-                OK
+                Close
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       <Footer />
     </main>

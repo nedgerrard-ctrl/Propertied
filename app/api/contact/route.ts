@@ -27,6 +27,8 @@ type SavedLegalDocument = {
   fileUrl: string;
 };
 
+type FieldErrors = Record<string, string>;
+
 function isNonEmptyString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -90,163 +92,250 @@ async function saveLegalDocument(file: File): Promise<SavedLegalDocument> {
   };
 }
 
+function badRequest(message: string, fieldErrors?: FieldErrors) {
+  return NextResponse.json(
+    {
+      success: false,
+      message,
+      fieldErrors: fieldErrors ?? {},
+    },
+    { status: 400 }
+  );
+}
+
+function getStringRecordFromJson(body: unknown) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {};
+  }
+
+  return body as Record<string, unknown>;
+}
+
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
+    const contentType = request.headers.get("content-type") || "";
+    const isMultipart = contentType.includes("multipart/form-data");
+    const isJson = contentType.includes("application/json");
 
-    const enquiryType = String(formData.get("enquiryType") ?? "");
-    const name = String(formData.get("name") ?? "");
-    const email = String(formData.get("email") ?? "");
-    const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "");
-    const phone = String(formData.get("phone") ?? "");
-    const message = String(formData.get("message") ?? "");
+    let enquiryType = "";
+    let name = "";
+    let email = "";
+    let phoneCountryCode = "";
+    let phone = "";
+    let message = "";
 
     // buyer
-    const buyerType = String(formData.get("buyerType") ?? "");
-    const investorRegion = String(formData.get("investorRegion") ?? "");
-    const minBudget = String(formData.get("minBudget") ?? "");
-    const maxBudget = String(formData.get("maxBudget") ?? "");
-    const preferredLocations = String(formData.get("preferredLocations") ?? "");
-    const propertyInterest = String(formData.get("propertyInterest") ?? "");
-    const minBedrooms = String(formData.get("minBedrooms") ?? "");
-    const maxBedrooms = String(formData.get("maxBedrooms") ?? "");
-    const minBathrooms = String(formData.get("minBathrooms") ?? "");
-    const maxBathrooms = String(formData.get("maxBathrooms") ?? "");
-    const minCarSpaces = String(formData.get("minCarSpaces") ?? "");
-    const maxCarSpaces = String(formData.get("maxCarSpaces") ?? "");
-    const propertyType = String(formData.get("propertyType") ?? "");
-    const keywords = String(formData.get("keywords") ?? "");
+    let buyerType = "";
+    let investorRegion = "";
+    let minBudget = "";
+    let maxBudget = "";
+    let preferredLocations = "";
+    let propertyInterest = "";
+    let minBedrooms = "";
+    let maxBedrooms = "";
+    let minBathrooms = "";
+    let maxBathrooms = "";
+    let minCarSpaces = "";
+    let maxCarSpaces = "";
+    let propertyType = "";
+    let keywords = "";
 
     // developer
-    const projectName = String(formData.get("projectName") ?? "");
-    const projectLocation = String(formData.get("projectLocation") ?? "");
-    const commissionStructureInterest = String(
-      formData.get("commissionStructureInterest") ?? ""
-    );
+    let projectName = "";
+    let projectLocation = "";
+    let commissionStructureInterest = "";
 
-    const uploadedFiles = formData
-      .getAll("legalDocuments")
-      .filter((item): item is File => item instanceof File && item.size > 0);
+    let uploadedFiles: File[] = [];
 
-    if (!["general", "developer", "buyer"].includes(enquiryType)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid enquiry type." },
-        { status: 400 }
+    if (isMultipart) {
+      const formData = await request.formData();
+
+      enquiryType = String(formData.get("enquiryType") ?? "");
+      name = String(formData.get("name") ?? "");
+      email = String(formData.get("email") ?? "");
+      phoneCountryCode = String(formData.get("phoneCountryCode") ?? "");
+      phone = String(formData.get("phone") ?? "");
+      message = String(formData.get("message") ?? "");
+
+      buyerType = String(formData.get("buyerType") ?? "");
+      investorRegion = String(formData.get("investorRegion") ?? "");
+      minBudget = String(formData.get("minBudget") ?? "");
+      maxBudget = String(formData.get("maxBudget") ?? "");
+      preferredLocations = String(formData.get("preferredLocations") ?? "");
+      propertyInterest = String(formData.get("propertyInterest") ?? "");
+      minBedrooms = String(formData.get("minBedrooms") ?? "");
+      maxBedrooms = String(formData.get("maxBedrooms") ?? "");
+      minBathrooms = String(formData.get("minBathrooms") ?? "");
+      maxBathrooms = String(formData.get("maxBathrooms") ?? "");
+      minCarSpaces = String(formData.get("minCarSpaces") ?? "");
+      maxCarSpaces = String(formData.get("maxCarSpaces") ?? "");
+      propertyType = String(formData.get("propertyType") ?? "");
+      keywords = String(formData.get("keywords") ?? "");
+
+      projectName = String(formData.get("projectName") ?? "");
+      projectLocation = String(formData.get("projectLocation") ?? "");
+      commissionStructureInterest = String(
+        formData.get("commissionStructureInterest") ?? ""
       );
+
+      uploadedFiles = formData
+        .getAll("legalDocuments")
+        .filter((item): item is File => item instanceof File && item.size > 0);
+    } else if (isJson) {
+      const body = getStringRecordFromJson(await request.json());
+
+      enquiryType = String(body.enquiryType ?? "");
+      name = String(body.name ?? "");
+      email = String(body.email ?? "");
+      phoneCountryCode = String(body.phoneCountryCode ?? "");
+      phone = String(body.phone ?? "");
+      message = String(body.message ?? "");
+
+      buyerType = String(body.buyerType ?? "");
+      investorRegion = String(body.investorRegion ?? "");
+      minBudget = String(body.minBudget ?? "");
+      maxBudget = String(body.maxBudget ?? "");
+      preferredLocations = String(body.preferredLocations ?? "");
+      propertyInterest = String(body.propertyInterest ?? "");
+      minBedrooms = String(body.minBedrooms ?? "");
+      maxBedrooms = String(body.maxBedrooms ?? "");
+      minBathrooms = String(body.minBathrooms ?? "");
+      maxBathrooms = String(body.maxBathrooms ?? "");
+      minCarSpaces = String(body.minCarSpaces ?? "");
+      maxCarSpaces = String(body.maxCarSpaces ?? "");
+      propertyType = String(body.propertyType ?? "");
+      keywords = String(body.keywords ?? "");
+
+      projectName = String(body.projectName ?? "");
+      projectLocation = String(body.projectLocation ?? "");
+      commissionStructureInterest = String(
+        body.commissionStructureInterest ?? ""
+      );
+
+      uploadedFiles = [];
+    } else {
+      return badRequest("Unsupported request format.");
     }
 
-    if (
-      !isNonEmptyString(name) ||
-      !isNonEmptyString(email) ||
-      !isNonEmptyString(phoneCountryCode) ||
-      !isNonEmptyString(phone)
-    ) {
-      return NextResponse.json(
-        { success: false, message: "Please fill in all required fields." },
-        { status: 400 }
-      );
+    if (!["general", "developer", "buyer"].includes(enquiryType)) {
+      return badRequest("Invalid enquiry type.");
+    }
+
+    const fieldErrors: FieldErrors = {};
+
+    if (!isNonEmptyString(name)) {
+      fieldErrors.name = "Enter your full name";
+    }
+
+    if (!isNonEmptyString(phoneCountryCode)) {
+      fieldErrors.phoneCountryCode = "Select a country code";
+    }
+
+    if (!isNonEmptyString(phone)) {
+      fieldErrors.phone = "Enter your phone number";
+    }
+
+    if (!isNonEmptyString(email)) {
+      fieldErrors.email = "Enter your email address";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      return badRequest("Please correct the highlighted fields.", fieldErrors);
     }
 
     if (!EMAIL_REGEX.test(email.trim())) {
-      return NextResponse.json(
-        { success: false, message: "Please enter a valid email address." },
-        { status: 400 }
-      );
+      return badRequest("Please correct the highlighted fields.", {
+        email: "Enter a valid email address",
+      });
     }
 
     const normalizedPhone = normalizePhone(phone);
+
     if (!PHONE_REGEX.test(normalizedPhone)) {
-      return NextResponse.json(
-        { success: false, message: "Please enter a valid phone number." },
-        { status: 400 }
-      );
+      return badRequest("Please correct the highlighted fields.", {
+        phone: "Enter a valid phone number",
+      });
     }
 
     const maxLengthChecks = [
-      [name, 100],
-      [email, 120],
-      [phoneCountryCode, 6],
-      [phone, 20],
-      [message, 1000],
-      [preferredLocations, 150],
-      [propertyType, 100],
-      [keywords, 300],
-      [projectName, 120],
-      [projectLocation, 120],
-      [commissionStructureInterest, 150],
-    ];
+      [name, 100, "name"],
+      [email, 120, "email"],
+      [phoneCountryCode, 6, "phoneCountryCode"],
+      [phone, 20, "phone"],
+      [message, 1000, "message"],
+      [preferredLocations, 150, "preferredLocations"],
+      [propertyType, 100, "propertyType"],
+      [keywords, 300, "keywords"],
+      [projectName, 120, "projectName"],
+      [projectLocation, 120, "projectLocation"],
+      [commissionStructureInterest, 150, "commissionStructureInterest"],
+    ] as const;
 
-    const hasInvalidLength = maxLengthChecks.some(
-      ([value, max]) => !validateMaxLength(value, max as number)
-    );
-
-    if (hasInvalidLength) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "One or more fields exceed the maximum allowed length.",
-        },
-        { status: 400 }
-      );
+    for (const [value, max, key] of maxLengthChecks) {
+      if (!validateMaxLength(value, max)) {
+        return badRequest("Please correct the highlighted fields.", {
+          [key]: "This field is too long",
+        });
+      }
     }
 
     if (uploadedFiles.length > MAX_DOCUMENTS) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `You can upload up to ${MAX_DOCUMENTS} legal documents.`,
-        },
-        { status: 400 }
-      );
+      return badRequest(`You can upload up to ${MAX_DOCUMENTS} legal documents.`, {
+        legalDocuments: `Upload up to ${MAX_DOCUMENTS} files only`,
+      });
     }
 
     for (const file of uploadedFiles) {
       if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Only PDF, DOC, DOCX, JPG, and PNG files are allowed.", {
+          legalDocuments: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed",
+        });
       }
 
       if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Each legal document must be 5MB or smaller.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Each legal document must be 5MB or smaller.", {
+          legalDocuments: "Each file must be 5MB or smaller",
+        });
       }
 
       if (!validateMaxLength(file.name, 200)) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "One or more uploaded filenames are too long.",
-          },
-          { status: 400 }
-        );
+        return badRequest("One or more uploaded filenames are too long.", {
+          legalDocuments: "One or more uploaded filenames are too long",
+        });
       }
     }
 
     if (enquiryType === "buyer") {
-      if (
-        !isNonEmptyString(buyerType) ||
-        !isNonEmptyString(investorRegion) ||
-        !isNonEmptyString(minBudget) ||
-        !isNonEmptyString(maxBudget) ||
-        !isNonEmptyString(preferredLocations) ||
-        !isNonEmptyString(propertyInterest)
-      ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Please fill in all required buyer/investor fields.",
-          },
-          { status: 400 }
+      const buyerFieldErrors: FieldErrors = {};
+
+      if (!isNonEmptyString(buyerType)) {
+        buyerFieldErrors.buyerType = "Select buyer type";
+      }
+
+      if (!isNonEmptyString(investorRegion)) {
+        buyerFieldErrors.investorRegion = "Select investor region";
+      }
+
+      if (!isNonEmptyString(minBudget)) {
+        buyerFieldErrors.minBudget = "Select a minimum budget";
+      }
+
+      if (!isNonEmptyString(maxBudget)) {
+        buyerFieldErrors.maxBudget = "Select a maximum budget";
+      }
+
+      if (!isNonEmptyString(preferredLocations)) {
+        buyerFieldErrors.preferredLocations = "Enter preferred locations";
+      }
+
+      if (!isNonEmptyString(propertyInterest)) {
+        buyerFieldErrors.propertyInterest = "Select property interest";
+      }
+
+      if (Object.keys(buyerFieldErrors).length > 0) {
+        return badRequest(
+          "Please correct the highlighted buyer/investor fields.",
+          buyerFieldErrors
         );
       }
 
@@ -258,13 +347,9 @@ export async function POST(request: Request) {
         maxBudgetValue !== null &&
         maxBudgetValue < minBudgetValue
       ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Maximum budget cannot be lower than minimum budget.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Please correct the highlighted fields.", {
+          maxBudget: "Maximum budget cannot be lower than minimum budget",
+        });
       }
 
       const minBedroomsValue = toNumberOrNull(minBedrooms);
@@ -279,13 +364,9 @@ export async function POST(request: Request) {
         maxBedroomsValue !== null &&
         maxBedroomsValue < minBedroomsValue
       ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Maximum bedrooms cannot be lower than minimum bedrooms.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Please correct the highlighted fields.", {
+          maxBedrooms: "Maximum bedrooms cannot be lower than minimum bedrooms",
+        });
       }
 
       if (
@@ -293,14 +374,9 @@ export async function POST(request: Request) {
         maxBathroomsValue !== null &&
         maxBathroomsValue < minBathroomsValue
       ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              "Maximum bathrooms cannot be lower than minimum bathrooms.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Please correct the highlighted fields.", {
+          maxBathrooms: "Maximum bathrooms cannot be lower than minimum bathrooms",
+        });
       }
 
       if (
@@ -308,29 +384,32 @@ export async function POST(request: Request) {
         maxCarSpacesValue !== null &&
         maxCarSpacesValue < minCarSpacesValue
       ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              "Maximum car spaces cannot be lower than minimum car spaces.",
-          },
-          { status: 400 }
-        );
+        return badRequest("Please correct the highlighted fields.", {
+          maxCarSpaces: "Maximum car spaces cannot be lower than minimum car spaces",
+        });
       }
     }
 
     if (enquiryType === "developer") {
-      if (
-        !isNonEmptyString(projectName) ||
-        !isNonEmptyString(projectLocation) ||
-        !isNonEmptyString(commissionStructureInterest)
-      ) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Please fill in all required developer fields.",
-          },
-          { status: 400 }
+      const developerFieldErrors: FieldErrors = {};
+
+      if (!isNonEmptyString(projectName)) {
+        developerFieldErrors.projectName = "Enter the project name";
+      }
+
+      if (!isNonEmptyString(projectLocation)) {
+        developerFieldErrors.projectLocation = "Enter the project location";
+      }
+
+      if (!isNonEmptyString(commissionStructureInterest)) {
+        developerFieldErrors.commissionStructureInterest =
+          "Enter your commission structure interest";
+      }
+
+      if (Object.keys(developerFieldErrors).length > 0) {
+        return badRequest(
+          "Please correct the highlighted developer fields.",
+          developerFieldErrors
         );
       }
     }
@@ -385,6 +464,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message: "Something went wrong while submitting the form.",
+        fieldErrors: {},
       },
       { status: 500 }
     );

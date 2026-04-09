@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[0-9]{6,15}$/;
 
 const ALLOWED_DOCUMENT_TYPES = [
   "application/pdf",
@@ -47,6 +52,8 @@ type BuyerFormData = {
   keywords: string;
   message: string;
 };
+
+type BuyerFieldErrors = Partial<Record<keyof BuyerFormData | "legalDocuments", string>>;
 
 const initialFormData: BuyerFormData = {
   enquiryType: "buyer",
@@ -174,7 +181,9 @@ function parseBedroomRange(rawBedrooms: string) {
   };
 }
 
-function buildPrefilledFormData(searchParams: URLSearchParams): Partial<BuyerFormData> {
+function buildPrefilledFormData(
+  searchParams: URLSearchParams
+): Partial<BuyerFormData> {
   const projectName = searchParams.get("projectName")?.trim() ?? "";
   const suburb = searchParams.get("suburb")?.trim() ?? "";
   const state = searchParams.get("state")?.trim() ?? "";
@@ -220,12 +229,44 @@ function formatFileSize(fileSize: number) {
   return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-3 text-[14px] text-[#dc2626]">{message}</p>;
+}
+
+function getUnderlineInputClass(hasError: boolean) {
+  return `w-full border-b bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#cfc2b2] focus:border-[#5f5245]"
+  }`;
+}
+
+function getBoxInputClass(hasError: boolean) {
+  return `w-full rounded-sm border bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none transition ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#d9cec0] focus:border-[#5f5245]"
+  }`;
+}
+
+function getTextareaClass(hasError: boolean) {
+  return `w-full rounded-sm border bg-[#fdfbf8] px-4 py-4 text-[14px] leading-7 text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] resize-none ${
+    hasError
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#d9cec0] focus:border-[#5f5245]"
+  }`;
+}
+
 function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
-  const [selectedDocuments, setSelectedDocuments] = useState<SelectedLegalDocument[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<
+    SelectedLegalDocument[]
+  >([]);
+  const [fieldErrors, setFieldErrors] = useState<BuyerFieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
@@ -317,8 +358,24 @@ function BuyersInvestorsContactContent() {
         next.maxCarSpaces = "";
       }
 
+      if (name === "propertyInterest" && value !== "off-plan") {
+        next.minBedrooms = "";
+        next.maxBedrooms = "";
+        next.minBathrooms = "";
+        next.maxBathrooms = "";
+        next.minCarSpaces = "";
+        next.maxCarSpaces = "";
+        next.propertyType = "";
+        next.keywords = "";
+      }
+
       return next;
     });
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -326,12 +383,10 @@ function BuyersInvestorsContactContent() {
     if (files.length === 0) return;
 
     if (selectedDocuments.length + files.length > MAX_DOCUMENTS) {
-      setFeedbackModal({
-        open: true,
-        title: "Too Many Files",
-        message: `You can upload up to ${MAX_DOCUMENTS} legal documents.`,
-        success: false,
-      });
+      setFieldErrors((prev) => ({
+        ...prev,
+        legalDocuments: `Upload up to ${MAX_DOCUMENTS} files only`,
+      }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -341,12 +396,10 @@ function BuyersInvestorsContactContent() {
     );
 
     if (invalidTypeFile) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid File Type",
-        message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed.",
-        success: false,
-      });
+      setFieldErrors((prev) => ({
+        ...prev,
+        legalDocuments: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed",
+      }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -354,12 +407,10 @@ function BuyersInvestorsContactContent() {
     const oversizedFile = files.find((file) => file.size > MAX_DOCUMENT_SIZE_BYTES);
 
     if (oversizedFile) {
-      setFeedbackModal({
-        open: true,
-        title: "File Too Large",
-        message: "Each legal document must be 5MB or smaller.",
-        success: false,
-      });
+      setFieldErrors((prev) => ({
+        ...prev,
+        legalDocuments: "Each file must be 5MB or smaller",
+      }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -370,6 +421,10 @@ function BuyersInvestorsContactContent() {
     }));
 
     setSelectedDocuments((prev) => [...prev, ...nextDocuments]);
+    setFieldErrors((prev) => ({
+      ...prev,
+      legalDocuments: "",
+    }));
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -381,90 +436,7 @@ function BuyersInvestorsContactContent() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-
-    const normalizedPhone = formData.phone.replace(/\s|-/g, "").trim();
-
-    if (!EMAIL_REGEX.test(formData.email.trim())) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Email",
-        message: "Please enter a valid email address.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (!PHONE_REGEX.test(normalizedPhone)) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Phone Number",
-        message: "Please enter a valid phone number.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (
-      formData.minBudget &&
-      formData.maxBudget &&
-      Number(formData.maxBudget) < Number(formData.minBudget)
-    ) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Budget Range",
-        message: "Maximum budget cannot be lower than minimum budget.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (
-      formData.minBedrooms &&
-      formData.maxBedrooms &&
-      Number(formData.maxBedrooms) < Number(formData.minBedrooms)
-    ) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Bedroom Range",
-        message: "Maximum bedrooms cannot be lower than minimum bedrooms.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (
-      formData.minBathrooms &&
-      formData.maxBathrooms &&
-      Number(formData.maxBathrooms) < Number(formData.minBathrooms)
-    ) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Bathroom Range",
-        message: "Maximum bathrooms cannot be lower than minimum bathrooms.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (
-      formData.minCarSpaces &&
-      formData.maxCarSpaces &&
-      Number(formData.maxCarSpaces) < Number(formData.minCarSpaces)
-    ) {
-      setFeedbackModal({
-        open: true,
-        title: "Invalid Car Space Range",
-        message: "Maximum car spaces cannot be lower than minimum car spaces.",
-        success: false,
-      });
-      setLoading(false);
-      return;
-    }
+    setFieldErrors({});
 
     try {
       const payload =
@@ -500,7 +472,14 @@ function BuyersInvestorsContactContent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit form.");
+        setFieldErrors(data.fieldErrors ?? {});
+        setFeedbackModal({
+          open: true,
+          title: "Submission Failed",
+          message: data.message || "Please correct the highlighted fields.",
+          success: false,
+        });
+        return;
       }
 
       setFeedbackModal({
@@ -511,15 +490,13 @@ function BuyersInvestorsContactContent() {
       });
       setFormData(initialFormData);
       setSelectedDocuments([]);
+      setFieldErrors({});
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Something went wrong.";
-
+    } catch {
       setFeedbackModal({
         open: true,
         title: "Submission Failed",
-        message,
+        message: "Something went wrong.",
         success: false,
       });
     } finally {
@@ -547,7 +524,7 @@ function BuyersInvestorsContactContent() {
         </div>
 
         <div className="mx-auto mt-12 max-w-5xl rounded-sm border border-[#e3d8ca] bg-[#fbf8f3] p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-12">
-          <form onSubmit={handleSubmit} className="space-y-12">
+          <form onSubmit={handleSubmit} noValidate className="space-y-12">
             <section className="space-y-8">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a7b6d]">
@@ -566,10 +543,11 @@ function BuyersInvestorsContactContent() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter your name"
-                    required
                     maxLength={100}
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    className={getUnderlineInputClass(Boolean(fieldErrors.name))}
                   />
+                  <FieldError message={fieldErrors.name} />
                 </div>
 
                 <div>
@@ -577,33 +555,40 @@ function BuyersInvestorsContactContent() {
                     Phone
                   </label>
                   <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
-                    <select
-                      name="phoneCountryCode"
-                      value={formData.phoneCountryCode}
-                      onChange={handleChange}
-                      required
-                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none"
-                    >
-                      <option value="+61">+61</option>
-                      <option value="+65">+65</option>
-                      <option value="+44">+44</option>
-                      <option value="+1">+1</option>
-                      <option value="+86">+86</option>
-                      <option value="+64">+64</option>
-                    </select>
+                    <div>
+                      <select
+                        name="phoneCountryCode"
+                        value={formData.phoneCountryCode}
+                        onChange={handleChange}
+                        aria-invalid={Boolean(fieldErrors.phoneCountryCode)}
+                        className={getUnderlineInputClass(
+                          Boolean(fieldErrors.phoneCountryCode)
+                        )}
+                      >
+                        <option value="+61">+61</option>
+                        <option value="+65">+65</option>
+                        <option value="+44">+44</option>
+                        <option value="+1">+1</option>
+                        <option value="+86">+86</option>
+                        <option value="+64">+64</option>
+                      </select>
+                      <FieldError message={fieldErrors.phoneCountryCode} />
+                    </div>
 
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter your phone number"
-                      required
-                      maxLength={15}
-                      inputMode="numeric"
-                      pattern="[0-9\s-]+"
-                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
-                    />
+                    <div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Enter your phone number"
+                        maxLength={20}
+                        inputMode="numeric"
+                        aria-invalid={Boolean(fieldErrors.phone)}
+                        className={getUnderlineInputClass(Boolean(fieldErrors.phone))}
+                      />
+                      <FieldError message={fieldErrors.phone} />
+                    </div>
                   </div>
                 </div>
 
@@ -617,10 +602,11 @@ function BuyersInvestorsContactContent() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    required
                     maxLength={120}
-                    className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    className={getUnderlineInputClass(Boolean(fieldErrors.email))}
                   />
+                  <FieldError message={fieldErrors.email} />
                 </div>
               </div>
             </section>
@@ -652,6 +638,8 @@ function BuyersInvestorsContactContent() {
                           formData.buyerType === option.value
                             ? "border-[#5f5245] bg-[#2f2a24] text-white"
                             : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                        } ${
+                          fieldErrors.buyerType ? "ring-1 ring-[#dc2626]" : ""
                         }`}
                       >
                         <input
@@ -661,12 +649,12 @@ function BuyersInvestorsContactContent() {
                           checked={formData.buyerType === option.value}
                           onChange={handleChange}
                           className="sr-only"
-                          required
                         />
                         {option.label}
                       </label>
                     ))}
                   </div>
+                  <FieldError message={fieldErrors.buyerType} />
                 </div>
 
                 <div>
@@ -684,6 +672,8 @@ function BuyersInvestorsContactContent() {
                           formData.investorRegion === option.value
                             ? "border-[#5f5245] bg-[#2f2a24] text-white"
                             : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                        } ${
+                          fieldErrors.investorRegion ? "ring-1 ring-[#dc2626]" : ""
                         }`}
                       >
                         <input
@@ -693,12 +683,12 @@ function BuyersInvestorsContactContent() {
                           checked={formData.investorRegion === option.value}
                           onChange={handleChange}
                           className="sr-only"
-                          required
                         />
                         {option.label}
                       </label>
                     ))}
                   </div>
+                  <FieldError message={fieldErrors.investorRegion} />
                 </div>
               </div>
 
@@ -717,6 +707,8 @@ function BuyersInvestorsContactContent() {
                         formData.propertyInterest === option.value
                           ? "border-[#5f5245] bg-[#2f2a24] text-white"
                           : "border-[#d9cec0] bg-[#fdfbf8] text-[#5b5147] hover:border-[#5f5245]"
+                      } ${
+                        fieldErrors.propertyInterest ? "ring-1 ring-[#dc2626]" : ""
                       }`}
                     >
                       <input
@@ -726,12 +718,12 @@ function BuyersInvestorsContactContent() {
                         checked={formData.propertyInterest === option.value}
                         onChange={handleChange}
                         className="sr-only"
-                        required
                       />
                       {option.label}
                     </label>
                   ))}
                 </div>
+                <FieldError message={fieldErrors.propertyInterest} />
               </div>
 
               <div>
@@ -744,10 +736,13 @@ function BuyersInvestorsContactContent() {
                   value={formData.preferredLocations}
                   onChange={handleChange}
                   placeholder="e.g. Hawthorn, Kew, Brunswick, South Yarra"
-                  required
                   maxLength={150}
-                  className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  aria-invalid={Boolean(fieldErrors.preferredLocations)}
+                  className={getUnderlineInputClass(
+                    Boolean(fieldErrors.preferredLocations)
+                  )}
                 />
+                <FieldError message={fieldErrors.preferredLocations} />
               </div>
 
               <div className="grid gap-8 md:grid-cols-2">
@@ -759,8 +754,8 @@ function BuyersInvestorsContactContent() {
                     name="minBudget"
                     value={formData.minBudget}
                     onChange={handleChange}
-                    required
-                    className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    aria-invalid={Boolean(fieldErrors.minBudget)}
+                    className={getBoxInputClass(Boolean(fieldErrors.minBudget))}
                   >
                     <option value="">Select minimum budget</option>
                     {budgetOptions.map((option) => (
@@ -769,6 +764,7 @@ function BuyersInvestorsContactContent() {
                       </option>
                     ))}
                   </select>
+                  <FieldError message={fieldErrors.minBudget} />
                 </div>
 
                 <div>
@@ -779,8 +775,8 @@ function BuyersInvestorsContactContent() {
                     name="maxBudget"
                     value={formData.maxBudget}
                     onChange={handleChange}
-                    required
-                    className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                    aria-invalid={Boolean(fieldErrors.maxBudget)}
+                    className={getBoxInputClass(Boolean(fieldErrors.maxBudget))}
                   >
                     <option value="">Select maximum budget</option>
                     {filteredMaxBudgetOptions.map((option) => (
@@ -789,6 +785,7 @@ function BuyersInvestorsContactContent() {
                       </option>
                     ))}
                   </select>
+                  <FieldError message={fieldErrors.maxBudget} />
                 </div>
               </div>
             </section>
@@ -813,7 +810,8 @@ function BuyersInvestorsContactContent() {
                       name="minBedrooms"
                       value={formData.minBedrooms}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.minBedrooms)}
+                      className={getBoxInputClass(Boolean(fieldErrors.minBedrooms))}
                     >
                       {roomOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -821,6 +819,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.minBedrooms} />
                   </div>
 
                   <div>
@@ -831,7 +830,8 @@ function BuyersInvestorsContactContent() {
                       name="maxBedrooms"
                       value={formData.maxBedrooms}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.maxBedrooms)}
+                      className={getBoxInputClass(Boolean(fieldErrors.maxBedrooms))}
                     >
                       {filteredMaxBedroomOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -839,6 +839,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.maxBedrooms} />
                   </div>
                 </div>
 
@@ -851,7 +852,8 @@ function BuyersInvestorsContactContent() {
                       name="minBathrooms"
                       value={formData.minBathrooms}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.minBathrooms)}
+                      className={getBoxInputClass(Boolean(fieldErrors.minBathrooms))}
                     >
                       {bathroomCarOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -859,6 +861,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.minBathrooms} />
                   </div>
 
                   <div>
@@ -869,7 +872,8 @@ function BuyersInvestorsContactContent() {
                       name="maxBathrooms"
                       value={formData.maxBathrooms}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.maxBathrooms)}
+                      className={getBoxInputClass(Boolean(fieldErrors.maxBathrooms))}
                     >
                       {filteredMaxBathroomOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -877,6 +881,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.maxBathrooms} />
                   </div>
                 </div>
 
@@ -889,7 +894,8 @@ function BuyersInvestorsContactContent() {
                       name="minCarSpaces"
                       value={formData.minCarSpaces}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.minCarSpaces)}
+                      className={getBoxInputClass(Boolean(fieldErrors.minCarSpaces))}
                     >
                       {bathroomCarOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -897,6 +903,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.minCarSpaces} />
                   </div>
 
                   <div>
@@ -907,7 +914,8 @@ function BuyersInvestorsContactContent() {
                       name="maxCarSpaces"
                       value={formData.maxCarSpaces}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.maxCarSpaces)}
+                      className={getBoxInputClass(Boolean(fieldErrors.maxCarSpaces))}
                     >
                       {filteredMaxCarSpaceOptions.map((option) => (
                         <option key={option.label} value={option.value}>
@@ -915,6 +923,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.maxCarSpaces} />
                   </div>
                 </div>
 
@@ -927,7 +936,8 @@ function BuyersInvestorsContactContent() {
                       name="propertyType"
                       value={formData.propertyType}
                       onChange={handleChange}
-                      className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] text-[#1f1a17] outline-none"
+                      aria-invalid={Boolean(fieldErrors.propertyType)}
+                      className={getBoxInputClass(Boolean(fieldErrors.propertyType))}
                     >
                       <option value="">Select property type</option>
                       {propertyTypeOptions.map((type) => (
@@ -936,6 +946,7 @@ function BuyersInvestorsContactContent() {
                         </option>
                       ))}
                     </select>
+                    <FieldError message={fieldErrors.propertyType} />
                   </div>
 
                   <div>
@@ -949,8 +960,10 @@ function BuyersInvestorsContactContent() {
                       onChange={handleChange}
                       placeholder="e.g. city views, north-facing, low body corp"
                       maxLength={300}
-                      className="w-full border-b border-[#cfc2b2] bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                      aria-invalid={Boolean(fieldErrors.keywords)}
+                      className={getUnderlineInputClass(Boolean(fieldErrors.keywords))}
                     />
+                    <FieldError message={fieldErrors.keywords} />
                   </div>
                 </div>
               </section>
@@ -963,12 +976,14 @@ function BuyersInvestorsContactContent() {
                 </h2>
                 <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
                   Upload supporting legal documents. Maximum {MAX_DOCUMENTS} files, 5MB each.
-                  {/* Files are stored in
-                  <span className="font-medium"> public/uploads/legal-documents/</span>. */}
                 </p>
               </div>
 
-              <div className="rounded-sm border border-[#d9cec0] bg-[#fdfbf8] p-5">
+              <div
+                className={`rounded-sm border bg-[#fdfbf8] p-5 ${
+                  fieldErrors.legalDocuments ? "border-[#dc2626]" : "border-[#d9cec0]"
+                }`}
+              >
                 <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                   Upload Legal Documents
                 </label>
@@ -986,6 +1001,8 @@ function BuyersInvestorsContactContent() {
                   Accepted: PDF, DOC, DOCX, JPG, PNG
                 </p>
 
+                <FieldError message={fieldErrors.legalDocuments} />
+
                 {selectedDocuments.length > 0 && (
                   <div className="mt-4 space-y-3">
                     {selectedDocuments.map((document) => (
@@ -998,7 +1015,8 @@ function BuyersInvestorsContactContent() {
                             {document.file.name}
                           </p>
                           <p className="mt-1 text-[12px] text-[#8a7b6d]">
-                            {document.file.type || "Unknown type"} · {formatFileSize(document.file.size)}
+                            {document.file.type || "Unknown type"} ·{" "}
+                            {formatFileSize(document.file.size)}
                           </p>
                         </div>
 
@@ -1038,8 +1056,10 @@ function BuyersInvestorsContactContent() {
                   rows={6}
                   maxLength={1000}
                   placeholder="Tell us more about your property goals, timeframe, and any specific requirements."
-                  className="w-full rounded-sm border border-[#d9cec0] bg-[#fdfbf8] px-4 py-4 text-[14px] leading-7 text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] focus:border-[#5f5245]"
+                  aria-invalid={Boolean(fieldErrors.message)}
+                  className={getTextareaClass(Boolean(fieldErrors.message))}
                 />
+                <FieldError message={fieldErrors.message} />
               </div>
             </section>
 
