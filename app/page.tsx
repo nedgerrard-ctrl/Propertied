@@ -189,7 +189,7 @@ function VideoHero() {
 
 function StatsStrip() {
   return (
-    <section className="bg-[#0f0c0a] border-b border-white/[0.06]">
+    <section className="bg-[#1c1814] border-b border-white/[0.06]">
       <div className="mx-auto max-w-7xl px-8">
         <div className="grid grid-cols-1 divide-y divide-white/[0.06] md:grid-cols-3 md:divide-x md:divide-y-0">
           {stats.map((s, i) => (
@@ -220,13 +220,13 @@ function StatsStrip() {
 
 function EthosSection() {
   return (
-    <section className="bg-[#0a0806] py-36 px-8">
+    <section className="bg-[#f6f2eb] py-36 px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid md:grid-cols-[1fr_2fr] gap-16 md:items-start">
           {/* Label column */}
           <div className="md:pt-3">
             <div className="h-px w-12 bg-[#c8a96e] mb-6" />
-            <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54]">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
               Our Ethos
             </p>
           </div>
@@ -238,10 +238,10 @@ function EthosSection() {
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className={`${cormorant.className} text-4xl md:text-5xl lg:text-[3.4rem] font-light leading-[1.2] text-neutral-100`}>
+            <h2 className={`${cormorant.className} text-4xl md:text-5xl lg:text-[3.4rem] font-light leading-[1.2] text-[#1f1a17]`}>
               We believe property investment should be simple, transparent, and built for the long term.
             </h2>
-            <p className="mt-8 max-w-[55ch] text-[13.5px] leading-[2] text-[#8a7b6d]">
+            <p className="mt-8 max-w-[55ch] text-[13.5px] leading-[2] text-[#5a4a3f]">
               PPM manages the full property lifecycle on behalf of investors — from sourcing
               new developments and matching them with qualified buyers, to ongoing portfolio
               management and resale through our sister company, Online Property Services.
@@ -262,7 +262,7 @@ function EthosSection() {
 
 function ServicesGrid() {
   return (
-    <section className="bg-[#0f0c0a] py-28 px-8 border-t border-white/[0.06]">
+    <section className="bg-[#2f2a24] py-28 px-8 border-t border-white/[0.06]">
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 flex items-center gap-8">
           <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54] shrink-0">
@@ -286,8 +286,8 @@ function ServicesGrid() {
                 href={svc.href}
                 className={`group relative flex flex-col overflow-hidden transition-all duration-500 ${
                   svc.accent
-                    ? 'border border-[#c8a96e]/30 bg-[#c8a96e]/[0.04] hover:bg-[#c8a96e]/[0.08] hover:border-[#c8a96e]/60'
-                    : 'border border-white/[0.06] bg-[#0a0806] hover:border-white/[0.12] hover:bg-white/[0.02]'
+                    ? 'border border-[#c8a96e]/40 bg-[#c8a96e]/[0.06] hover:bg-[#c8a96e]/[0.12] hover:border-[#c8a96e]/70'
+                    : 'border border-white/[0.07] bg-[#1c1814] hover:border-white/[0.14] hover:bg-[#211d18]'
                 }`}
               >
                 {/* Image header — only for cards that have one */}
@@ -337,7 +337,7 @@ function ServicesGrid() {
 
 function CtaBanner() {
   return (
-    <section className="bg-[#0a0806] border-t border-white/[0.06] py-28 px-8">
+    <section className="bg-[#1c1814] border-t border-white/[0.06] py-28 px-8">
       <div className="mx-auto max-w-7xl text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

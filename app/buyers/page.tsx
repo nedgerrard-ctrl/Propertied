@@ -160,7 +160,7 @@ export default function BuyersPage() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-200 selection:bg-neutral-800 selection:text-white">
+    <main className="min-h-screen bg-[#0f0c0a] text-neutral-200 selection:bg-neutral-800 selection:text-white">
       <Navbar />
 
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
@@ -221,11 +221,11 @@ export default function BuyersPage() {
       </section>
 
       {/* ── Who We Work With ──────────────────────────────────────────────────── */}
-      <section className="bg-[#0d0b09]/60 py-32 border-y border-white/[0.06]">
+      <section className="bg-[#f6f2eb] py-32 border-y border-[#e3d8ca]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <motion.h2
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-            className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-white mb-20"
+            className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-[#1f1a17] mb-20"
           >
             Tailored for every buyer
           </motion.h2>
@@ -236,17 +236,17 @@ export default function BuyersPage() {
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.85 }}
             >
-              <div className="border-t border-[#c8a96e]/30 pt-8 mb-8 flex justify-between items-start">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-white">For Investors</h3>
-                <span className="text-sm text-neutral-500 tabular-nums">01</span>
+              <div className="border-t border-[#c8a96e]/40 pt-8 mb-8 flex justify-between items-start">
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">For Investors</h3>
+                <span className="text-sm text-[#8a7b6d] tabular-nums">01</span>
               </div>
-              <p className="text-[13px] leading-[2] text-neutral-400 font-light mb-8">
+              <p className="text-[13px] leading-[2] text-[#5a4a3f] font-light mb-8">
                 PPM provides access to off-the-plan and established investment opportunities
                 across Melbourne, selected for yield potential, capital growth fundamentals,
                 and developer quality. Our end-to-end model means we source your property,
                 manage it, and advise on the right time to resell.
               </p>
-              <ul className="space-y-4 mb-12 text-[13px] text-neutral-300">
+              <ul className="space-y-4 mb-12 text-[13px] text-[#2a1f1a]">
                 {[
                   'Access to exclusive off-the-plan developments',
                   'Independent advice — not tied to any single developer',
@@ -255,14 +255,14 @@ export default function BuyersPage() {
                   'Resale timing and reinvestment strategy advice',
                 ].map((item) => (
                   <li key={item} className="flex gap-4">
-                    <span className="text-[#c8a96e]/60 shrink-0">—</span>
+                    <span className="text-[#c8a96e] shrink-0">—</span>
                     {item}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/contact/buyers-investors"
-                className="text-[11px] uppercase tracking-[0.22em] border-b border-[#c8a96e]/40 pb-1 text-[#c8a96e] hover:border-[#c8a96e] transition-colors"
+                className="text-[11px] uppercase tracking-[0.22em] border-b border-[#c8a96e]/60 pb-1 text-[#c8a96e] hover:border-[#c8a96e] transition-colors"
               >
                 Enquire as Investor
               </Link>
@@ -273,17 +273,17 @@ export default function BuyersPage() {
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.85, delay: 0.1 }}
             >
-              <div className="border-t border-[#c8a96e]/30 pt-8 mb-8 flex justify-between items-start">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-white">For Owner-Occupiers</h3>
-                <span className="text-sm text-neutral-500 tabular-nums">02</span>
+              <div className="border-t border-[#c8a96e]/40 pt-8 mb-8 flex justify-between items-start">
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">For Owner-Occupiers</h3>
+                <span className="text-sm text-[#8a7b6d] tabular-nums">02</span>
               </div>
-              <p className="text-[13px] leading-[2] text-neutral-400 font-light mb-8">
+              <p className="text-[13px] leading-[2] text-[#5a4a3f] font-light mb-8">
                 Buying your own home is one of the most significant decisions you will make.
                 PPM gives you access to quality developments before they reach the broader
                 market, with independent guidance throughout — from shortlisting and contract
                 review through to settlement. We work for you, not the developer.
               </p>
-              <ul className="space-y-4 mb-12 text-[13px] text-neutral-300">
+              <ul className="space-y-4 mb-12 text-[13px] text-[#2a1f1a]">
                 {[
                   'New builds and off-the-plan apartments and townhouses',
                   "Lock in today's price — settle on completion",
@@ -292,14 +292,14 @@ export default function BuyersPage() {
                   'Guided support from enquiry through to settlement',
                 ].map((item) => (
                   <li key={item} className="flex gap-4">
-                    <span className="text-[#c8a96e]/60 shrink-0">—</span>
+                    <span className="text-[#c8a96e] shrink-0">—</span>
                     {item}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/contact/buyers-investors"
-                className="text-[11px] uppercase tracking-[0.22em] border-b border-[#c8a96e]/40 pb-1 text-[#c8a96e] hover:border-[#c8a96e] transition-colors"
+                className="text-[11px] uppercase tracking-[0.22em] border-b border-[#c8a96e]/60 pb-1 text-[#c8a96e] hover:border-[#c8a96e] transition-colors"
               >
                 Enquire as Owner-Occupier
               </Link>
@@ -309,7 +309,8 @@ export default function BuyersPage() {
       </section>
 
       {/* ── Available Projects ────────────────────────────────────────────────── */}
-      <section className="py-32 max-w-7xl mx-auto px-6 md:px-12">
+      <section className="bg-[#1e1a15] py-32">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="flex justify-between items-end mb-16">
           <div>
             <p className="text-[10px] uppercase tracking-[0.32em] text-neutral-500 mb-3">Featured &amp; Current</p>
@@ -384,10 +385,11 @@ export default function BuyersPage() {
             </motion.div>
           ))}
         </div>
+      </div>
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────────── */}
-      <section className="py-32 px-6 text-center border-t border-neutral-900">
+      <section className="bg-[#2f2a24] py-32 px-6 text-center border-t border-white/[0.06]">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.9 }}
