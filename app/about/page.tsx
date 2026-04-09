@@ -320,7 +320,7 @@ export default function AboutPage() {
 
               <div className="mt-10">
                 <Link
-                  href="/contact"
+                  href="/contact/developers"
                   className="inline-block border border-white px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-[#2f2a24]"
                 >
                   Partner With Us
@@ -376,13 +376,13 @@ export default function AboutPage() {
           </p>
           <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-10">
             <Link
-              href="/contact"
+              href="/contact/buyers-investors"
               className="text-[12px] uppercase tracking-[0.22em] text-white border-b border-white/25 pb-0.5 transition hover:border-white"
             >
               I am a Buyer or Investor →
             </Link>
             <Link
-              href="/contact"
+              href="/contact/developers"
               className="text-[12px] uppercase tracking-[0.22em] text-white border-b border-white/25 pb-0.5 transition hover:border-white"
             >
               I am a Developer →
