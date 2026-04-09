@@ -165,18 +165,18 @@ function GridCard({ quote, client, rating }: { quote: string; client: string; ra
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-8%' }}
       transition={{ duration: 0.85, ease: 'easeOut' }}
-      className="border-t border-neutral-800 pt-8"
+      className="border-t border-[#d9cec0] pt-8"
     >
       {/* Stars */}
       <div className="flex gap-1 mb-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i < rating ? 'fill-[#c8a96e]' : 'fill-neutral-700'}`}>
+          <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i < rating ? 'fill-[#c8a96e]' : 'fill-[#d9cec0]'}`}>
             <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
           </svg>
         ))}
       </div>
 
-      <p className={`${cormorant.className} text-[1.25rem] italic text-neutral-300 leading-relaxed`}>
+      <p className={`${cormorant.className} text-[1.25rem] italic text-[#2a1f1a] leading-relaxed`}>
         &ldquo;{quote}&rdquo;
       </p>
 
@@ -196,7 +196,7 @@ export default function TestimonialsPage() {
       <Navbar />
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
-      <section className="pt-44 pb-10 px-8 md:px-14 max-w-7xl mx-auto">
+      <section className="bg-[#1c1814] pt-44 pb-10 px-8 md:px-14 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -210,17 +210,14 @@ export default function TestimonialsPage() {
       </section>
 
       {/* ── Cinematic quotes ──────────────────────────────────────────────── */}
-      <section className="pb-20">
+      <section className="bg-[#1e1a15] pb-20">
         {cinematic.map((item, i) => (
           <CinematicQuote key={item.id} quote={item.quote} client={item.client} index={i} />
         ))}
       </section>
 
       {/* ── Compact grid ──────────────────────────────────────────────────── */}
-      <section
-        className="border-t border-neutral-800 py-28"
-        style={{ backgroundColor: 'rgba(10,8,6,0.6)', backdropFilter: 'blur(12px)' }}
-      >
+      <section className="bg-[#f6f2eb] border-t border-[#e3d8ca] py-28">
         <div className="max-w-7xl mx-auto px-8 md:px-14">
           <p className="text-[10px] tracking-[0.3em] text-[#8a7b6d] uppercase mb-16">
             More Reviews
@@ -234,7 +231,7 @@ export default function TestimonialsPage() {
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="border-t border-neutral-800 py-28">
+      <section className="bg-[#2f2a24] border-t border-white/[0.06] py-28">
         <div className="max-w-7xl mx-auto px-8 md:px-14 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -257,7 +254,7 @@ export default function TestimonialsPage() {
               </Link>
               <Link
                 href="/buyers"
-                className="border border-neutral-800 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-neutral-600 hover:text-neutral-200"
+                className="border border-white/20 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#9e8d7a] transition hover:border-white/40 hover:text-white"
               >
                 View Properties
               </Link>
