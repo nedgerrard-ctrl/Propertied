@@ -195,21 +195,7 @@ export default function TestimonialsPage() {
       <AmbientBackground />
       <Navbar />
 
-      {/* ── Header ────────────────────────────────────────────────────────── */}
-      <section className="bg-[#1c1814] pt-44 pb-10 px-8 md:px-14 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.4 }}
-        >
-          <p className="text-[10px] tracking-[0.34em] text-[#8a7b6d] uppercase mb-3">
-            Client Perspectives
-          </p>
-          <div className="h-px w-full bg-neutral-800" />
-        </motion.div>
-      </section>
-
-      {/* ── Cinematic quotes ──────────────────────────────────────────────── */}
+{/* ── Cinematic quotes ──────────────────────────────────────────────── */}
       <section className="bg-[#1e1a15] pb-20">
         {cinematic.map((item, i) => (
           <CinematicQuote key={item.id} quote={item.quote} client={item.client} index={i} />
