@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type EnquiryStatus = "qualified" | "in-progress" | "closed";
+type EnquiryStatus = "pending" | "qualified" | "in-progress" | "closed";
 type EnquiryType = "general" | "developer" | "buyer";
 type PropertyInterest = "off-plan" | "established" | "";
 
@@ -48,21 +48,29 @@ type Enquiry = {
   createdAt: string;
 };
 
-const STATUS_OPTIONS: EnquiryStatus[] = ["qualified", "in-progress", "closed"];
+const STATUS_OPTIONS: EnquiryStatus[] = [
+  "pending",
+  "qualified",
+  "in-progress",
+  "closed",
+];
 
 const STATUS_LABEL: Record<EnquiryStatus, string> = {
+  pending: "Pending",
   qualified: "Qualified",
   "in-progress": "In Progress",
   closed: "Closed",
 };
 
 const STATUS_BADGE: Record<EnquiryStatus, string> = {
+  pending: "bg-amber-100 text-amber-800",
   qualified: "bg-emerald-100 text-emerald-800",
   "in-progress": "bg-blue-100 text-blue-800",
   closed: "bg-neutral-200 text-neutral-600",
 };
 
 const STATUS_BUTTON: Record<EnquiryStatus, string> = {
+  pending: "border-amber-400 bg-amber-50 text-amber-800",
   qualified: "border-emerald-400 bg-emerald-50 text-emerald-800",
   "in-progress": "border-blue-400 bg-blue-50 text-blue-800",
   closed: "border-neutral-400 bg-neutral-100 text-neutral-600",
@@ -112,7 +120,7 @@ function getEnquiryTypeLabel(type: EnquiryType) {
   }
 }
 
-function getSourceLabel(enquiry: Enquiry) {
+function getTypeLabel(enquiry: Enquiry) {
   if (enquiry.enquiryType === "buyer") {
     if (enquiry.propertyInterest === "off-plan") return "Off-the-Plan";
     if (enquiry.propertyInterest === "established") return "Established";
@@ -295,16 +303,16 @@ function DetailPanel({
 
             <dl className="space-y-2 text-[13px]">
               <div className="flex gap-3">
-                <dt className="w-28 shrink-0 text-neutral-400">Type</dt>
+                <dt className="w-28 shrink-0 text-neutral-400">Enquiry</dt>
                 <dd className="font-medium text-neutral-900">
                   {getEnquiryTypeLabel(enquiry.enquiryType)}
                 </dd>
               </div>
 
               <div className="flex gap-3">
-                <dt className="w-28 shrink-0 text-neutral-400">Source</dt>
+                <dt className="w-28 shrink-0 text-neutral-400">Type</dt>
                 <dd className="font-medium text-neutral-900">
-                  {getSourceLabel(enquiry)}
+                  {getTypeLabel(enquiry)}
                 </dd>
               </div>
 
@@ -520,12 +528,12 @@ function DetailPanel({
               Update Status
             </p>
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {STATUS_OPTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => setPendingStatus(s)}
-                  className={`flex-1 rounded border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
+                  className={`rounded border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
                     pendingStatus === s
                       ? STATUS_BUTTON[s]
                       : "border-neutral-200 bg-white text-neutral-400"
@@ -557,8 +565,8 @@ export default function EnquiriesPanel() {
   const [selected, setSelected] = useState<Enquiry | null>(null);
 
   const [statusFilter, setStatusFilter] = useState("all");
+  const [enquiryFilter, setEnquiryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [sourceFilter, setSourceFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -578,13 +586,13 @@ export default function EnquiriesPanel() {
   const filtered = useMemo(() => {
     return enquiries.filter((e) => {
       if (statusFilter !== "all" && e.status !== statusFilter) return false;
-      if (typeFilter !== "all" && e.enquiryType !== typeFilter) return false;
+      if (enquiryFilter !== "all" && e.enquiryType !== enquiryFilter) return false;
 
-      if (sourceFilter !== "all") {
-        if (sourceFilter === "off-plan" && e.propertyInterest !== "off-plan") return false;
-        if (sourceFilter === "established" && e.propertyInterest !== "established") return false;
-        if (sourceFilter === "developer" && e.enquiryType !== "developer") return false;
-        if (sourceFilter === "general" && e.enquiryType !== "general") return false;
+      if (typeFilter !== "all") {
+        if (typeFilter === "off-plan" && e.propertyInterest !== "off-plan") return false;
+        if (typeFilter === "established" && e.propertyInterest !== "established") return false;
+        if (typeFilter === "developer" && e.enquiryType !== "developer") return false;
+        if (typeFilter === "general" && e.enquiryType !== "general") return false;
       }
 
       if (dateFrom) {
@@ -601,11 +609,12 @@ export default function EnquiriesPanel() {
 
       return true;
     });
-  }, [enquiries, statusFilter, typeFilter, sourceFilter, dateFrom, dateTo]);
+  }, [enquiries, statusFilter, enquiryFilter, typeFilter, dateFrom, dateTo]);
 
   const counts = useMemo(
     () => ({
       total: enquiries.length,
+      pending: enquiries.filter((e) => e.status === "pending").length,
       qualified: enquiries.filter((e) => e.status === "qualified").length,
       "in-progress": enquiries.filter((e) => e.status === "in-progress").length,
       closed: enquiries.filter((e) => e.status === "closed").length,
@@ -615,8 +624,8 @@ export default function EnquiriesPanel() {
 
   const hasFilters =
     statusFilter !== "all" ||
+    enquiryFilter !== "all" ||
     typeFilter !== "all" ||
-    sourceFilter !== "all" ||
     dateFrom ||
     dateTo;
 
@@ -638,9 +647,10 @@ export default function EnquiriesPanel() {
 
   return (
     <div className="mt-10">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
+          { label: "Pending", value: counts.pending, color: "text-amber-700" },
           { label: "Qualified", value: counts.qualified, color: "text-emerald-700" },
           {
             label: "In Progress",
@@ -672,9 +682,26 @@ export default function EnquiriesPanel() {
             className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           >
             <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
             <option value="qualified">Qualified</option>
             <option value="in-progress">In Progress</option>
             <option value="closed">Closed</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
+            Enquiry
+          </label>
+          <select
+            value={enquiryFilter}
+            onChange={(e) => setEnquiryFilter(e.target.value)}
+            className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
+          >
+            <option value="all">All enquiries</option>
+            <option value="general">General</option>
+            <option value="buyer">Buyer / Investor</option>
+            <option value="developer">Developer</option>
           </select>
         </div>
 
@@ -687,23 +714,7 @@ export default function EnquiriesPanel() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           >
-            <option value="all">All enquiry types</option>
-            <option value="general">General</option>
-            <option value="buyer">Buyer / Investor</option>
-            <option value="developer">Developer</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            Source
-          </label>
-          <select
-            value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
-          >
-            <option value="all">All sources</option>
+            <option value="all">All types</option>
             <option value="off-plan">Off-the-Plan</option>
             <option value="established">Established</option>
             <option value="developer">Developer Enquiry</option>
@@ -739,8 +750,8 @@ export default function EnquiriesPanel() {
           <button
             onClick={() => {
               setStatusFilter("all");
+              setEnquiryFilter("all");
               setTypeFilter("all");
-              setSourceFilter("all");
               setDateFrom("");
               setDateTo("");
             }}
@@ -768,10 +779,10 @@ export default function EnquiriesPanel() {
               <tr className="border-b border-neutral-100 bg-neutral-50 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Name</th>
-                <th className="px-5 py-3">Type</th>
+                <th className="px-5 py-3">Enquiry</th>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
-                <th className="px-5 py-3">Source</th>
+                <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Summary</th>
                 <th className="px-5 py-3">Docs</th>
                 <th className="px-5 py-3">Status</th>
@@ -797,7 +808,7 @@ export default function EnquiriesPanel() {
                   <td className="px-5 py-3.5 text-neutral-600">
                     {formatPhone(e.phoneCountryCode, e.phone)}
                   </td>
-                  <td className="px-5 py-3.5 text-neutral-600">{getSourceLabel(e)}</td>
+                  <td className="px-5 py-3.5 text-neutral-600">{getTypeLabel(e)}</td>
                   <td className="px-5 py-3.5 capitalize text-neutral-600">
                     {getSummaryLabel(e)}
                   </td>

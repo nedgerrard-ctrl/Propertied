@@ -79,7 +79,6 @@ const enquirySchema = new Schema(
       maxlength: 1000,
     },
 
-    // buyer / investor fields
     buyerType: {
       type: String,
       enum: ["owner-occupier", "investor", ""],
@@ -171,7 +170,6 @@ const enquirySchema = new Schema(
       default: [],
     },
 
-    // developer fields
     projectName: {
       type: String,
       trim: true,
@@ -195,8 +193,8 @@ const enquirySchema = new Schema(
 
     status: {
       type: String,
-      enum: ["qualified", "in-progress", "closed"],
-      default: "qualified",
+      enum: ["pending", "qualified", "in-progress", "closed"],
+      default: "pending",
     },
   },
   {
