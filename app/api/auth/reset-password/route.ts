@@ -26,7 +26,8 @@ function isStrongPassword(password: string) {
     password.length >= 8 &&
     /[a-z]/.test(password) &&
     /[A-Z]/.test(password) &&
-    /[0-9]/.test(password)
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
   );
 }
 
@@ -34,10 +35,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const token =
-      typeof body?.token === "string" ? body.token.trim() : "";
-    const password =
-      typeof body?.password === "string" ? body.password : "";
+    const token = typeof body?.token === "string" ? body.token.trim() : "";
+    const password = typeof body?.password === "string" ? body.password : "";
     const confirmPassword =
       typeof body?.confirmPassword === "string" ? body.confirmPassword : "";
 
@@ -51,9 +50,17 @@ export async function POST(request: Request) {
       fieldErrors.password = "Enter a new password";
     } else if (password.length < 8) {
       fieldErrors.password = "Password must be at least 8 characters";
+    } else if (!/[A-Z]/.test(password)) {
+      fieldErrors.password = "Include at least 1 uppercase letter";
+    } else if (!/[a-z]/.test(password)) {
+      fieldErrors.password = "Include at least 1 lowercase letter";
+    } else if (!/[0-9]/.test(password)) {
+      fieldErrors.password = "Include at least 1 number";
+    } else if (!/[^A-Za-z0-9]/.test(password)) {
+      fieldErrors.password = "Include at least 1 special character";
     } else if (!isStrongPassword(password)) {
       fieldErrors.password =
-        "Use at least 1 uppercase letter, 1 lowercase letter, and 1 number";
+        "Password must meet all password requirements";
     }
 
     if (!confirmPassword) {
@@ -71,8 +78,8 @@ export async function POST(request: Request) {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: new Date() },
+      resetPasswordTokenHash: hashedToken,
+      resetPasswordExpiresAt: { $gt: new Date() },
     });
 
     if (!user) {
@@ -85,9 +92,9 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
+    user.passwordHash = hashedPassword;
+    user.resetPasswordTokenHash = null;
+    user.resetPasswordExpiresAt = null;
 
     await user.save();
 
