@@ -1,3 +1,4 @@
+// app/buyers/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,12 +9,26 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { projects, type Project } from '@/lib/projects-data'
 
+function buildProjectEnquiryHref(project: Project) {
+  const params = new URLSearchParams({
+    projectId: project.id,
+    projectName: project.name,
+    suburb: project.suburb,
+    state: project.state,
+    propertyType: project.type,
+    propertyInterest: project.propertyInterest,
+    bedrooms: project.bedrooms,
+    bathrooms: project.bathrooms,
+    carSpaces: project.carSpaces,
+    priceFrom: project.priceFrom,
+  })
+
+  return `/contact/buyers-investors?${params.toString()}`
+}
+
 const Prism = dynamic(() => import('../components/Prism'), { ssr: false })
 
-// ─── Detail slide-over ────────────────────────────────────────────────────────
-
 function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: () => void }) {
-  // Close on Escape key
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -22,7 +37,6 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
 
   return (
     <>
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -31,24 +45,20 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
         onClick={onClose}
       />
 
-      {/* Panel — slides in from right */}
       <motion.aside
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         transition={{ type: 'spring', damping: 32, stiffness: 320 }}
         className="fixed inset-y-0 right-0 z-40 flex w-full max-w-[520px] flex-col bg-[#0a0806] shadow-[−24px_0_80px_rgba(0,0,0,0.6)]"
       >
-        {/* ── Hero image with name overlaid ── */}
         <div className="relative h-72 shrink-0 overflow-hidden">
           <img
             src={project.image}
             alt={project.name}
             className="h-full w-full object-cover"
           />
-          {/* gradient: dark at bottom so text is readable */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-[#0a0806]/50 to-transparent" />
 
-          {/* Close button — floats top-right over image */}
           <button
             onClick={onClose}
             aria-label="Close"
@@ -59,7 +69,6 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
             </svg>
           </button>
 
-          {/* Status badge */}
           <span className={[
             'absolute left-5 top-5 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
             project.status === 'Current'
@@ -69,7 +78,6 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
             {project.status}
           </span>
 
-          {/* Project name over image */}
           <div className="absolute bottom-0 left-0 right-0 px-8 pb-7">
             <p className="mb-2 text-[9px] uppercase tracking-[0.28em] text-[#c8a96e]/70">
               {project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}
@@ -80,10 +88,11 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           </div>
         </div>
 
-        {/* ── Stats row ── */}
         <div className="flex shrink-0 border-b border-white/[0.06]">
           {[
             { label: 'Bedrooms', value: project.bedrooms },
+            { label: 'Bathrooms', value: project.bathrooms },
+            { label: 'Car Spaces', value: project.carSpaces },
             { label: 'Guide Price', value: project.priceFrom },
             { label: 'Status', value: project.status },
           ].map((s, i) => (
@@ -103,10 +112,7 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           ))}
         </div>
 
-        {/* ── Scrollable body ── */}
         <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
-
-          {/* About */}
           <section>
             <div className="mb-4 flex items-center gap-3">
               <span className="h-px w-5 shrink-0 bg-[#c8a96e]/50" />
@@ -117,7 +123,6 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
 
           <div className="h-px bg-white/[0.06]" />
 
-          {/* Highlights */}
           <section>
             <div className="mb-5 flex items-center gap-3">
               <span className="h-px w-5 shrink-0 bg-[#c8a96e]/50" />
@@ -134,10 +139,9 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           </section>
         </div>
 
-        {/* ── Sticky CTA ── */}
         <div className="shrink-0 border-t border-white/[0.06] bg-[#0a0806] px-8 py-5">
           <Link
-            href="/contact/buyers-investors"
+            href={buildProjectEnquiryHref(project)}
             className="flex w-full items-center justify-center gap-2 border border-[#c8a96e] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
           >
             Enquire About This Project
@@ -154,8 +158,6 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
   )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function BuyersPage() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
@@ -163,9 +165,7 @@ export default function BuyersPage() {
     <main className="min-h-screen bg-[#0f0c0a] text-neutral-200 selection:bg-neutral-800 selection:text-white">
       <Navbar />
 
-      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        {/* Prism background */}
         <div className="absolute inset-0 z-0 h-full w-full opacity-60">
           <Prism
             animationType="rotate"
@@ -179,7 +179,6 @@ export default function BuyersPage() {
             transparent
           />
         </div>
-        {/* Gradient fade so text stays readable */}
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-neutral-950/70 via-neutral-950/50 to-neutral-950 pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-44 pb-24">
@@ -201,15 +200,14 @@ export default function BuyersPage() {
             </motion.p>
           </div>
 
-          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }}
             className="grid grid-cols-3 gap-8 border-t border-white/[0.08] pt-12"
           >
             {[
               { value: `${projects.length}`, label: 'Active Projects' },
-              { value: '$1.5B+',             label: 'In Project Sales' },
-              { value: '2013',               label: 'Established' },
+              { value: '$1.5B+', label: 'In Project Sales' },
+              { value: '2013', label: 'Established' },
             ].map((s) => (
               <div key={s.label}>
                 <p className="font-[family-name:var(--font-cormorant)] text-4xl font-light text-[#c8a96e] mb-2">{s.value}</p>
@@ -220,18 +218,17 @@ export default function BuyersPage() {
         </div>
       </section>
 
-      {/* ── Who We Work With ──────────────────────────────────────────────────── */}
-      <section className="bg-[#f6f2eb] py-32 border-y border-[#e3d8ca]">
+      <section className="bg-[#efe9df] py-28">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <motion.h2
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-            className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-[#1f1a17] mb-20"
-          >
-            Tailored for every buyer
-          </motion.h2>
+          <div className="mb-16">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d] mb-4">Who We Work With</p>
+            <h2 className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-[#1f1a17]">
+              Investor-led strategy.<br />
+              Owner-occupier guidance.
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
-            {/* Investors */}
             <motion.div
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.85 }}
@@ -268,7 +265,6 @@ export default function BuyersPage() {
               </Link>
             </motion.div>
 
-            {/* Owner-Occupiers */}
             <motion.div
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.85, delay: 0.1 }}
@@ -308,87 +304,86 @@ export default function BuyersPage() {
         </div>
       </section>
 
-      {/* ── Available Projects ────────────────────────────────────────────────── */}
       <section className="bg-[#1e1a15] py-32">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="flex justify-between items-end mb-16">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.32em] text-neutral-500 mb-3">Featured &amp; Current</p>
-            <h2 className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-white">
-              Available Projects
-            </h2>
-          </div>
-          <Link
-            href="/contact/buyers-investors"
-            className="hidden sm:inline-block text-[10px] uppercase tracking-[0.2em] border-b border-neutral-700 pb-1 text-neutral-400 hover:text-white hover:border-white transition-colors"
-          >
-            Register Interest
-          </Link>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-x-12 gap-y-20">
-          {projects.map((project, idx) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-8%' }}
-              transition={{ duration: 0.8, delay: idx * 0.1 }}
-              className="group cursor-pointer"
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="flex justify-between items-end mb-16">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-neutral-500 mb-3">Featured &amp; Current</p>
+              <h2 className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl font-light text-white">
+                Available Projects
+              </h2>
+            </div>
+            <Link
+              href="/contact/buyers-investors"
+              className="hidden sm:inline-block text-[10px] uppercase tracking-[0.2em] border-b border-neutral-700 pb-1 text-neutral-400 hover:text-white hover:border-white transition-colors"
             >
-              {/* Image */}
-              <div className="relative overflow-hidden aspect-[4/3] w-full mb-6 bg-neutral-900">
-                <img
-                  src={project.image}
-                  alt={project.name}
-                  className="h-full w-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
-                />
-                <div className={[
-                  'absolute top-4 right-4 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
-                  project.status === 'Current'
-                    ? 'bg-[#c8a96e] text-[#0a0806]'
-                    : 'bg-black/60 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
-                ].join(' ')}>
-                  {project.status}
+              Register Interest
+            </Link>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-x-12 gap-y-20">
+            {projects.map((project, idx) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-8%' }}
+                transition={{ duration: 0.8, delay: idx * 0.1 }}
+                className="group cursor-pointer"
+              >
+                <div className="relative overflow-hidden aspect-[4/3] w-full mb-6 bg-neutral-900">
+                  <img
+                    src={project.image}
+                    alt={project.name}
+                    className="h-full w-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                  />
+                  <div className={[
+                    'absolute top-4 right-4 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+                    project.status === 'Current'
+                      ? 'bg-[#c8a96e] text-[#0a0806]'
+                      : 'bg-black/60 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
+                  ].join(' ')}>
+                    {project.status}
+                  </div>
                 </div>
-              </div>
 
-              {/* Meta */}
-              <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500 mb-3">
-                {project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}
-              </p>
-              <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-white mb-4">
-                {project.name}
-              </h3>
-              <div className="flex gap-6 text-[11px] uppercase tracking-wider text-neutral-400 mb-5">
-                <span>{project.bedrooms} bed</span>
-                <span>{project.priceFrom}</span>
-              </div>
-              <p className="text-[13px] text-neutral-500 line-clamp-2 leading-[1.9] mb-8">
-                {project.description}
-              </p>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500 mb-3">
+                  {project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}
+                </p>
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-white mb-4">
+                  {project.name}
+                </h3>
+                <div className="flex flex-wrap gap-4 text-[11px] uppercase tracking-wider text-neutral-400 mb-5">
+                  <span>{project.bedrooms} bed</span>
+                  <span>{project.bathrooms} bath</span>
+                  <span>{project.carSpaces} car</span>
+                  <span>{project.type}</span>
+                  <span>{project.priceFrom}</span>
+                </div>
+                <p className="text-[13px] text-neutral-500 line-clamp-2 leading-[1.9] mb-8">
+                  {project.description}
+                </p>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setSelectedProject(project)}
-                  className="flex-1 border border-neutral-700 py-3 text-[10px] uppercase tracking-[0.18em] text-neutral-400 hover:border-neutral-400 hover:text-white transition-colors"
-                >
-                  View Details
-                </button>
-                <Link
-                  href="/contact/buyers-investors"
-                  className="flex-1 border border-[#c8a96e] py-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0a0806] transition-colors"
-                >
-                  Enquire
-                </Link>
-              </div>
-            </motion.div>
-          ))}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setSelectedProject(project)}
+                    className="flex-1 border border-neutral-700 py-3 text-[10px] uppercase tracking-[0.18em] text-neutral-400 hover:border-neutral-400 hover:text-white transition-colors"
+                  >
+                    View Details
+                  </button>
+                  <Link
+                    href={buildProjectEnquiryHref(project)}
+                    className="flex-1 border border-[#c8a96e] py-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0a0806] transition-colors"
+                  >
+                    Enquire
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────────── */}
       <section className="bg-[#2f2a24] py-32 px-6 text-center border-t border-white/[0.06]">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
@@ -421,7 +416,6 @@ export default function BuyersPage() {
 
       <Footer />
 
-      {/* Detail slide-over */}
       {selectedProject && (
         <ProjectDetailPanel
           project={selectedProject}

@@ -53,7 +53,9 @@ type BuyerFormData = {
   message: string;
 };
 
-type BuyerFieldErrors = Partial<Record<keyof BuyerFormData | "legalDocuments", string>>;
+type BuyerFieldErrors = Partial<
+  Record<keyof BuyerFormData | "legalDocuments", string>
+>;
 
 const initialFormData: BuyerFormData = {
   enquiryType: "buyer",
@@ -89,7 +91,7 @@ const minBudgetOptions = [
   { label: "$1,200,000", value: "1200000" },
   { label: "$1,500,000", value: "1500000" },
   { label: "$2,000,000+", value: "2000000" },
-]
+];
 
 const maxBudgetOptions = [
   { label: "Any", value: "2147483647" },
@@ -100,7 +102,7 @@ const maxBudgetOptions = [
   { label: "$1,200,000", value: "1200000" },
   { label: "$1,500,000", value: "1500000" },
   { label: "$2,000,000+", value: "2000000" },
-]
+];
 
 const roomOptions = [
   { label: "Any", value: "" },
@@ -120,6 +122,7 @@ const bathroomCarOptions = [
   { label: "4", value: "4" },
   { label: "5+", value: "5" },
 ];
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
 
@@ -245,15 +248,30 @@ function validateBuyerForm(
       documentsCount
     ),
     phone: validateBuyerField("phone", formData.phone, formData, documentsCount),
-    buyerType: validateBuyerField("buyerType", formData.buyerType, formData, documentsCount),
+    buyerType: validateBuyerField(
+      "buyerType",
+      formData.buyerType,
+      formData,
+      documentsCount
+    ),
     investorRegion: validateBuyerField(
       "investorRegion",
       formData.investorRegion,
       formData,
       documentsCount
     ),
-    minBudget: validateBuyerField("minBudget", formData.minBudget, formData, documentsCount),
-    maxBudget: validateBuyerField("maxBudget", formData.maxBudget, formData, documentsCount),
+    minBudget: validateBuyerField(
+      "minBudget",
+      formData.minBudget,
+      formData,
+      documentsCount
+    ),
+    maxBudget: validateBuyerField(
+      "maxBudget",
+      formData.maxBudget,
+      formData,
+      documentsCount
+    ),
     preferredLocations: validateBuyerField(
       "preferredLocations",
       formData.preferredLocations,
@@ -308,11 +326,27 @@ function validateBuyerForm(
       formData,
       documentsCount
     ),
-    keywords: validateBuyerField("keywords", formData.keywords, formData, documentsCount),
-    message: validateBuyerField("message", formData.message, formData, documentsCount),
-    legalDocuments: validateBuyerField("legalDocuments", "", formData, documentsCount),
+    keywords: validateBuyerField(
+      "keywords",
+      formData.keywords,
+      formData,
+      documentsCount
+    ),
+    message: validateBuyerField(
+      "message",
+      formData.message,
+      formData,
+      documentsCount
+    ),
+    legalDocuments: validateBuyerField(
+      "legalDocuments",
+      "",
+      formData,
+      documentsCount
+    ),
   };
 }
+
 function ContactTabs() {
   return (
     <div className="mt-24 flex flex-wrap justify-center gap-4 px-6">
@@ -352,35 +386,35 @@ function getFilteredRangeOptions(
   });
 }
 
-function parseBedroomRange(rawBedrooms: string) {
-  const cleaned = rawBedrooms.trim();
+function parseNumericRange(rawValue: string) {
+  const cleaned = rawValue.trim();
 
   if (!cleaned) {
     return {
-      minBedrooms: "",
-      maxBedrooms: "",
+      min: "",
+      max: "",
     };
   }
 
   const rangeMatch = cleaned.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)/i);
   if (rangeMatch) {
     return {
-      minBedrooms: rangeMatch[1],
-      maxBedrooms: rangeMatch[2],
+      min: rangeMatch[1],
+      max: rangeMatch[2],
     };
   }
 
   const singleMatch = cleaned.match(/(\d+)/);
   if (singleMatch) {
     return {
-      minBedrooms: singleMatch[1],
-      maxBedrooms: singleMatch[1],
+      min: singleMatch[1],
+      max: singleMatch[1],
     };
   }
 
   return {
-    minBedrooms: "",
-    maxBedrooms: "",
+    min: "",
+    max: "",
   };
 }
 
@@ -393,6 +427,8 @@ function buildPrefilledFormData(
   const propertyType = searchParams.get("propertyType")?.trim() ?? "";
   const propertyInterest = searchParams.get("propertyInterest")?.trim() ?? "";
   const bedrooms = searchParams.get("bedrooms")?.trim() ?? "";
+  const bathrooms = searchParams.get("bathrooms")?.trim() ?? "";
+  const carSpaces = searchParams.get("carSpaces")?.trim() ?? "";
   const priceFrom = searchParams.get("priceFrom")?.trim() ?? "";
 
   const preferredLocations = [suburb, state].filter(Boolean).join(", ");
@@ -402,6 +438,8 @@ function buildPrefilledFormData(
     preferredLocations ? `Location: ${preferredLocations}` : "",
     propertyType ? `Property type: ${propertyType}` : "",
     bedrooms ? `Bedrooms: ${bedrooms}` : "",
+    bathrooms ? `Bathrooms: ${bathrooms}` : "",
+    carSpaces ? `Car spaces: ${carSpaces}` : "",
     priceFrom ? `Guide price: ${priceFrom}` : "",
   ].filter(Boolean);
 
@@ -414,14 +452,21 @@ function buildPrefilledFormData(
     ? propertyType
     : "";
 
-  const { minBedrooms, maxBedrooms } = parseBedroomRange(bedrooms);
+  const bedroomRange = parseNumericRange(bedrooms);
+  const bathroomRange = parseNumericRange(bathrooms);
+  const carSpaceRange = parseNumericRange(carSpaces);
 
   return {
     preferredLocations,
     propertyInterest: safePropertyInterest as BuyerFormData["propertyInterest"],
     propertyType: safePropertyType,
-    minBedrooms,
-    maxBedrooms,
+    minBedrooms: bedroomRange.min,
+    maxBedrooms: bedroomRange.max,
+    minBathrooms: bathroomRange.min,
+    maxBathrooms: bathroomRange.max,
+    minCarSpaces: carSpaceRange.min,
+    maxCarSpaces: carSpaceRange.max,
+    keywords: projectName,
     message: messageLines.join("\n"),
   };
 }
@@ -491,6 +536,8 @@ function BuyersInvestorsContactContent() {
       searchParams.get("propertyType") ||
       searchParams.get("propertyInterest") ||
       searchParams.get("bedrooms") ||
+      searchParams.get("bathrooms") ||
+      searchParams.get("carSpaces") ||
       searchParams.get("priceFrom");
 
     if (!hasPrefillParams) return;
@@ -526,104 +573,104 @@ function BuyersInvestorsContactContent() {
   );
 
   function handleChange(
-  event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-) {
-  const { name, value } = event.target;
-  const fieldName = name as keyof BuyerFormData;
+    event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = event.target;
+    const fieldName = name as keyof BuyerFormData;
 
-  setFormData((prev) => {
-    const next = { ...prev, [fieldName]: value } as BuyerFormData;
+    setFormData((prev) => {
+      const next = { ...prev, [fieldName]: value } as BuyerFormData;
 
-    if (fieldName === "minBudget" && next.maxBudget && Number(next.maxBudget) < Number(value)) {
-      next.maxBudget = "";
-    }
+      if (
+        fieldName === "minBudget" &&
+        next.maxBudget &&
+        Number(next.maxBudget) < Number(value)
+      ) {
+        next.maxBudget = "";
+      }
 
-    if (
-      fieldName === "minBedrooms" &&
-      next.maxBedrooms &&
-      Number(next.maxBedrooms) < Number(value)
-    ) {
-      next.maxBedrooms = "";
-    }
+      if (
+        fieldName === "minBedrooms" &&
+        next.maxBedrooms &&
+        Number(next.maxBedrooms) < Number(value)
+      ) {
+        next.maxBedrooms = "";
+      }
 
-    if (
-      fieldName === "minBathrooms" &&
-      next.maxBathrooms &&
-      Number(next.maxBathrooms) < Number(value)
-    ) {
-      next.maxBathrooms = "";
-    }
+      if (
+        fieldName === "minBathrooms" &&
+        next.maxBathrooms &&
+        Number(next.maxBathrooms) < Number(value)
+      ) {
+        next.maxBathrooms = "";
+      }
 
-    if (
-      fieldName === "minCarSpaces" &&
-      next.maxCarSpaces &&
-      Number(next.maxCarSpaces) < Number(value)
-    ) {
-      next.maxCarSpaces = "";
-    }
+      if (
+        fieldName === "minCarSpaces" &&
+        next.maxCarSpaces &&
+        Number(next.maxCarSpaces) < Number(value)
+      ) {
+        next.maxCarSpaces = "";
+      }
 
-    if (fieldName === "propertyInterest" && value !== "off-plan") {
-      next.minBedrooms = "";
-      next.maxBedrooms = "";
-      next.minBathrooms = "";
-      next.maxBathrooms = "";
-      next.minCarSpaces = "";
-      next.maxCarSpaces = "";
-      next.propertyType = "";
-      next.keywords = "";
-    }
+      if (fieldName === "propertyInterest" && value !== "off-plan") {
+        next.minBedrooms = "";
+        next.maxBedrooms = "";
+        next.minBathrooms = "";
+        next.maxBathrooms = "";
+        next.minCarSpaces = "";
+        next.maxCarSpaces = "";
+        next.propertyType = "";
+        next.keywords = "";
+      }
 
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      [fieldName]: validateBuyerField(fieldName, value, next, selectedDocuments.length),
-      maxBudget: validateBuyerField(
-        "maxBudget",
-        next.maxBudget,
-        next,
-        selectedDocuments.length
-      ),
-      maxBedrooms: validateBuyerField(
-        "maxBedrooms",
-        next.maxBedrooms,
-        next,
-        selectedDocuments.length
-      ),
-      maxBathrooms: validateBuyerField(
-        "maxBathrooms",
-        next.maxBathrooms,
-        next,
-        selectedDocuments.length
-      ),
-      maxCarSpaces: validateBuyerField(
-        "maxCarSpaces",
-        next.maxCarSpaces,
-        next,
-        selectedDocuments.length
-      ),
-    }));
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        [fieldName]: validateBuyerField(
+          fieldName,
+          value,
+          next,
+          selectedDocuments.length
+        ),
+        maxBudget: validateBuyerField(
+          "maxBudget",
+          next.maxBudget,
+          next,
+          selectedDocuments.length
+        ),
+        maxBedrooms: validateBuyerField(
+          "maxBedrooms",
+          next.maxBedrooms,
+          next,
+          selectedDocuments.length
+        ),
+        maxBathrooms: validateBuyerField(
+          "maxBathrooms",
+          next.maxBathrooms,
+          next,
+          selectedDocuments.length
+        ),
+        maxCarSpaces: validateBuyerField(
+          "maxCarSpaces",
+          next.maxCarSpaces,
+          next,
+          selectedDocuments.length
+        ),
+      }));
 
-    return next;
-  });
-}
+      return next;
+    });
+  }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (files.length === 0) return;
 
     if (selectedDocuments.length + files.length > MAX_DOCUMENTS) {
-      setSelectedDocuments((prev) => {
-  const updatedDocuments = [...prev, ...nextDocuments];
-  setFieldErrors((prevErrors) => ({
-    ...prevErrors,
-    legalDocuments: validateBuyerField(
-      "legalDocuments",
-      "",
-      formData,
-      updatedDocuments.length
-    ),
-  }));
-  return updatedDocuments;
-});
+      setFieldErrors((prev) => ({
+        ...prev,
+        legalDocuments: `Upload up to ${MAX_DOCUMENTS} files only`,
+      }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -641,7 +688,9 @@ function BuyersInvestorsContactContent() {
       return;
     }
 
-    const oversizedFile = files.find((file) => file.size > MAX_DOCUMENT_SIZE_BYTES);
+    const oversizedFile = files.find(
+      (file) => file.size > MAX_DOCUMENT_SIZE_BYTES
+    );
 
     if (oversizedFile) {
       setFieldErrors((prev) => ({
@@ -657,48 +706,54 @@ function BuyersInvestorsContactContent() {
       previewId: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
     }));
 
-    setSelectedDocuments((prev) => [...prev, ...nextDocuments]);
+    const updatedDocuments = [...selectedDocuments, ...nextDocuments];
+    setSelectedDocuments(updatedDocuments);
     setFieldErrors((prev) => ({
       ...prev,
-      legalDocuments: "",
+      legalDocuments: validateBuyerField(
+        "legalDocuments",
+        "",
+        formData,
+        updatedDocuments.length
+      ),
     }));
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-function handleRemoveDocument(previewId: string) {
-  setSelectedDocuments((prev) => {
-    const nextDocuments = prev.filter((doc) => doc.previewId !== previewId);
-    setFieldErrors((prevErrors) => ({
-      ...prevErrors,
-      legalDocuments: validateBuyerField(
-        "legalDocuments",
-        "",
-        formData,
-        nextDocuments.length
-      ),
-    }));
-    return nextDocuments;
-  });
-}
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault();
-
-  const validationErrors = validateBuyerForm(formData, selectedDocuments.length);
-  setFieldErrors(validationErrors);
-
-  if (Object.values(validationErrors).some(Boolean)) {
-    setFeedbackModal({
-      open: true,
-      title: "Submission Failed",
-      message: "Please correct the highlighted fields.",
-      success: false,
+  function handleRemoveDocument(previewId: string) {
+    setSelectedDocuments((prev) => {
+      const nextDocuments = prev.filter((doc) => doc.previewId !== previewId);
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        legalDocuments: validateBuyerField(
+          "legalDocuments",
+          "",
+          formData,
+          nextDocuments.length
+        ),
+      }));
+      return nextDocuments;
     });
-    return;
   }
 
-  setLoading(true);
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const validationErrors = validateBuyerForm(formData, selectedDocuments.length);
+    setFieldErrors(validationErrors);
+
+    if (Object.values(validationErrors).some(Boolean)) {
+      setFeedbackModal({
+        open: true,
+        title: "Submission Failed",
+        message: "Please correct the highlighted fields.",
+        success: false,
+      });
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const payload =
@@ -1019,7 +1074,7 @@ function handleRemoveDocument(previewId: string) {
                     aria-invalid={Boolean(fieldErrors.minBudget)}
                     className={getBoxInputClass(Boolean(fieldErrors.minBudget))}
                   >
-                    <option value=" ">Select minimum budget</option>
+                    <option value="">Select minimum budget</option>
                     {minBudgetOptions.map((option) => (
                       <option key={option.label} value={option.value}>
                         {option.label}
@@ -1040,7 +1095,7 @@ function handleRemoveDocument(previewId: string) {
                     aria-invalid={Boolean(fieldErrors.maxBudget)}
                     className={getBoxInputClass(Boolean(fieldErrors.maxBudget))}
                   >
-                    <option value=" ">Select maximum budget</option>
+                    <option value="">Select maximum budget</option>
                     {filteredMaxBudgetOptions.map((option) => (
                       <option key={option.label} value={option.value}>
                         {option.label}
