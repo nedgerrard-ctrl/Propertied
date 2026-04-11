@@ -19,6 +19,9 @@ type DeveloperFormData = {
 
 type DeveloperFieldErrors = Partial<Record<keyof DeveloperFormData, string>>;
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9]{6,15}$/;
+
 const initialFormData: DeveloperFormData = {
   enquiryType: "developer",
   name: "",
@@ -88,6 +91,75 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-3 text-[14px] text-[#dc2626]">{message}</p>;
 }
 
+function normalizePhone(value: string) {
+  return value.replace(/\s|-/g, "").trim();
+}
+
+function validateField(
+  name: keyof DeveloperFormData,
+  value: string
+): DeveloperFieldErrors[keyof DeveloperFormData] {
+  const trimmedValue = value.trim();
+
+  switch (name) {
+    case "name":
+      if (!trimmedValue) return "Enter your full name";
+      if (value.length > 100) return "This field is too long";
+      return "";
+    case "email":
+      if (!trimmedValue) return "Enter your email address";
+      if (value.length > 120) return "This field is too long";
+      if (!EMAIL_REGEX.test(trimmedValue)) return "Enter a valid email address";
+      return "";
+    case "phoneCountryCode":
+      if (!trimmedValue) return "Select a country code";
+      if (value.length > 6) return "This field is too long";
+      return "";
+    case "phone": {
+      if (!trimmedValue) return "Enter your phone number";
+      if (value.length > 20) return "This field is too long";
+      const normalizedPhone = normalizePhone(value);
+      if (!PHONE_REGEX.test(normalizedPhone)) return "Enter a valid phone number";
+      return "";
+    }
+    case "projectName":
+      if (!trimmedValue) return "Enter the project name";
+      if (value.length > 120) return "This field is too long";
+      return "";
+    case "projectLocation":
+      if (!trimmedValue) return "Enter the project location";
+      if (value.length > 120) return "This field is too long";
+      return "";
+    case "commissionStructureInterest":
+      if (!trimmedValue) return "Enter your commission structure interest";
+      if (value.length > 150) return "This field is too long";
+      return "";
+    case "message":
+      if (value.length > 1000) return "This field is too long";
+      return "";
+    case "enquiryType":
+      return "";
+    default:
+      return "";
+  }
+}
+
+function validateForm(formData: DeveloperFormData): DeveloperFieldErrors {
+  return {
+    name: validateField("name", formData.name),
+    email: validateField("email", formData.email),
+    phoneCountryCode: validateField("phoneCountryCode", formData.phoneCountryCode),
+    phone: validateField("phone", formData.phone),
+    projectName: validateField("projectName", formData.projectName),
+    projectLocation: validateField("projectLocation", formData.projectLocation),
+    commissionStructureInterest: validateField(
+      "commissionStructureInterest",
+      formData.commissionStructureInterest
+    ),
+    message: validateField("message", formData.message),
+  };
+}
+
 export default function DevelopersContactPage() {
   const [formData, setFormData] = useState<DeveloperFormData>(initialFormData);
   const [fieldErrors, setFieldErrors] = useState<DeveloperFieldErrors>({});
@@ -108,18 +180,32 @@ export default function DevelopersContactPage() {
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
     const { name, value } = event.target;
+    const fieldName = name as keyof DeveloperFormData;
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
     setFieldErrors((prev) => ({
       ...prev,
-      [name]: "",
+      [fieldName]: validateField(fieldName, value),
     }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const validationErrors = validateForm(formData);
+    setFieldErrors(validationErrors);
+
+    if (Object.values(validationErrors).some(Boolean)) {
+      setFeedbackModal({
+        open: true,
+        title: "Submission Failed",
+        message: "Please correct the highlighted fields.",
+        success: false,
+      });
+      return;
+    }
+
     setLoading(true);
-    setFieldErrors({});
 
     try {
       const response = await fetch("/api/contact", {
@@ -270,7 +356,7 @@ export default function DevelopersContactPage() {
                   name="projectName"
                   value={formData.projectName}
                   onChange={handleChange}
-                  placeholder="Enter project name"
+                  placeholder="Enter the project name"
                   maxLength={120}
                   aria-invalid={Boolean(fieldErrors.projectName)}
                   className={getUnderlineInputClass(Boolean(fieldErrors.projectName))}
@@ -287,12 +373,10 @@ export default function DevelopersContactPage() {
                   name="projectLocation"
                   value={formData.projectLocation}
                   onChange={handleChange}
-                  placeholder="Enter project location"
+                  placeholder="Enter the project location"
                   maxLength={120}
                   aria-invalid={Boolean(fieldErrors.projectLocation)}
-                  className={getUnderlineInputClass(
-                    Boolean(fieldErrors.projectLocation)
-                  )}
+                  className={getUnderlineInputClass(Boolean(fieldErrors.projectLocation))}
                 />
                 <FieldError message={fieldErrors.projectLocation} />
               </div>
@@ -306,7 +390,7 @@ export default function DevelopersContactPage() {
                   name="commissionStructureInterest"
                   value={formData.commissionStructureInterest}
                   onChange={handleChange}
-                  placeholder="Describe your commission structure interest"
+                  placeholder="Tell us about the commission structure"
                   maxLength={150}
                   aria-invalid={Boolean(fieldErrors.commissionStructureInterest)}
                   className={getUnderlineInputClass(
@@ -324,9 +408,9 @@ export default function DevelopersContactPage() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
+                  placeholder="Share any important details about the project or partnership"
                   rows={6}
                   maxLength={1000}
-                  placeholder="Share any extra details about the project or partnership."
                   aria-invalid={Boolean(fieldErrors.message)}
                   className={getTextareaClass(Boolean(fieldErrors.message))}
                 />

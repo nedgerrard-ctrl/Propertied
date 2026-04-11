@@ -120,7 +120,199 @@ const bathroomCarOptions = [
   { label: "4", value: "4" },
   { label: "5+", value: "5" },
 ];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9]{6,15}$/;
 
+function normalizePhone(value: string) {
+  return value.replace(/\s|-/g, "").trim();
+}
+
+function validateBuyerField(
+  name: keyof BuyerFormData | "legalDocuments",
+  value: string,
+  formData: BuyerFormData,
+  documentsCount: number
+): string {
+  const trimmedValue = value.trim();
+
+  switch (name) {
+    case "name":
+      if (!trimmedValue) return "Enter your full name";
+      return "";
+
+    case "email":
+      if (!trimmedValue) return "Enter your email address";
+      if (!EMAIL_REGEX.test(trimmedValue)) return "Enter a valid email address";
+      return "";
+
+    case "phoneCountryCode":
+      if (!trimmedValue) return "Select a country code";
+      return "";
+
+    case "phone": {
+      if (!trimmedValue) return "Enter your phone number";
+      const normalizedPhone = normalizePhone(value);
+      if (!PHONE_REGEX.test(normalizedPhone)) return "Enter a valid phone number";
+      return "";
+    }
+
+    case "buyerType":
+      return trimmedValue ? "" : "Select buyer type";
+
+    case "investorRegion":
+      return trimmedValue ? "" : "Select investor region";
+
+    case "minBudget":
+      return trimmedValue ? "" : "Select a minimum budget";
+
+    case "maxBudget":
+      if (!trimmedValue) return "Select a maximum budget";
+      if (formData.minBudget && Number(value) < Number(formData.minBudget)) {
+        return "Maximum budget cannot be lower than minimum budget";
+      }
+      return "";
+
+    case "preferredLocations":
+      return trimmedValue ? "" : "Enter preferred locations";
+
+    case "propertyInterest":
+      return trimmedValue ? "" : "Select property interest";
+
+    case "minBedrooms":
+      return "";
+
+    case "maxBedrooms":
+      if (!trimmedValue || !formData.minBedrooms) return "";
+      if (Number(value) < Number(formData.minBedrooms)) {
+        return "Maximum bedrooms cannot be lower than minimum bedrooms";
+      }
+      return "";
+
+    case "minBathrooms":
+      return "";
+
+    case "maxBathrooms":
+      if (!trimmedValue || !formData.minBathrooms) return "";
+      if (Number(value) < Number(formData.minBathrooms)) {
+        return "Maximum bathrooms cannot be lower than minimum bathrooms";
+      }
+      return "";
+
+    case "minCarSpaces":
+      return "";
+
+    case "maxCarSpaces":
+      if (!trimmedValue || !formData.minCarSpaces) return "";
+      if (Number(value) < Number(formData.minCarSpaces)) {
+        return "Maximum car spaces cannot be lower than minimum car spaces";
+      }
+      return "";
+
+    case "propertyType":
+      return "";
+
+    case "keywords":
+      return "";
+
+    case "message":
+      return "";
+
+    case "legalDocuments":
+      if (documentsCount > MAX_DOCUMENTS) {
+        return `Upload up to ${MAX_DOCUMENTS} files only`;
+      }
+      return "";
+
+    case "enquiryType":
+      return "";
+
+    default:
+      return "";
+  }
+}
+
+function validateBuyerForm(
+  formData: BuyerFormData,
+  documentsCount: number
+): BuyerFieldErrors {
+  return {
+    name: validateBuyerField("name", formData.name, formData, documentsCount),
+    email: validateBuyerField("email", formData.email, formData, documentsCount),
+    phoneCountryCode: validateBuyerField(
+      "phoneCountryCode",
+      formData.phoneCountryCode,
+      formData,
+      documentsCount
+    ),
+    phone: validateBuyerField("phone", formData.phone, formData, documentsCount),
+    buyerType: validateBuyerField("buyerType", formData.buyerType, formData, documentsCount),
+    investorRegion: validateBuyerField(
+      "investorRegion",
+      formData.investorRegion,
+      formData,
+      documentsCount
+    ),
+    minBudget: validateBuyerField("minBudget", formData.minBudget, formData, documentsCount),
+    maxBudget: validateBuyerField("maxBudget", formData.maxBudget, formData, documentsCount),
+    preferredLocations: validateBuyerField(
+      "preferredLocations",
+      formData.preferredLocations,
+      formData,
+      documentsCount
+    ),
+    propertyInterest: validateBuyerField(
+      "propertyInterest",
+      formData.propertyInterest,
+      formData,
+      documentsCount
+    ),
+    minBedrooms: validateBuyerField(
+      "minBedrooms",
+      formData.minBedrooms,
+      formData,
+      documentsCount
+    ),
+    maxBedrooms: validateBuyerField(
+      "maxBedrooms",
+      formData.maxBedrooms,
+      formData,
+      documentsCount
+    ),
+    minBathrooms: validateBuyerField(
+      "minBathrooms",
+      formData.minBathrooms,
+      formData,
+      documentsCount
+    ),
+    maxBathrooms: validateBuyerField(
+      "maxBathrooms",
+      formData.maxBathrooms,
+      formData,
+      documentsCount
+    ),
+    minCarSpaces: validateBuyerField(
+      "minCarSpaces",
+      formData.minCarSpaces,
+      formData,
+      documentsCount
+    ),
+    maxCarSpaces: validateBuyerField(
+      "maxCarSpaces",
+      formData.maxCarSpaces,
+      formData,
+      documentsCount
+    ),
+    propertyType: validateBuyerField(
+      "propertyType",
+      formData.propertyType,
+      formData,
+      documentsCount
+    ),
+    keywords: validateBuyerField("keywords", formData.keywords, formData, documentsCount),
+    message: validateBuyerField("message", formData.message, formData, documentsCount),
+    legalDocuments: validateBuyerField("legalDocuments", "", formData, documentsCount),
+  };
+}
 function ContactTabs() {
   return (
     <div className="mt-24 flex flex-wrap justify-center gap-4 px-6">
@@ -334,70 +526,104 @@ function BuyersInvestorsContactContent() {
   );
 
   function handleChange(
-    event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) {
-    const { name, value } = event.target;
+  event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+) {
+  const { name, value } = event.target;
+  const fieldName = name as keyof BuyerFormData;
 
-    setFormData((prev) => {
-      const next = { ...prev, [name]: value };
+  setFormData((prev) => {
+    const next = { ...prev, [fieldName]: value } as BuyerFormData;
 
-      if (name === "minBudget" && next.maxBudget && Number(next.maxBudget) < Number(value)) {
-        next.maxBudget = "";
-      }
+    if (fieldName === "minBudget" && next.maxBudget && Number(next.maxBudget) < Number(value)) {
+      next.maxBudget = "";
+    }
 
-      if (
-        name === "minBedrooms" &&
-        next.maxBedrooms &&
-        Number(next.maxBedrooms) < Number(value)
-      ) {
-        next.maxBedrooms = "";
-      }
+    if (
+      fieldName === "minBedrooms" &&
+      next.maxBedrooms &&
+      Number(next.maxBedrooms) < Number(value)
+    ) {
+      next.maxBedrooms = "";
+    }
 
-      if (
-        name === "minBathrooms" &&
-        next.maxBathrooms &&
-        Number(next.maxBathrooms) < Number(value)
-      ) {
-        next.maxBathrooms = "";
-      }
+    if (
+      fieldName === "minBathrooms" &&
+      next.maxBathrooms &&
+      Number(next.maxBathrooms) < Number(value)
+    ) {
+      next.maxBathrooms = "";
+    }
 
-      if (
-        name === "minCarSpaces" &&
-        next.maxCarSpaces &&
-        Number(next.maxCarSpaces) < Number(value)
-      ) {
-        next.maxCarSpaces = "";
-      }
+    if (
+      fieldName === "minCarSpaces" &&
+      next.maxCarSpaces &&
+      Number(next.maxCarSpaces) < Number(value)
+    ) {
+      next.maxCarSpaces = "";
+    }
 
-      if (name === "propertyInterest" && value !== "off-plan") {
-        next.minBedrooms = "";
-        next.maxBedrooms = "";
-        next.minBathrooms = "";
-        next.maxBathrooms = "";
-        next.minCarSpaces = "";
-        next.maxCarSpaces = "";
-        next.propertyType = "";
-        next.keywords = "";
-      }
+    if (fieldName === "propertyInterest" && value !== "off-plan") {
+      next.minBedrooms = "";
+      next.maxBedrooms = "";
+      next.minBathrooms = "";
+      next.maxBathrooms = "";
+      next.minCarSpaces = "";
+      next.maxCarSpaces = "";
+      next.propertyType = "";
+      next.keywords = "";
+    }
 
-      return next;
-    });
-
-    setFieldErrors((prev) => ({
-      ...prev,
-      [name]: "",
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [fieldName]: validateBuyerField(fieldName, value, next, selectedDocuments.length),
+      maxBudget: validateBuyerField(
+        "maxBudget",
+        next.maxBudget,
+        next,
+        selectedDocuments.length
+      ),
+      maxBedrooms: validateBuyerField(
+        "maxBedrooms",
+        next.maxBedrooms,
+        next,
+        selectedDocuments.length
+      ),
+      maxBathrooms: validateBuyerField(
+        "maxBathrooms",
+        next.maxBathrooms,
+        next,
+        selectedDocuments.length
+      ),
+      maxCarSpaces: validateBuyerField(
+        "maxCarSpaces",
+        next.maxCarSpaces,
+        next,
+        selectedDocuments.length
+      ),
     }));
-  }
+
+    return next;
+  });
+}
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (files.length === 0) return;
 
     if (selectedDocuments.length + files.length > MAX_DOCUMENTS) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        legalDocuments: `Upload up to ${MAX_DOCUMENTS} files only`,
-      }));
+      setSelectedDocuments((prev) => {
+  const updatedDocuments = [...prev, ...nextDocuments];
+  setFieldErrors((prevErrors) => ({
+    ...prevErrors,
+    legalDocuments: validateBuyerField(
+      "legalDocuments",
+      "",
+      formData,
+      updatedDocuments.length
+    ),
+  }));
+  return updatedDocuments;
+});
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -440,14 +666,39 @@ function BuyersInvestorsContactContent() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function handleRemoveDocument(previewId: string) {
-    setSelectedDocuments((prev) => prev.filter((doc) => doc.previewId !== previewId));
-  }
+function handleRemoveDocument(previewId: string) {
+  setSelectedDocuments((prev) => {
+    const nextDocuments = prev.filter((doc) => doc.previewId !== previewId);
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      legalDocuments: validateBuyerField(
+        "legalDocuments",
+        "",
+        formData,
+        nextDocuments.length
+      ),
+    }));
+    return nextDocuments;
+  });
+}
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setFieldErrors({});
+  event.preventDefault();
+
+  const validationErrors = validateBuyerForm(formData, selectedDocuments.length);
+  setFieldErrors(validationErrors);
+
+  if (Object.values(validationErrors).some(Boolean)) {
+    setFeedbackModal({
+      open: true,
+      title: "Submission Failed",
+      message: "Please correct the highlighted fields.",
+      success: false,
+    });
+    return;
+  }
+
+  setLoading(true);
 
     try {
       const payload =

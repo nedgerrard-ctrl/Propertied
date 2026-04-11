@@ -16,6 +16,9 @@ type ContactFormData = {
 
 type FieldErrors = Partial<Record<keyof ContactFormData, string>>;
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9]{6,15}$/;
+
 const initialFormData: ContactFormData = {
   enquiryType: "general",
   name: "",
@@ -61,6 +64,57 @@ function getInputClass(hasError: boolean) {
   ].join(" ");
 }
 
+function normalizePhone(value: string) {
+  return value.replace(/\s|-/g, "").trim();
+}
+
+function validateField(
+  name: keyof ContactFormData,
+  value: string
+): FieldErrors[keyof ContactFormData] {
+  const trimmedValue = value.trim();
+
+  switch (name) {
+    case "name":
+      if (!trimmedValue) return "Enter your full name";
+      if (value.length > 100) return "This field is too long";
+      return "";
+    case "email":
+      if (!trimmedValue) return "Enter your email address";
+      if (value.length > 120) return "This field is too long";
+      if (!EMAIL_REGEX.test(trimmedValue)) return "Enter a valid email address";
+      return "";
+    case "phoneCountryCode":
+      if (!trimmedValue) return "Select a country code";
+      if (value.length > 6) return "This field is too long";
+      return "";
+    case "phone": {
+      if (!trimmedValue) return "Enter your phone number";
+      if (value.length > 20) return "This field is too long";
+      const normalizedPhone = normalizePhone(value);
+      if (!PHONE_REGEX.test(normalizedPhone)) return "Enter a valid phone number";
+      return "";
+    }
+    case "message":
+      if (value.length > 1000) return "This field is too long";
+      return "";
+    case "enquiryType":
+      return "";
+    default:
+      return "";
+  }
+}
+
+function validateForm(formData: ContactFormData): FieldErrors {
+  return {
+    name: validateField("name", formData.name),
+    email: validateField("email", formData.email),
+    phoneCountryCode: validateField("phoneCountryCode", formData.phoneCountryCode),
+    phone: validateField("phone", formData.phone),
+    message: validateField("message", formData.message),
+  };
+}
+
 export default function ContactPage() {
   const [formData, setFormData] = useState<ContactFormData>(initialFormData);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -81,22 +135,36 @@ export default function ContactPage() {
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
     const { name, value } = event.target;
+    const fieldName = name as keyof ContactFormData;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [fieldName]: value,
     }));
 
     setFieldErrors((prev) => ({
       ...prev,
-      [name]: "",
+      [fieldName]: validateField(fieldName, value),
     }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const validationErrors = validateForm(formData);
+    setFieldErrors(validationErrors);
+
+    if (Object.values(validationErrors).some(Boolean)) {
+      setFeedbackModal({
+        open: true,
+        title: "Submission Failed",
+        message: "Please correct the highlighted fields.",
+        success: false,
+      });
+      return;
+    }
+
     setLoading(true);
-    setFieldErrors({});
 
     try {
       const response = await fetch("/api/contact", {
