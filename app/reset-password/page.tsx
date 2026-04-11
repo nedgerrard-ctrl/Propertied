@@ -22,6 +22,25 @@ function getFieldClass(hasError: boolean) {
   ].join(" ");
 }
 
+function validatePassword(password: string): string {
+  if (!password) return "Enter a new password";
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Z]/.test(password)) return "Include at least 1 uppercase letter";
+  if (!/[a-z]/.test(password)) return "Include at least 1 lowercase letter";
+  if (!/[0-9]/.test(password)) return "Include at least 1 number";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Include at least 1 special character";
+  return "";
+}
+
+function validateConfirmPassword(
+  password: string,
+  confirmPassword: string
+): string {
+  if (!confirmPassword) return "Confirm your new password";
+  if (confirmPassword !== password) return "Passwords do not match";
+  return "";
+}
+
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,10 +58,27 @@ function ResetPasswordContent() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
     setMessage("");
     setSuccess(false);
-    setFieldErrors({});
+
+    const nextFieldErrors: ResetFieldErrors = {
+      token: token ? "" : "Reset token is missing",
+      password: validatePassword(password),
+      confirmPassword: validateConfirmPassword(password, confirmPassword),
+    };
+
+    setFieldErrors(nextFieldErrors);
+
+    if (
+      nextFieldErrors.token ||
+      nextFieldErrors.password ||
+      nextFieldErrors.confirmPassword
+    ) {
+      setMessage("Please correct the highlighted fields.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const response = await fetch("/api/auth/reset-password", {
@@ -70,6 +106,7 @@ function ResetPasswordContent() {
       setMessage(data.message || "Your password has been reset successfully.");
       setPassword("");
       setConfirmPassword("");
+      setFieldErrors({});
 
       setTimeout(() => {
         router.push("/login");
@@ -167,8 +204,15 @@ function ResetPasswordContent() {
                   placeholder="Enter a new password"
                   value={password}
                   onChange={(e) => {
-                    setPassword(e.target.value);
-                    setFieldErrors((prev) => ({ ...prev, password: "" }));
+                    const nextPassword = e.target.value;
+                    setPassword(nextPassword);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      password: validatePassword(nextPassword),
+                      confirmPassword: confirmPassword
+                        ? validateConfirmPassword(nextPassword, confirmPassword)
+                        : prev.confirmPassword,
+                    }));
                   }}
                   aria-invalid={Boolean(fieldErrors.password)}
                   className={`${getFieldClass(Boolean(fieldErrors.password))} pr-20`}
@@ -204,10 +248,14 @@ function ResetPasswordContent() {
                   placeholder="Confirm your new password"
                   value={confirmPassword}
                   onChange={(e) => {
-                    setConfirmPassword(e.target.value);
+                    const nextConfirmPassword = e.target.value;
+                    setConfirmPassword(nextConfirmPassword);
                     setFieldErrors((prev) => ({
                       ...prev,
-                      confirmPassword: "",
+                      confirmPassword: validateConfirmPassword(
+                        password,
+                        nextConfirmPassword
+                      ),
                     }));
                   }}
                   aria-invalid={Boolean(fieldErrors.confirmPassword)}
@@ -285,6 +333,10 @@ function ResetPasswordContent() {
             <p className="flex items-start gap-2">
               <span className="mt-0.5 text-[#b89464]">—</span>
               Include uppercase, lowercase, and a number.
+            </p>
+            <p className="flex items-start gap-2">
+              <span className="mt-0.5 text-[#b89464]">—</span>
+              Include at least 1 special character.
             </p>
           </div>
         </div>
