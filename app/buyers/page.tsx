@@ -341,7 +341,7 @@ export default function BuyersPage() {
                 <img
                   src={project.image}
                   alt={project.name}
-                  className="h-full w-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
                 />
                 <div className={[
                   'absolute top-4 right-4 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',

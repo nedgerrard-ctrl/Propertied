@@ -296,7 +296,7 @@ function ServicesGrid() {
                     <img
                       src={svc.image}
                       alt={svc.label}
-                      className="h-48 w-full object-cover grayscale opacity-60 transition-all duration-700 group-hover:grayscale-0 group-hover:opacity-80 group-hover:scale-[1.03]"
+                      className="h-48 w-full object-cover transition-all duration-700 group-hover:scale-[1.03]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-transparent to-transparent" />
                   </div>
