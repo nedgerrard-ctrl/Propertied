@@ -153,6 +153,32 @@ async function patchStatus(id: string, status: EnquiryStatus) {
   return res.ok;
 }
 
+async function deleteEnquiry(id: string) {
+  const res = await fetch(`/api/admin/enquiries/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete enquiry");
+  }
+
+  return true;
+}
+
+async function bulkDeleteEnquiries(ids: string[]) {
+  const res = await fetch("/api/admin/enquiries", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete selected enquiries");
+  }
+
+  return true;
+}
+
 function InlineStatusSelect({
   enquiry,
   onStatusUpdate,
@@ -194,20 +220,93 @@ function InlineStatusSelect({
   );
 }
 
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmLabel,
+  confirmVariant = "danger",
+  loading = false,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  confirmVariant?: "danger" | "blue";
+  loading?: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-6">
+      <div className="w-full max-w-md rounded-sm bg-white p-8 text-center shadow-2xl">
+        <div
+          className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
+            confirmVariant === "danger" ? "bg-red-100" : "bg-blue-100"
+          }`}
+        >
+          {confirmVariant === "danger" ? (
+            <svg viewBox="0 0 20 20" className="h-7 w-7 fill-red-600">
+              <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-10.5a.75.75 0 0 0-1.5 0v4a.75.75 0 0 0 1.5 0v-4Zm0 7a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 20 20" className="h-7 w-7 fill-blue-600">
+              <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-10.5a.75.75 0 0 0-1.5 0v4a.75.75 0 0 0 1.5 0v-4Zm0 7a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z" />
+            </svg>
+          )}
+        </div>
+
+        <h3 className="mt-5 text-2xl font-light text-[#1f1a17]">{title}</h3>
+        <p className="mt-3 text-[14px] leading-7 text-[#6c6258]">{message}</p>
+
+        <div className="mt-8 grid grid-cols-2 gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="w-full rounded-sm border border-neutral-200 bg-white px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className={`w-full rounded-sm px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition disabled:opacity-50 ${
+              confirmVariant === "danger"
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {loading ? "Processing..." : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DetailPanel({
   enquiry,
   onClose,
   onStatusUpdate,
+  onDelete,
 }: {
   enquiry: Enquiry;
   onClose: () => void;
   onStatusUpdate: (id: string, status: EnquiryStatus) => void;
+  onDelete: (id: string) => void;
 }) {
   const [pendingStatus, setPendingStatus] = useState<EnquiryStatus>(
     enquiry.status
   );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setPendingStatus(enquiry.status);
@@ -226,6 +325,21 @@ function DetailPanel({
     }
 
     setSaving(false);
+  }
+
+  async function handleConfirmDelete() {
+    setDeleting(true);
+
+    try {
+      await deleteEnquiry(enquiry._id);
+      onDelete(enquiry._id);
+      setShowDeleteConfirm(false);
+      onClose();
+    } catch {
+      alert("Failed to delete enquiry.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -543,17 +657,40 @@ function DetailPanel({
                 </button>
               ))}
             </div>
+      
+            <div className="mt-12 grid grid-cols-2 ">
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleting}
+                className="w-full rounded border border-red-200 bg-red-50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:opacity-40"
+              >
+                {deleting ? "Deleting…" : "Delete Enquiry"}
+              </button>
 
-            <button
-              onClick={handleSave}
-              disabled={saving || pendingStatus === enquiry.status}
-              className="mt-3 w-full rounded border border-neutral-900 bg-neutral-900 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-neutral-700 disabled:opacity-40"
-            >
-              {saving ? "Saving…" : saved ? "Saved ✓" : "Save Status"}
-            </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || pendingStatus === enquiry.status}
+                className="w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:opacity-40"
+              >
+                {saving ? "Saving…" : saved ? "Saved ✓" : "Save Changes"}
+              </button>
+            </div>
           </section>
         </div>
       </aside>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete enquiry?"
+        message={`Are you sure you want to delete the enquiry from ${enquiry.name}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={deleting}
+        onCancel={() => {
+          if (!deleting) setShowDeleteConfirm(false);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 }
@@ -570,6 +707,10 @@ export default function EnquiriesPanel() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
   useEffect(() => {
     fetch("/api/admin/enquiries")
       .then((r) => r.json())
@@ -581,6 +722,12 @@ export default function EnquiriesPanel() {
   function handleStatusUpdate(id: string, status: EnquiryStatus) {
     setEnquiries((prev) => prev.map((e) => (e._id === id ? { ...e, status } : e)));
     setSelected((prev) => (prev?._id === id ? { ...prev, status } : prev));
+  }
+
+  function handleDelete(id: string) {
+    setEnquiries((prev) => prev.filter((e) => e._id !== id));
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+    setSelected((prev) => (prev?._id === id ? null : prev));
   }
 
   const filtered = useMemo(() => {
@@ -628,6 +775,66 @@ export default function EnquiriesPanel() {
     typeFilter !== "all" ||
     dateFrom ||
     dateTo;
+
+  const allFilteredIds = filtered.map((e) => e._id);
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((e) => selectedIds.includes(e._id));
+  const selectedCount = selectedIds.length;
+
+  function toggleSelectOne(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  function toggleSelectAllFiltered() {
+    if (allFilteredSelected) {
+      setSelectedIds((prev) =>
+        prev.filter((id) => !allFilteredIds.includes(id))
+      );
+      return;
+    }
+
+    setSelectedIds((prev) => Array.from(new Set([...prev, ...allFilteredIds])));
+  }
+
+  async function handleBulkDelete() {
+    setBulkDeleting(true);
+
+    try {
+      await bulkDeleteEnquiries(selectedIds);
+      setEnquiries((prev) => prev.filter((e) => !selectedIds.includes(e._id)));
+      setSelected((prev) =>
+        prev && selectedIds.includes(prev._id) ? null : prev
+      );
+      setSelectedIds([]);
+      setShowBulkDeleteConfirm(false);
+    } catch {
+      alert("Failed to delete selected enquiries.");
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
+  async function handleRowDelete(
+    e: React.MouseEvent<HTMLButtonElement>,
+    enquiryId: string,
+    enquiryName: string
+  ) {
+    e.stopPropagation();
+    const confirmed = window.confirm(
+      `Delete enquiry from ${enquiryName}? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteEnquiry(enquiryId);
+      handleDelete(enquiryId);
+    } catch {
+      alert("Failed to delete enquiry.");
+    }
+  }
 
   if (loading) {
     return (
@@ -766,6 +973,30 @@ export default function EnquiriesPanel() {
         </span>
       </div>
 
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-5 py-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleSelectAllFiltered}
+            disabled={filtered.length === 0}
+            className="rounded border border-neutral-200 px-3 py-2 text-[12px] text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {allFilteredSelected ? "Deselect visible" : "Select visible"}
+          </button>
+
+          <span className="text-[12px] text-neutral-500">
+            {selectedCount} selected
+          </span>
+        </div>
+
+        <button
+          onClick={() => setShowBulkDeleteConfirm(true)}
+          disabled={selectedCount === 0 || bulkDeleting}
+          className="rounded border border-red-200 bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {bulkDeleting ? "Deleting…" : `Delete Selected${selectedCount ? ` (${selectedCount})` : ""}`}
+        </button>
+      </div>
+
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-neutral-400">
@@ -777,6 +1008,15 @@ export default function EnquiriesPanel() {
           <table className="w-full text-left text-[13px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                <th className="px-5 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleSelectAllFiltered}
+                    aria-label="Select all visible enquiries"
+                    className="h-4 w-4 rounded border-neutral-300"
+                  />
+                </th>
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Enquiry</th>
@@ -786,40 +1026,74 @@ export default function EnquiriesPanel() {
                 <th className="px-5 py-3">Summary</th>
                 <th className="px-5 py-3">Docs</th>
                 <th className="px-5 py-3">Status</th>
+                <th className="px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((e, i) => (
-                <tr
-                  key={e._id}
-                  onClick={() => setSelected(e)}
-                  className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
-                    i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
-                  }`}
-                >
-                  <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
-                    {formatDate(e.createdAt)}
-                  </td>
-                  <td className="px-5 py-3.5 font-medium text-neutral-900">{e.name}</td>
-                  <td className="px-5 py-3.5 text-neutral-600">
-                    {getEnquiryTypeLabel(e.enquiryType)}
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-600">{e.email}</td>
-                  <td className="px-5 py-3.5 text-neutral-600">
-                    {formatPhone(e.phoneCountryCode, e.phone)}
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-600">{getTypeLabel(e)}</td>
-                  <td className="px-5 py-3.5 capitalize text-neutral-600">
-                    {getSummaryLabel(e)}
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-600">
-                    {e.legalDocuments?.length ?? 0}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <InlineStatusSelect enquiry={e} onStatusUpdate={handleStatusUpdate} />
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((e, i) => {
+                const isChecked = selectedIds.includes(e._id);
+
+                return (
+                  <tr
+                    key={e._id}
+                    onClick={() => setSelected(e)}
+                    className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
+                      i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
+                    }`}
+                  >
+                    <td
+                      className="px-5 py-3.5"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleSelectOne(e._id)}
+                        aria-label={`Select enquiry from ${e.name}`}
+                        className="h-4 w-4 rounded border-neutral-300"
+                      />
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
+                      {formatDate(e.createdAt)}
+                    </td>
+                    <td className="px-5 py-3.5 font-medium text-neutral-900">
+                      {e.name}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">
+                      {getEnquiryTypeLabel(e.enquiryType)}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">{e.email}</td>
+                    <td className="px-5 py-3.5 text-neutral-600">
+                      {formatPhone(e.phoneCountryCode, e.phone)}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">{getTypeLabel(e)}</td>
+                    <td className="px-5 py-3.5 capitalize text-neutral-600">
+                      {getSummaryLabel(e)}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">
+                      {e.legalDocuments?.length ?? 0}
+                    </td>
+                    <td
+                      className="px-5 py-3.5"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <InlineStatusSelect enquiry={e} onStatusUpdate={handleStatusUpdate} />
+                    </td>
+                    <td
+                      className="px-5 py-3.5"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <button
+                        onClick={(event) => handleRowDelete(event, e._id, e.name)}
+                        className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -830,8 +1104,24 @@ export default function EnquiriesPanel() {
           enquiry={selected}
           onClose={() => setSelected(null)}
           onStatusUpdate={handleStatusUpdate}
+          onDelete={handleDelete}
         />
       )}
+
+      <ConfirmDialog
+        open={showBulkDeleteConfirm}
+        title="Delete selected enquiries?"
+        message={`Are you sure you want to delete ${selectedCount} selected ${
+          selectedCount === 1 ? "enquiry" : "enquiries"
+        }? This action cannot be undone.`}
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={bulkDeleting}
+        onCancel={() => {
+          if (!bulkDeleting) setShowBulkDeleteConfirm(false);
+        }}
+        onConfirm={handleBulkDelete}
+      />
     </div>
   );
 }
