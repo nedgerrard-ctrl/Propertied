@@ -13,11 +13,15 @@ const Prism = dynamic(() => import('../components/Prism'), { ssr: false })
 // ─── Detail slide-over ────────────────────────────────────────────────────────
 
 function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: () => void }) {
-  // Close on Escape key
+  // Close on Escape key + lock background scroll
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handler)
+      document.body.style.overflow = ''
+    }
   }, [onClose])
 
   return (
