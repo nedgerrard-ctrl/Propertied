@@ -96,7 +96,7 @@ export const projects: Project[] = [
     state: "VIC",
     type: "Apartment",
     propertyInterest: "off-plan",
-    status: "Upcoming",
+    status: "Current",
     bedrooms: "1–3",
     bathrooms: "1–2",
     carSpaces: "0–2",
