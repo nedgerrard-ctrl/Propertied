@@ -637,45 +637,54 @@ function DetailPanel({
 
           <hr className="border-neutral-100" />
 
-          <section>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-              Update Status
-            </p>
+          <div className="flex flex-1 flex-col overflow-hidden">
 
-            <div className="grid grid-cols-2 gap-2">
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setPendingStatus(s)}
-                  className={`rounded border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
-                    pendingStatus === s
-                      ? STATUS_BUTTON[s]
-                      : "border-neutral-200 bg-white text-neutral-400"
-                  }`}
-                >
-                  {STATUS_LABEL[s]}
-                </button>
-              ))}
-            </div>
-      
-            <div className="mt-12 grid grid-cols-2 ">
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={deleting}
-                className="w-full rounded border border-red-200 bg-red-50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:opacity-40"
-              >
-                {deleting ? "Deleting…" : "Delete Enquiry"}
-              </button>
+  {/* SCROLLABLE CONTENT */}
+  <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
+    {/* EVERYTHING except Update Status buttons */}
+  </div>
 
-              <button
-                onClick={handleSave}
-                disabled={saving || pendingStatus === enquiry.status}
-                className="w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:opacity-40"
-              >
-                {saving ? "Saving…" : saved ? "Saved ✓" : "Save Changes"}
-              </button>
-            </div>
-          </section>
+  {/* FIXED BOTTOM BAR */}
+  <div className="border-t border-neutral-200 bg-white px-6 py-4">
+    
+    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+      Update Status
+    </p>
+
+    <div className="grid grid-cols-2 gap-2">
+      {STATUS_OPTIONS.map((s) => (
+        <button
+          key={s}
+          onClick={() => setPendingStatus(s)}
+          className={`rounded border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
+            pendingStatus === s
+              ? STATUS_BUTTON[s]
+              : "border-neutral-200 bg-white text-neutral-400"
+          }`}
+        >
+          {STATUS_LABEL[s]}
+        </button>
+      ))}
+    </div>
+
+    <div className="mt-4 grid grid-cols-2 gap-3">
+      <button
+        onClick={() => setShowDeleteConfirm(true)}
+        className="rounded border border-red-200 bg-red-50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700 hover:bg-red-100"
+      >
+        Delete Enquiry
+      </button>
+
+      <button
+        onClick={handleSave}
+        className="rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white hover:bg-blue-700"
+      >
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+</div>
         </div>
       </aside>
 
