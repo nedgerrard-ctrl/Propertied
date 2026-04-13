@@ -125,6 +125,7 @@ const bathroomCarOptions = [
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
+const NAME_REGEX = /^[A-Za-z\s]+$/;
 
 function normalizePhone(value: string) {
   return value.replace(/\s|-/g, "").trim();
@@ -140,8 +141,10 @@ function validateBuyerField(
 
   switch (name) {
     case "name":
-      if (!trimmedValue) return "Enter your full name";
-      return "";
+  if (!trimmedValue) return "Enter your full name";
+  if (value.length > 100) return "This field is too long";
+  if (!NAME_REGEX.test(trimmedValue)) return "Name can contain letters and spaces only";
+  return "";
 
     case "email":
       if (!trimmedValue) return "Enter your email address";

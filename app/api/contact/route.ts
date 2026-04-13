@@ -7,6 +7,7 @@ import crypto from "crypto";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
+const NAME_REGEX = /^[A-Za-z\s]+$/;
 
 const ALLOWED_DOCUMENT_TYPES = [
   "application/pdf",
@@ -393,7 +394,11 @@ export async function POST(request: Request) {
         });
       }
     }
-
+    if (!isNonEmptyString(name)) {
+  fieldErrors.name = "Enter your full name";
+} else if (!NAME_REGEX.test(name.trim())) {
+  fieldErrors.name = "Name can contain letters and spaces only";
+}
     if (enquiryType === "developer") {
       const developerFieldErrors: FieldErrors = {};
 

@@ -18,6 +18,7 @@ type FieldErrors = Partial<Record<keyof ContactFormData, string>>;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
+const NAME_REGEX = /^[A-Za-z\s]+$/;
 
 const initialFormData: ContactFormData = {
   enquiryType: "general",
@@ -76,9 +77,10 @@ function validateField(
 
   switch (name) {
     case "name":
-      if (!trimmedValue) return "Enter your full name";
-      if (value.length > 100) return "This field is too long";
-      return "";
+  if (!trimmedValue) return "Enter your full name";
+  if (value.length > 100) return "This field is too long";
+  if (!NAME_REGEX.test(trimmedValue)) return "Name can contain letters and spaces only";
+  return "";
     case "email":
       if (!trimmedValue) return "Enter your email address";
       if (value.length > 120) return "This field is too long";
