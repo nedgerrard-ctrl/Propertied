@@ -564,7 +564,7 @@ function BuyersInvestorsContactContent() {
     }));
   }, [searchParams]);
 
-  const showPropertyPreferences = formData.propertyInterest === "off-plan";
+ const showPropertyPreferences =true;
 
   const filteredMaxBudgetOptions = useMemo(
     () => getFilteredRangeOptions(maxBudgetOptions, formData.minBudget),
@@ -627,16 +627,7 @@ function BuyersInvestorsContactContent() {
         next.maxCarSpaces = "";
       }
 
-      if (fieldName === "propertyInterest" && value !== "off-plan") {
-        next.minBedrooms = "";
-        next.maxBedrooms = "";
-        next.minBathrooms = "";
-        next.maxBathrooms = "";
-        next.minCarSpaces = "";
-        next.maxCarSpaces = "";
-        next.propertyType = "";
-        next.keywords = "";
-      }
+     
 
       setFieldErrors((prevErrors) => ({
         ...prevErrors,
@@ -770,20 +761,8 @@ function BuyersInvestorsContactContent() {
     setLoading(true);
 
     try {
-      const payload =
-        formData.propertyInterest === "off-plan"
-          ? formData
-          : {
-              ...formData,
-              minBedrooms: "",
-              maxBedrooms: "",
-              minBathrooms: "",
-              maxBathrooms: "",
-              minCarSpaces: "",
-              maxCarSpaces: "",
-              propertyType: "",
-              keywords: "",
-            };
+      const payload = formData;
+        
 
       const multipartData = new FormData();
 
@@ -1131,7 +1110,7 @@ function BuyersInvestorsContactContent() {
                     Property Preferences
                   </h2>
                   <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
-                    Tell us the type of off-plan property and features you are looking for.
+                    Tell us the property type and features you are looking for, for either off-the-plan or established opportunities.
                   </p>
                 </div>
 
