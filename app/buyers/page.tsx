@@ -20,13 +20,33 @@ function getPropertyInterestBadgeClass(propertyInterest: Project['propertyIntere
     : 'bg-white/10 text-[#c8a96e] border border-[#c8a96e]/35 backdrop-blur-sm'
 }
 
+function getBuyerEnquiryHref(project: Project) {
+  const params = new URLSearchParams({
+    projectName: project.name,
+    suburb: project.suburb,
+    state: project.state,
+    propertyType: project.type,
+    propertyInterest: project.propertyInterest,
+    bedrooms: project.bedrooms,
+    bathrooms: project.bathrooms,
+    carSpaces: project.carSpaces,
+    priceFrom: project.priceFrom,
+  })
+
+  return `/contact/buyers-investors?${params.toString()}`
+}
+
 // ─── Detail slide-over ────────────────────────────────────────────────────────
 
 function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: () => void }) {
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+
     window.addEventListener('keydown', handler)
     document.body.style.overflow = 'hidden'
+
     return () => {
       window.removeEventListener('keydown', handler)
       document.body.style.overflow = ''
@@ -68,19 +88,23 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           </button>
 
           <div className="absolute left-5 top-5 flex gap-2">
-            <span className={[
-              'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
-              project.status === 'Current'
-                ? 'bg-[#c8a96e] text-[#0a0806]'
-                : 'bg-black/50 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
-            ].join(' ')}>
+            <span
+              className={[
+                'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+                project.status === 'Current'
+                  ? 'bg-[#c8a96e] text-[#0a0806]'
+                  : 'bg-black/50 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
+              ].join(' ')}
+            >
               {project.status}
             </span>
 
-            <span className={[
-              'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
-              getPropertyInterestBadgeClass(project.propertyInterest),
-            ].join(' ')}>
+            <span
+              className={[
+                'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+                getPropertyInterestBadgeClass(project.propertyInterest),
+              ].join(' ')}
+            >
               {getPropertyInterestLabel(project.propertyInterest)}
             </span>
           </div>
@@ -105,12 +129,16 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
               key={s.label}
               className={`flex-1 px-5 py-5 ${i > 0 ? 'border-l border-white/[0.06]' : ''}`}
             >
-              <p className="mb-1.5 text-[8px] uppercase tracking-[0.24em] text-[#6b5e54]">{s.label}</p>
-              <p className={`text-[13px] font-medium leading-tight ${
-                s.label === 'Status' && project.status === 'Current'
-                  ? 'text-[#c8a96e]'
-                  : 'text-neutral-200'
-              }`}>
+              <p className="mb-1.5 text-[8px] uppercase tracking-[0.24em] text-[#6b5e54]">
+                {s.label}
+              </p>
+              <p
+                className={`text-[13px] font-medium leading-tight ${
+                  s.label === 'Status' && project.status === 'Current'
+                    ? 'text-[#c8a96e]'
+                    : 'text-neutral-200'
+                }`}
+              >
                 {s.value}
               </p>
             </div>
@@ -121,7 +149,9 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           <section>
             <div className="mb-4 flex items-center gap-3">
               <span className="h-px w-5 shrink-0 bg-[#c8a96e]/50" />
-              <p className="text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">About This Project</p>
+              <p className="text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">
+                About This Project
+              </p>
             </div>
             <p className="text-[13px] leading-[2] text-[#8a7b6d]">{project.description}</p>
           </section>
@@ -131,7 +161,9 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
           <section>
             <div className="mb-5 flex items-center gap-3">
               <span className="h-px w-5 shrink-0 bg-[#c8a96e]/50" />
-              <p className="text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">Key Highlights</p>
+              <p className="text-[9px] uppercase tracking-[0.26em] text-[#6b5e54]">
+                Key Highlights
+              </p>
             </div>
             <ul className="space-y-3.5">
               {project.highlights.map((h) => (
@@ -146,7 +178,7 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
 
         <div className="shrink-0 border-t border-white/[0.06] bg-[#0a0806] px-8 py-5">
           <Link
-            href="/contact/buyers-investors"
+            href={getBuyerEnquiryHref(project)}
             className="flex w-full items-center justify-center gap-2 border border-[#c8a96e] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
           >
             Enquire About This Project
@@ -155,7 +187,11 @@ function ProjectDetailPanel({ project, onClose }: { project: Project; onClose: (
             </svg>
           </Link>
           <p className="mt-3 text-center text-[10px] text-[#6b5e54]">
-            Press <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] text-neutral-400">Esc</kbd> to close
+            Press{' '}
+            <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] text-neutral-400">
+              Esc
+            </kbd>{' '}
+            to close
           </p>
         </div>
       </motion.aside>
@@ -190,25 +226,36 @@ export default function BuyersPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-44 md:px-12">
           <div className="mb-24 grid grid-cols-1 items-end gap-12 lg:grid-cols-2">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-              <p className="mb-8 text-[10px] uppercase tracking-[0.36em] text-[#6b5e54]">For Buyers</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1 }}
+            >
+              <p className="mb-8 text-[10px] uppercase tracking-[0.36em] text-[#6b5e54]">
+                For Buyers
+              </p>
               <h1 className="font-[family-name:var(--font-cormorant)] text-5xl font-light leading-[1.1] text-white md:text-7xl">
-                Find your next<br />
+                Find your next
+                <br />
                 <em className="italic text-[#c8a96e]">Melbourne</em> property.
               </h1>
             </motion.div>
             <motion.p
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
               className="max-w-md pb-4 text-[14px] font-light leading-[2] text-[#8a7b6d]"
             >
-              Whether you are building an investment portfolio or searching for your
-              first home, we source, guide, and support you through every step of the
-              buying process.
+              Whether you are building an investment portfolio or searching for your first
+              home, we source, guide, and support you through every step of the buying
+              process.
             </motion.p>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5 }}
             className="grid grid-cols-3 gap-8 border-t border-white/[0.08] pt-12"
           >
             {[
@@ -217,8 +264,12 @@ export default function BuyersPage() {
               { value: '2013', label: 'Established' },
             ].map((s) => (
               <div key={s.label}>
-                <p className="mb-2 font-[family-name:var(--font-cormorant)] text-4xl font-light text-[#c8a96e]">{s.value}</p>
-                <p className="text-[10px] uppercase tracking-[0.26em] text-[#6b5e54]">{s.label}</p>
+                <p className="mb-2 font-[family-name:var(--font-cormorant)] text-4xl font-light text-[#c8a96e]">
+                  {s.value}
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.26em] text-[#6b5e54]">
+                  {s.label}
+                </p>
               </div>
             ))}
           </motion.div>
@@ -228,7 +279,9 @@ export default function BuyersPage() {
       <section className="border-y border-[#e3d8ca] bg-[#f6f2eb] py-32">
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <motion.h2
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
             className="mb-20 font-[family-name:var(--font-cormorant)] text-4xl font-light text-[#1f1a17] md:text-5xl"
           >
             Tailored for every buyer
@@ -236,11 +289,15 @@ export default function BuyersPage() {
 
           <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
             <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.85 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.85 }}
             >
               <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">For Investors</h3>
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
+                  For Investors
+                </h3>
                 <span className="tabular-nums text-sm text-[#8a7b6d]">01</span>
               </div>
               <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
@@ -272,11 +329,15 @@ export default function BuyersPage() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.85, delay: 0.1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.85, delay: 0.1 }}
             >
               <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">For Owner-Occupiers</h3>
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
+                  For Owner-Occupiers
+                </h3>
                 <span className="tabular-nums text-sm text-[#8a7b6d]">02</span>
               </div>
               <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
@@ -314,7 +375,9 @@ export default function BuyersPage() {
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <div className="mb-16 flex items-end justify-between">
             <div>
-              <p className="mb-3 text-[10px] uppercase tracking-[0.32em] text-neutral-500">Featured &amp; Current</p>
+              <p className="mb-3 text-[10px] uppercase tracking-[0.32em] text-neutral-500">
+                Featured &amp; Current
+              </p>
               <h2 className="font-[family-name:var(--font-cormorant)] text-4xl font-light text-white md:text-5xl">
                 Available Projects
               </h2>
@@ -345,21 +408,25 @@ export default function BuyersPage() {
                   />
 
                   <div className="absolute left-4 top-4">
-                    <span className={[
-                      'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
-                      getPropertyInterestBadgeClass(project.propertyInterest),
-                    ].join(' ')}>
+                    <span
+                      className={[
+                        'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+                        getPropertyInterestBadgeClass(project.propertyInterest),
+                      ].join(' ')}
+                    >
                       {getPropertyInterestLabel(project.propertyInterest)}
                     </span>
                   </div>
 
                   <div className="absolute right-4 top-4">
-                    <div className={[
-                      'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
-                      project.status === 'Current'
-                        ? 'bg-[#c8a96e] text-[#0a0806]'
-                        : 'bg-black/60 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
-                    ].join(' ')}>
+                    <div
+                      className={[
+                        'px-3 py-1 text-[9px] font-medium uppercase tracking-[0.2em]',
+                        project.status === 'Current'
+                          ? 'bg-[#c8a96e] text-[#0a0806]'
+                          : 'bg-black/60 text-[#c8a96e] border border-[#c8a96e]/40 backdrop-blur-sm',
+                      ].join(' ')}
+                    >
                       {project.status}
                     </div>
                   </div>
@@ -387,7 +454,7 @@ export default function BuyersPage() {
                     View Details
                   </button>
                   <Link
-                    href="/contact/buyers-investors"
+                    href={getBuyerEnquiryHref(project)}
                     className="flex-1 border border-[#c8a96e] py-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#c8a96e] transition-colors hover:bg-[#c8a96e] hover:text-[#0a0806]"
                   >
                     Enquire
@@ -401,10 +468,14 @@ export default function BuyersPage() {
 
       <section className="border-t border-white/[0.06] bg-[#2f2a24] px-6 py-32 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.9 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9 }}
         >
-          <p className="mb-6 text-[10px] uppercase tracking-[0.34em] text-neutral-500">Ready to Begin?</p>
+          <p className="mb-6 text-[10px] uppercase tracking-[0.34em] text-neutral-500">
+            Ready to Begin?
+          </p>
           <h2 className="mb-8 font-[family-name:var(--font-cormorant)] text-4xl font-light text-white md:text-5xl">
             Start your property search with PPM.
           </h2>
