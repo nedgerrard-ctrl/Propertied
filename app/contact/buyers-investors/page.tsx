@@ -13,6 +13,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import { useCountryCodes } from "../useCountryCodes";
 
 const ALLOWED_DOCUMENT_TYPES = [
   "application/pdf",
@@ -63,7 +64,7 @@ const initialFormData: BuyerFormData = {
   investorRegion: "",
   name: "",
   email: "",
-  phoneCountryCode: "+61",
+  phoneCountryCode: "",
   phone: "",
   minBudget: "",
   maxBudget: "",
@@ -512,6 +513,7 @@ function getTextareaClass(hasError: boolean) {
 function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { countries, defaultDialCode } = useCountryCodes("+61");
 
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
   const [selectedDocuments, setSelectedDocuments] = useState<
@@ -530,7 +532,16 @@ function BuyersInvestorsContactContent() {
     message: "",
     success: false,
   });
-
+  useEffect(() => {
+  setFormData((prev) =>
+    prev.phoneCountryCode
+      ? prev
+      : {
+          ...prev,
+          phoneCountryCode: defaultDialCode,
+        }
+  );
+}, [defaultDialCode]);
   useEffect(() => {
     const hasPrefillParams =
       searchParams.get("projectName") ||
@@ -874,7 +885,7 @@ function BuyersInvestorsContactContent() {
                   <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                     Phone
                   </label>
-                  <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
+                  <div className="grid grid-cols-[220px_minmax(0,1fr)] gap-4">
                     <div>
                       <select
                         name="phoneCountryCode"
@@ -885,12 +896,15 @@ function BuyersInvestorsContactContent() {
                           Boolean(fieldErrors.phoneCountryCode)
                         )}
                       >
-                        <option value="+61">+61</option>
-                        <option value="+65">+65</option>
-                        <option value="+44">+44</option>
-                        <option value="+1">+1</option>
-                        <option value="+86">+86</option>
-                        <option value="+64">+64</option>
+                        <option value="">Select code</option>
+                        {countries.map((country) => (
+                          <option
+                            key={`${country.code}-${country.dialCode}`}
+                            value={country.dialCode}
+                          >
+                            {country.label}
+                          </option>
+                        ))}
                       </select>
                       <FieldError message={fieldErrors.phoneCountryCode} />
                     </div>
