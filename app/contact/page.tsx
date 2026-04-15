@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useCountryCodes } from "./useCountryCodes";
 
 type ContactFormData = {
   enquiryType: "general";
@@ -24,7 +25,7 @@ const initialFormData: ContactFormData = {
   enquiryType: "general",
   name: "",
   email: "",
-  phoneCountryCode: "+61",
+  phoneCountryCode: "",
   phone: "",
   message: "",
 };
@@ -57,12 +58,11 @@ function ContactTabs() {
 }
 
 function getInputClass(hasError: boolean) {
-  return [
-    "w-full bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186]",
+  return `w-full border-b bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none transition placeholder:text-[#9c9186] ${
     hasError
-      ? "border-b border-[#dc2626] focus:border-[#dc2626]"
-      : "border-b border-[#cfc2b2] focus:border-[#5f5245]",
-  ].join(" ");
+      ? "border-[#dc2626] focus:border-[#dc2626]"
+      : "border-[#cfc2b2] focus:border-[#5f5245]"
+  }`;
 }
 
 function normalizePhone(value: string) {
@@ -77,10 +77,12 @@ function validateField(
 
   switch (name) {
     case "name":
-  if (!trimmedValue) return "Enter your full name";
-  if (value.length > 100) return "This field is too long";
-  if (!NAME_REGEX.test(trimmedValue)) return "Name can contain letters and spaces only";
-  return "";
+      if (!trimmedValue) return "Enter your full name";
+      if (value.length > 100) return "This field is too long";
+      if (!NAME_REGEX.test(trimmedValue)) {
+        return "Name can contain letters and spaces only";
+      }
+      return "";
     case "email":
       if (!trimmedValue) return "Enter your email address";
       if (value.length > 120) return "This field is too long";
@@ -88,7 +90,7 @@ function validateField(
       return "";
     case "phoneCountryCode":
       if (!trimmedValue) return "Select a country code";
-      if (value.length > 6) return "This field is too long";
+      if (value.length > 10) return "This field is too long";
       return "";
     case "phone": {
       if (!trimmedValue) return "Enter your phone number";
@@ -132,6 +134,19 @@ export default function ContactPage() {
     message: "",
     success: false,
   });
+
+  const { countries, defaultDialCode } = useCountryCodes("+61");
+
+  useEffect(() => {
+    setFormData((prev) =>
+      prev.phoneCountryCode
+        ? prev
+        : {
+            ...prev,
+            phoneCountryCode: defaultDialCode,
+          }
+    );
+  }, [defaultDialCode]);
 
   function handleChange(
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -190,7 +205,10 @@ export default function ContactPage() {
         message: "Your enquiry has been submitted successfully.",
         success: true,
       });
-      setFormData(initialFormData);
+      setFormData({
+        ...initialFormData,
+        phoneCountryCode: defaultDialCode,
+      });
       setFieldErrors({});
     } catch (error) {
       const message =
@@ -244,9 +262,7 @@ export default function ContactPage() {
                   className={getInputClass(Boolean(fieldErrors.name))}
                 />
                 {fieldErrors.name ? (
-                  <p className="mt-3 text-[14px] text-[#dc2626]">
-                    {fieldErrors.name}
-                  </p>
+                  <p className="mt-3 text-[14px] text-[#dc2626]">{fieldErrors.name}</p>
                 ) : null}
               </div>
 
@@ -254,26 +270,25 @@ export default function ContactPage() {
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                   Phone
                 </label>
-                <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
+                <div className="grid grid-cols-[minmax(200px,260px)_1fr] gap-4">
                   <div>
                     <select
                       name="phoneCountryCode"
                       value={formData.phoneCountryCode}
                       onChange={handleChange}
                       aria-invalid={Boolean(fieldErrors.phoneCountryCode)}
-                      className={[
-                        "w-full bg-transparent px-0 py-3 text-[14px] text-[#1f1a17] outline-none",
-                        fieldErrors.phoneCountryCode
-                          ? "border-b border-[#dc2626]"
-                          : "border-b border-[#cfc2b2]",
-                      ].join(" ")}
+                      className={getInputClass(Boolean(fieldErrors.phoneCountryCode))}
+                      
                     >
-                      <option value="+61">+61</option>
-                      <option value="+65">+65</option>
-                      <option value="+44">+44</option>
-                      <option value="+1">+1</option>
-                      <option value="+86">+86</option>
-                      <option value="+64">+64</option>
+                      <option value="">Select code</option>
+                      {countries.map((country) => (
+                        <option
+                          key={`${country.code}-${country.dialCode}`}
+                          value={country.dialCode}
+                        >
+                          {country.label}
+                        </option>
+                      ))}
                     </select>
                     {fieldErrors.phoneCountryCode ? (
                       <p className="mt-3 text-[14px] text-[#dc2626]">
@@ -295,9 +310,7 @@ export default function ContactPage() {
                       className={getInputClass(Boolean(fieldErrors.phone))}
                     />
                     {fieldErrors.phone ? (
-                      <p className="mt-3 text-[14px] text-[#dc2626]">
-                        {fieldErrors.phone}
-                      </p>
+                      <p className="mt-3 text-[14px] text-[#dc2626]">{fieldErrors.phone}</p>
                     ) : null}
                   </div>
                 </div>
@@ -318,9 +331,7 @@ export default function ContactPage() {
                   className={getInputClass(Boolean(fieldErrors.email))}
                 />
                 {fieldErrors.email ? (
-                  <p className="mt-3 text-[14px] text-[#dc2626]">
-                    {fieldErrors.email}
-                  </p>
+                  <p className="mt-3 text-[14px] text-[#dc2626]">{fieldErrors.email}</p>
                 ) : null}
               </div>
 
@@ -344,9 +355,7 @@ export default function ContactPage() {
                   ].join(" ")}
                 />
                 {fieldErrors.message ? (
-                  <p className="mt-3 text-[14px] text-[#dc2626]">
-                    {fieldErrors.message}
-                  </p>
+                  <p className="mt-3 text-[14px] text-[#dc2626]">{fieldErrors.message}</p>
                 ) : null}
               </div>
             </div>

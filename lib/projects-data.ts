@@ -1,4 +1,5 @@
 
+
 export type Project = {
   id: string;
   name: string;
@@ -113,4 +114,27 @@ export const projects: Project[] = [
     ],
     image: "/images/house4.png",
   },
+  {
+  id: 'yarra-house',
+  name: 'Yarra House',
+  suburb: 'Richmond',
+  state: 'VIC',
+  type: 'Apartment',
+  bedrooms: '2',
+  bathrooms: '2',        
+  carSpaces: '1',        
+  priceFrom: 'From $725,000',
+  status: 'Current',
+  propertyInterest: 'established',
+  image: "/images/house4.png",
+  description:
+    'Yarra House is a well-positioned established apartment opportunity in Richmond, offering immediate lifestyle appeal and strong inner-city connectivity.',
+  highlights: [
+    'Established inner-city apartment',
+    'Close to transport, cafes, and retail',
+    'Ideal for owner-occupiers or investors',
+    'Low-maintenance modern layout',
+    'Strong demand location in Richmond',
+  ],
+}
 ];

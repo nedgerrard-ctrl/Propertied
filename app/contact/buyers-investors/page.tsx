@@ -13,6 +13,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import { useCountryCodes } from "../useCountryCodes";
 
 const ALLOWED_DOCUMENT_TYPES = [
   "application/pdf",
@@ -63,7 +64,7 @@ const initialFormData: BuyerFormData = {
   investorRegion: "",
   name: "",
   email: "",
-  phoneCountryCode: "+61",
+  phoneCountryCode: "",
   phone: "",
   minBudget: "",
   maxBudget: "",
@@ -512,6 +513,7 @@ function getTextareaClass(hasError: boolean) {
 function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { countries, defaultDialCode } = useCountryCodes("+61");
 
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
   const [selectedDocuments, setSelectedDocuments] = useState<
@@ -530,7 +532,16 @@ function BuyersInvestorsContactContent() {
     message: "",
     success: false,
   });
-
+  useEffect(() => {
+  setFormData((prev) =>
+    prev.phoneCountryCode
+      ? prev
+      : {
+          ...prev,
+          phoneCountryCode: defaultDialCode,
+        }
+  );
+}, [defaultDialCode]);
   useEffect(() => {
     const hasPrefillParams =
       searchParams.get("projectName") ||
@@ -553,7 +564,7 @@ function BuyersInvestorsContactContent() {
     }));
   }, [searchParams]);
 
-  const showPropertyPreferences = formData.propertyInterest === "off-plan";
+ const showPropertyPreferences =true;
 
   const filteredMaxBudgetOptions = useMemo(
     () => getFilteredRangeOptions(maxBudgetOptions, formData.minBudget),
@@ -616,16 +627,7 @@ function BuyersInvestorsContactContent() {
         next.maxCarSpaces = "";
       }
 
-      if (fieldName === "propertyInterest" && value !== "off-plan") {
-        next.minBedrooms = "";
-        next.maxBedrooms = "";
-        next.minBathrooms = "";
-        next.maxBathrooms = "";
-        next.minCarSpaces = "";
-        next.maxCarSpaces = "";
-        next.propertyType = "";
-        next.keywords = "";
-      }
+     
 
       setFieldErrors((prevErrors) => ({
         ...prevErrors,
@@ -759,20 +761,8 @@ function BuyersInvestorsContactContent() {
     setLoading(true);
 
     try {
-      const payload =
-        formData.propertyInterest === "off-plan"
-          ? formData
-          : {
-              ...formData,
-              minBedrooms: "",
-              maxBedrooms: "",
-              minBathrooms: "",
-              maxBathrooms: "",
-              minCarSpaces: "",
-              maxCarSpaces: "",
-              propertyType: "",
-              keywords: "",
-            };
+      const payload = formData;
+        
 
       const multipartData = new FormData();
 
@@ -874,7 +864,7 @@ function BuyersInvestorsContactContent() {
                   <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                     Phone
                   </label>
-                  <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
+                  <div className="grid grid-cols-[220px_minmax(0,1fr)] gap-4">
                     <div>
                       <select
                         name="phoneCountryCode"
@@ -885,12 +875,15 @@ function BuyersInvestorsContactContent() {
                           Boolean(fieldErrors.phoneCountryCode)
                         )}
                       >
-                        <option value="+61">+61</option>
-                        <option value="+65">+65</option>
-                        <option value="+44">+44</option>
-                        <option value="+1">+1</option>
-                        <option value="+86">+86</option>
-                        <option value="+64">+64</option>
+                        <option value="">Select code</option>
+                        {countries.map((country) => (
+                          <option
+                            key={`${country.code}-${country.dialCode}`}
+                            value={country.dialCode}
+                          >
+                            {country.label}
+                          </option>
+                        ))}
                       </select>
                       <FieldError message={fieldErrors.phoneCountryCode} />
                     </div>
@@ -1117,7 +1110,7 @@ function BuyersInvestorsContactContent() {
                     Property Preferences
                   </h2>
                   <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
-                    Tell us the type of off-plan property and features you are looking for.
+                    Tell us the property type and features you are looking for, for either off-the-plan or established opportunities.
                   </p>
                 </div>
 

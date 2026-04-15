@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import { useCountryCodes } from "../useCountryCodes";
 
 type DeveloperFormData = {
   enquiryType: "developer";
@@ -27,7 +28,7 @@ const initialFormData: DeveloperFormData = {
   enquiryType: "developer",
   name: "",
   email: "",
-  phoneCountryCode: "+61",
+  phoneCountryCode: "",
   phone: "",
   projectName: "",
   projectLocation: "",
@@ -166,6 +167,7 @@ export default function DevelopersContactPage() {
   const [formData, setFormData] = useState<DeveloperFormData>(initialFormData);
   const [fieldErrors, setFieldErrors] = useState<DeveloperFieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const { countries, defaultDialCode } = useCountryCodes("+61");
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
     title: string;
@@ -177,7 +179,16 @@ export default function DevelopersContactPage() {
     message: "",
     success: false,
   });
-
+  useEffect(() => {
+  setFormData((prev) =>
+    prev.phoneCountryCode
+      ? prev
+      : {
+          ...prev,
+          phoneCountryCode: defaultDialCode,
+        }
+  );
+}, [defaultDialCode]);
   function handleChange(
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
@@ -237,7 +248,10 @@ export default function DevelopersContactPage() {
         message: "Your developer enquiry has been submitted successfully.",
         success: true,
       });
-      setFormData(initialFormData);
+      setFormData({
+  ...initialFormData,
+  phoneCountryCode: defaultDialCode,
+});
       setFieldErrors({});
     } catch {
       setFeedbackModal({
@@ -294,23 +308,24 @@ export default function DevelopersContactPage() {
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
                   Phone
                 </label>
-                <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-4">
+                <div className="grid grid-cols-[220px_minmax(0,1fr)] gap-4">
                   <div>
                     <select
                       name="phoneCountryCode"
                       value={formData.phoneCountryCode}
                       onChange={handleChange}
                       aria-invalid={Boolean(fieldErrors.phoneCountryCode)}
-                      className={getSelectInputClass(
-                        Boolean(fieldErrors.phoneCountryCode)
-                      )}
+                      className={getSelectInputClass(Boolean(fieldErrors.phoneCountryCode))}
                     >
-                      <option value="+61">+61</option>
-                      <option value="+65">+65</option>
-                      <option value="+44">+44</option>
-                      <option value="+1">+1</option>
-                      <option value="+86">+86</option>
-                      <option value="+64">+64</option>
+                      <option value="">Select code</option>
+                      {countries.map((country) => (
+                        <option
+                          key={`${country.code}-${country.dialCode}`}
+                          value={country.dialCode}
+                        >
+                          {country.label}
+                        </option>
+                      ))}
                     </select>
                     <FieldError message={fieldErrors.phoneCountryCode} />
                   </div>
