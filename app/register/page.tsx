@@ -25,7 +25,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneCountryCode, setPhoneCountryCode] = useState("+61");
-  const [clientType, setClientType] = useState<"buyer" | "investor" | "">("");
+  const [clientType, setClientType] = useState<"buyer" | "investor" | "developer" | "">("");
+  const [companyName, setCompanyName] = useState("");
   const [isExistingClient, setIsExistingClient] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -55,7 +56,8 @@ export default function RegisterPage() {
           phone,
           phoneCountryCode,
           clientType,
-          isExistingClient,
+          companyName,
+          isExistingClient: clientType !== "developer" && isExistingClient,
           password,
           confirmPassword,
         }),
@@ -83,21 +85,32 @@ export default function RegisterPage() {
       <div className="flex min-h-screen items-center justify-center bg-[#f4f1ea] px-6">
         <Navbar />
         <div className="w-full max-w-md rounded-2xl border border-[#ddd5c8] bg-white p-10 text-center shadow-lg">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <svg viewBox="0 0 20 20" className="h-7 w-7 fill-emerald-600">
-              <path
-                fillRule="evenodd"
-                d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                clipRule="evenodd"
-              />
-            </svg>
+          <div
+            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              isExistingClient ? "bg-amber-100" : "bg-emerald-100"
+            }`}
+          >
+            {isExistingClient ? (
+              <svg viewBox="0 0 20 20" className="h-7 w-7 fill-amber-600">
+                <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-10.5a.75.75 0 0 0-1.5 0v4a.75.75 0 0 0 1.5 0v-4Zm0 7a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 20" className="h-7 w-7 fill-emerald-600">
+                <path
+                  fillRule="evenodd"
+                  d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
           </div>
           <h2 className="text-2xl font-medium text-[#2f2923]">
-            Account created
+            {isExistingClient ? "Account pending approval" : "Account created"}
           </h2>
           <p className="mt-3 text-[14px] leading-6 text-[#6e655c]">
-            Your account has been created successfully. You will be redirected
-            to the sign-in page shortly.
+            {isExistingClient
+              ? "Your account has been created and is pending review. Our team will verify your existing client status — you'll gain access to client-only content once approved."
+              : "Your account has been created successfully. You will be redirected to the sign-in page shortly."}
           </p>
           <Link
             href="/login"
@@ -288,26 +301,31 @@ export default function RegisterPage() {
               <p className="mb-2 text-[13px] font-medium text-[#4d453d]">
                 I am a
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                {(["buyer", "investor"] as const).map((type) => (
+              <div className="grid grid-cols-3 gap-3">
+                {(
+                  [
+                    { value: "buyer", label: "Buyer" },
+                    { value: "investor", label: "Investor" },
+                    { value: "developer", label: "Developer" },
+                  ] as const
+                ).map(({ value, label }) => (
                   <button
-                    key={type}
+                    key={value}
                     type="button"
                     onClick={() => {
-                      setClientType(type);
+                      setClientType(value);
                       clearFieldError("clientType");
+                      if (value === "developer") setIsExistingClient(false);
                     }}
                     className={[
-                      "rounded-xl border px-4 py-3 text-[14px] font-medium capitalize transition",
-                      clientType === type
+                      "rounded-xl border px-4 py-3 text-[14px] font-medium transition",
+                      clientType === value
                         ? "border-[#2f2923] bg-[#2f2923] text-[#f4f1ea]"
                         : "border-[#c8bfb4] bg-[#fbfaf7] text-[#4d453d] hover:border-[#2f2923]",
-                      fieldErrors.clientType
-                        ? "border-[#dc2626]"
-                        : "",
+                      fieldErrors.clientType ? "border-[#dc2626]" : "",
                     ].join(" ")}
                   >
-                    {type === "buyer" ? "Buyer" : "Investor"}
+                    {label}
                   </button>
                 ))}
               </div>
@@ -318,24 +336,56 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Existing client */}
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3.5 transition hover:border-[#2f2923]">
-              <input
-                type="checkbox"
-                checked={isExistingClient}
-                onChange={(e) => setIsExistingClient(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-neutral-400 accent-[#2f2923]"
-              />
+            {/* Company name — shown for developers */}
+            {clientType === "developer" && (
               <div>
-                <p className="text-[14px] font-medium text-[#2f2923]">
-                  I&rsquo;m an existing PPM client
-                </p>
-                <p className="mt-0.5 text-[12px] leading-5 text-[#7a7166]">
-                  Select this if you already have an active portfolio managed by
-                  PPM. Your account will be reviewed and approved by our team.
-                </p>
+                <label
+                  htmlFor="companyName"
+                  className="mb-1.5 block text-[13px] font-medium text-[#4d453d]"
+                >
+                  Company name{" "}
+                  <span className="font-normal text-[#a49a8d]">(optional)</span>
+                </label>
+                <input
+                  id="companyName"
+                  type="text"
+                  placeholder="Acme Developments Pty Ltd"
+                  value={companyName}
+                  onChange={(e) => {
+                    setCompanyName(e.target.value);
+                    clearFieldError("companyName");
+                  }}
+                  aria-invalid={Boolean(fieldErrors.companyName)}
+                  className={getFieldClass(Boolean(fieldErrors.companyName))}
+                />
+                {fieldErrors.companyName && (
+                  <p className="mt-1.5 text-[13px] text-[#dc2626]">
+                    {fieldErrors.companyName}
+                  </p>
+                )}
               </div>
-            </label>
+            )}
+
+            {/* Existing client — hidden for developers */}
+            {clientType !== "developer" && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#c8bfb4] bg-[#fbfaf7] px-4 py-3.5 transition hover:border-[#2f2923]">
+                <input
+                  type="checkbox"
+                  checked={isExistingClient}
+                  onChange={(e) => setIsExistingClient(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-neutral-400 accent-[#2f2923]"
+                />
+                <div>
+                  <p className="text-[14px] font-medium text-[#2f2923]">
+                    I&rsquo;m an existing PPM client
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-5 text-[#7a7166]">
+                    Select this if you already have an active portfolio managed by
+                    PPM. Your account will be reviewed and approved by our team.
+                  </p>
+                </div>
+              </label>
+            )}
 
             {/* Password */}
             <div>

@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type ClientType = "buyer" | "investor" | "";
-type AccountStatus =
-  | "active"
-  | "pending-existing-client"
-  | "approved-existing-client";
+type AccountStatus = "active" | "pending-existing-client" | "approved-existing-client";
 
 type AssignedDocument = {
   originalName: string;
@@ -16,13 +12,13 @@ type AssignedDocument = {
   fileUrl: string;
 };
 
-type Client = {
+type Developer = {
   _id: string;
   name: string;
   email: string;
   phone: string;
   phoneCountryCode: string;
-  clientType: ClientType;
+  companyName: string;
   accountStatus: AccountStatus;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
@@ -41,36 +37,31 @@ type Enquiry = {
   _id: string;
   enquiryType: "general" | "developer" | "buyer";
   status: string;
-  propertyInterest: string;
   projectName: string;
-  buyerType: string;
-  investorRegion: string;
+  projectLocation: string;
+  commissionStructureInterest: string;
   legalDocuments: LegalDocument[];
   createdAt: string;
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────────
 
-const ACCOUNT_STATUS_OPTIONS: AccountStatus[] = [
-  "active",
-  "pending-existing-client",
-  "approved-existing-client",
-];
+const DEV_STATUS_OPTIONS: AccountStatus[] = ["active", "approved-existing-client"];
 
-const ACCOUNT_STATUS_LABEL: Record<AccountStatus, string> = {
+const DEV_STATUS_LABEL: Record<AccountStatus, string> = {
   active: "Active",
-  "pending-existing-client": "Pending Approval",
-  "approved-existing-client": "Approved Existing",
+  "pending-existing-client": "Pending",
+  "approved-existing-client": "Verified",
 };
 
-const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
-  active: "bg-emerald-100 text-emerald-800",
+const DEV_STATUS_BADGE: Record<AccountStatus, string> = {
+  active: "bg-neutral-100 text-neutral-600",
   "pending-existing-client": "bg-amber-100 text-amber-800",
   "approved-existing-client": "bg-blue-100 text-blue-800",
 };
 
-const ACCOUNT_STATUS_BUTTON: Record<AccountStatus, string> = {
-  active: "border-emerald-400 bg-emerald-50 text-emerald-800",
+const DEV_STATUS_BUTTON: Record<AccountStatus, string> = {
+  active: "border-neutral-400 bg-neutral-50 text-neutral-800",
   "pending-existing-client": "border-amber-400 bg-amber-50 text-amber-800",
   "approved-existing-client": "border-blue-400 bg-blue-50 text-blue-800",
 };
@@ -91,32 +82,22 @@ function formatPhone(countryCode?: string, phone?: string) {
   return [safeCode, safePhone].filter(Boolean).join(" ") || "—";
 }
 
-function formatFileSize(fileSize: number) {
-  if (fileSize < 1024) return `${fileSize} B`;
-  if (fileSize < 1024 * 1024) return `${(fileSize / 1024).toFixed(1)} KB`;
-  return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function getEnquiryLabel(enquiry: Enquiry) {
-  if (enquiry.enquiryType === "buyer") {
-    if (enquiry.propertyInterest === "off-plan") return "Off-the-Plan";
-    if (enquiry.propertyInterest === "established") return "Established";
-    return "Buyer / Investor";
-  }
-  if (enquiry.enquiryType === "developer") return "Developer";
-  return "General";
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function AccountStatusBadge({ status }: { status: AccountStatus }) {
+function StatusBadge({ status }: { status: AccountStatus }) {
   return (
     <span
       className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-        ACCOUNT_STATUS_BADGE[status] ?? "bg-neutral-100 text-neutral-500"
+        DEV_STATUS_BADGE[status] ?? "bg-neutral-100 text-neutral-500"
       }`}
     >
-      {ACCOUNT_STATUS_LABEL[status] ?? status}
+      {DEV_STATUS_LABEL[status] ?? status}
     </span>
   );
 }
@@ -141,15 +122,6 @@ function EnquiryStatusBadge({ status }: { status: string }) {
       }`}
     >
       {label[status] ?? status}
-    </span>
-  );
-}
-
-function TypeBadge({ clientType }: { clientType: ClientType }) {
-  if (!clientType) return <span className="text-neutral-400">—</span>;
-  return (
-    <span className="inline-block rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-600">
-      {clientType === "buyer" ? "Buyer" : "Investor"}
     </span>
   );
 }
@@ -186,7 +158,7 @@ function ConfirmDialog({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="w-full rounded-sm border border-neutral-200 bg-white px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900 disabled:opacity-50"
+            className="w-full rounded-sm border border-neutral-200 bg-white px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700 transition hover:border-neutral-400 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -195,7 +167,7 @@ function ConfirmDialog({
             disabled={loading}
             className="w-full rounded-sm bg-red-600 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {loading ? "Processing..." : confirmLabel}
+            {loading ? "Removing..." : confirmLabel}
           </button>
         </div>
       </div>
@@ -203,30 +175,29 @@ function ConfirmDialog({
   );
 }
 
-// ─── Detail Panel ──────────────────────────────────────────────────────────────
+// ─── Detail panel ──────────────────────────────────────────────────────────────
 
-function ClientDetailPanel({
-  client: initialClient,
+function DeveloperDetailPanel({
+  developer: initialDeveloper,
   onClose,
   onStatusUpdate,
 }: {
-  client: Client;
+  developer: Developer;
   onClose: () => void;
   onStatusUpdate: (id: string, status: AccountStatus) => void;
 }) {
-  const [client, setClient] = useState<Client>(initialClient);
+  const [developer, setDeveloper] = useState<Developer>(initialDeveloper);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
-  const [loadingDetail, setLoadingDetail] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(true); // true on mount — detail fetch starts immediately
   const [detailError, setDetailError] = useState("");
 
   const [pendingStatus, setPendingStatus] = useState<AccountStatus>(
-    initialClient.accountStatus
+    initialDeveloper.accountStatus
   );
   const [savingStatus, setSavingStatus] = useState(false);
   const [savedStatus, setSavedStatus] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"approve" | "reject" | null>(null);
 
-  const [notes, setNotes] = useState(initialClient.adminNotes ?? "");
+  const [notes, setNotes] = useState(initialDeveloper.adminNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
   const [savedNotes, setSavedNotes] = useState(false);
 
@@ -238,50 +209,30 @@ function ClientDetailPanel({
   const [deletingDoc, setDeletingDoc] = useState(false);
 
   useEffect(() => {
-    setLoadingDetail(true);
-    setDetailError("");
-    fetch(`/api/admin/clients/${initialClient._id}`)
+    fetch(`/api/admin/developers/${initialDeveloper._id}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.client) setClient(data.client);
+        if (data.developer) setDeveloper(data.developer);
         if (data.enquiries) setEnquiries(data.enquiries);
-        setNotes(data.client?.adminNotes ?? "");
-        setPendingStatus(data.client?.accountStatus ?? initialClient.accountStatus);
+        setNotes(data.developer?.adminNotes ?? "");
+        setPendingStatus(data.developer?.accountStatus ?? "active");
       })
-      .catch(() => setDetailError("Failed to load client details."))
+      .catch(() => setDetailError("Failed to load developer details."))
       .finally(() => setLoadingDetail(false));
-  }, [initialClient._id]);
-
-  async function handleApprovalAction(action: "approve" | "reject") {
-    const newStatus: AccountStatus =
-      action === "approve" ? "approved-existing-client" : "active";
-    setActionLoading(action);
-    const res = await fetch(`/api/admin/clients/${client._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accountStatus: newStatus }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setClient(data.client);
-      setPendingStatus(newStatus);
-      onStatusUpdate(client._id, newStatus);
-    }
-    setActionLoading(null);
-  }
+  }, [initialDeveloper._id]);
 
   async function handleSaveStatus() {
-    if (pendingStatus === client.accountStatus) return;
+    if (pendingStatus === developer.accountStatus) return;
     setSavingStatus(true);
-    const res = await fetch(`/api/admin/clients/${client._id}`, {
+    const res = await fetch(`/api/admin/developers/${developer._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ accountStatus: pendingStatus }),
     });
     if (res.ok) {
       const data = await res.json();
-      setClient(data.client);
-      onStatusUpdate(client._id, pendingStatus);
+      setDeveloper(data.developer);
+      onStatusUpdate(developer._id, pendingStatus);
       setSavedStatus(true);
       setTimeout(() => setSavedStatus(false), 2000);
     }
@@ -290,7 +241,7 @@ function ClientDetailPanel({
 
   async function handleSaveNotes() {
     setSavingNotes(true);
-    const res = await fetch(`/api/admin/clients/${client._id}`, {
+    const res = await fetch(`/api/admin/developers/${developer._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ adminNotes: notes }),
@@ -311,14 +262,14 @@ function ClientDetailPanel({
     const formData = new FormData();
     formData.append("document", file);
 
-    const res = await fetch(`/api/admin/clients/${client._id}/documents`, {
+    const res = await fetch(`/api/admin/developers/${developer._id}/documents`, {
       method: "POST",
       body: formData,
     });
 
     if (res.ok) {
       const data = await res.json();
-      setClient((prev) => ({
+      setDeveloper((prev) => ({
         ...prev,
         assignedDocuments: [...(prev.assignedDocuments ?? []), data.document],
       }));
@@ -334,13 +285,13 @@ function ClientDetailPanel({
   async function handleDeleteDoc() {
     if (!docToDelete) return;
     setDeletingDoc(true);
-    const res = await fetch(`/api/admin/clients/${client._id}/documents`, {
+    const res = await fetch(`/api/admin/developers/${developer._id}/documents`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ storedName: docToDelete.storedName }),
     });
     if (res.ok) {
-      setClient((prev) => ({
+      setDeveloper((prev) => ({
         ...prev,
         assignedDocuments: prev.assignedDocuments.filter(
           (d) => d.storedName !== docToDelete.storedName
@@ -362,11 +313,16 @@ function ClientDetailPanel({
         <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-neutral-400">
-              Client Profile
+              Developer Profile
             </p>
             <h2 className="mt-0.5 text-lg font-semibold text-neutral-900">
-              {client.name || "Unnamed Client"}
+              {developer.name || "Unnamed Developer"}
             </h2>
+            {developer.companyName && (
+              <p className="mt-0.5 text-[13px] text-neutral-500">
+                {developer.companyName}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -382,9 +338,7 @@ function ClientDetailPanel({
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {loadingDetail ? (
-            <div className="py-10 text-center text-sm text-neutral-400">
-              Loading…
-            </div>
+            <div className="py-10 text-center text-sm text-neutral-400">Loading…</div>
           ) : detailError ? (
             <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {detailError}
@@ -400,29 +354,34 @@ function ClientDetailPanel({
                   <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Name</dt>
                     <dd className="font-medium text-neutral-900">
-                      {client.name || "—"}
+                      {developer.name || "—"}
                     </dd>
                   </div>
+                  {developer.companyName && (
+                    <div className="flex gap-3">
+                      <dt className="w-32 shrink-0 text-neutral-400">Company</dt>
+                      <dd className="font-medium text-neutral-900">
+                        {developer.companyName}
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Email</dt>
                     <dd className="break-all font-medium text-neutral-900">
-                      <a
-                        href={`mailto:${client.email}`}
-                        className="hover:underline"
-                      >
-                        {client.email}
+                      <a href={`mailto:${developer.email}`} className="hover:underline">
+                        {developer.email}
                       </a>
                     </dd>
                   </div>
                   <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Phone</dt>
                     <dd className="font-medium text-neutral-900">
-                      {client.phone ? (
+                      {developer.phone ? (
                         <a
-                          href={`tel:${formatPhone(client.phoneCountryCode, client.phone).replace(/\s/g, "")}`}
+                          href={`tel:${formatPhone(developer.phoneCountryCode, developer.phone).replace(/\s/g, "")}`}
                           className="hover:underline"
                         >
-                          {formatPhone(client.phoneCountryCode, client.phone)}
+                          {formatPhone(developer.phoneCountryCode, developer.phone)}
                         </a>
                       ) : (
                         "—"
@@ -430,21 +389,15 @@ function ClientDetailPanel({
                     </dd>
                   </div>
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-neutral-400">Type</dt>
-                    <dd>
-                      <TypeBadge clientType={client.clientType} />
-                    </dd>
-                  </div>
-                  <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Status</dt>
                     <dd>
-                      <AccountStatusBadge status={client.accountStatus} />
+                      <StatusBadge status={developer.accountStatus} />
                     </dd>
                   </div>
                   <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Registered</dt>
                     <dd className="font-medium text-neutral-900">
-                      {formatDate(client.createdAt)}
+                      {formatDate(developer.createdAt)}
                     </dd>
                   </div>
                 </dl>
@@ -452,75 +405,32 @@ function ClientDetailPanel({
 
               <hr className="border-neutral-100" />
 
-              {/* Pending existing-client approval actions */}
-              {client.accountStatus === "pending-existing-client" && (
-                <section>
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <svg viewBox="0 0 20 20" className="h-4 w-4 fill-amber-600 shrink-0">
-                        <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-800">
-                        Pending Existing Client Approval
-                      </p>
-                    </div>
-                    <p className="text-[13px] text-amber-800 leading-5 mb-4">
-                      This user claims to be an existing PPM client. Review their details then approve or reject their request.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => handleApprovalAction("approve")}
-                        disabled={actionLoading !== null}
-                        className="rounded border border-emerald-600 bg-emerald-600 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {actionLoading === "approve" ? "Approving…" : "Approve Existing Client"}
-                      </button>
-                      <button
-                        onClick={() => handleApprovalAction("reject")}
-                        disabled={actionLoading !== null}
-                        className="rounded border border-neutral-300 bg-white px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-500 hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {actionLoading === "reject" ? "Rejecting…" : "Reject Existing Client"}
-                      </button>
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              <hr className="border-neutral-100" />
-
-              {/* Account status control */}
+              {/* Status control */}
               <section>
                 <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Update Account Status
+                  Update Status
                 </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {ACCOUNT_STATUS_OPTIONS.map((s) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {DEV_STATUS_OPTIONS.map((s) => (
                     <button
                       key={s}
                       onClick={() => setPendingStatus(s)}
                       className={`rounded border px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] transition leading-tight ${
                         pendingStatus === s
-                          ? ACCOUNT_STATUS_BUTTON[s]
+                          ? DEV_STATUS_BUTTON[s]
                           : "border-neutral-200 bg-white text-neutral-400"
                       }`}
                     >
-                      {ACCOUNT_STATUS_LABEL[s]}
+                      {DEV_STATUS_LABEL[s]}
                     </button>
                   ))}
                 </div>
                 <button
                   onClick={handleSaveStatus}
-                  disabled={
-                    savingStatus || pendingStatus === client.accountStatus
-                  }
+                  disabled={savingStatus || pendingStatus === developer.accountStatus}
                   className="mt-3 w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {savingStatus
-                    ? "Saving…"
-                    : savedStatus
-                      ? "Saved"
-                      : "Save Status"}
+                  {savingStatus ? "Saving…" : savedStatus ? "Saved" : "Save Status"}
                 </button>
               </section>
 
@@ -532,9 +442,7 @@ function ClientDetailPanel({
                   Submitted Enquiries ({enquiries.length})
                 </p>
                 {enquiries.length === 0 ? (
-                  <p className="text-[13px] text-neutral-400">
-                    No enquiries submitted.
-                  </p>
+                  <p className="text-[13px] text-neutral-400">No enquiries submitted.</p>
                 ) : (
                   <div className="space-y-2">
                     {enquiries.map((eq) => (
@@ -544,20 +452,26 @@ function ClientDetailPanel({
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-[13px] font-medium text-neutral-900">
-                            {getEnquiryLabel(eq)}
+                            {eq.enquiryType === "developer"
+                              ? eq.projectName || "Developer Enquiry"
+                              : eq.enquiryType === "buyer"
+                                ? "Buyer Enquiry"
+                                : "General Enquiry"}
                           </span>
                           <EnquiryStatusBadge status={eq.status} />
                         </div>
+                        {eq.projectLocation && (
+                          <p className="mt-1 text-[12px] text-neutral-500">
+                            {eq.projectLocation}
+                          </p>
+                        )}
+                        {eq.commissionStructureInterest && (
+                          <p className="mt-0.5 truncate text-[12px] text-neutral-400">
+                            Commission: {eq.commissionStructureInterest}
+                          </p>
+                        )}
                         <p className="mt-1 text-[12px] text-neutral-500">
                           {formatDate(eq.createdAt)}
-                          {eq.legalDocuments?.length > 0 && (
-                            <span className="ml-2 text-neutral-400">
-                              · {eq.legalDocuments.length}{" "}
-                              {eq.legalDocuments.length === 1
-                                ? "document"
-                                : "documents"}
-                            </span>
-                          )}
                         </p>
                       </div>
                     ))}
@@ -611,19 +525,19 @@ function ClientDetailPanel({
 
               <hr className="border-neutral-100" />
 
-              {/* Assigned documents (admin uploads) */}
+              {/* Assigned documents */}
               <section>
                 <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Assigned Documents ({client.assignedDocuments?.length ?? 0})
+                  Assigned Documents ({developer.assignedDocuments?.length ?? 0})
                 </p>
 
-                {(client.assignedDocuments?.length ?? 0) === 0 ? (
+                {(developer.assignedDocuments?.length ?? 0) === 0 ? (
                   <p className="mb-3 text-[13px] text-neutral-400">
                     No documents assigned yet.
                   </p>
                 ) : (
                   <div className="mb-3 space-y-2">
-                    {client.assignedDocuments.map((doc) => (
+                    {developer.assignedDocuments.map((doc) => (
                       <div
                         key={doc.storedName}
                         className="rounded border border-neutral-200 bg-neutral-50 px-4 py-3"
@@ -664,10 +578,7 @@ function ClientDetailPanel({
 
                 <div>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-neutral-200 bg-white px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900">
-                    <svg
-                      viewBox="0 0 20 20"
-                      className="h-4 w-4 fill-current shrink-0"
-                    >
+                    <svg viewBox="0 0 20 20" className="h-4 w-4 fill-current shrink-0">
                       <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                     </svg>
                     {uploading ? "Uploading…" : "Assign Document"}
@@ -701,13 +612,11 @@ function ClientDetailPanel({
                   onChange={(e) => setNotes(e.target.value)}
                   maxLength={2000}
                   rows={4}
-                  placeholder="Add internal notes about this client…"
+                  placeholder="Add internal notes about this developer…"
                   className="w-full resize-y rounded border border-neutral-200 bg-neutral-50 px-4 py-3 text-[13px] text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300"
                 />
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-[11px] text-neutral-400">
-                    {notes.length}/2000
-                  </span>
+                  <span className="text-[11px] text-neutral-400">{notes.length}/2000</span>
                   <button
                     onClick={handleSaveNotes}
                     disabled={savingNotes}
@@ -725,12 +634,10 @@ function ClientDetailPanel({
       <ConfirmDialog
         open={Boolean(docToDelete)}
         title="Remove document?"
-        message={`Remove "${docToDelete?.originalName}" from this client's profile? This cannot be undone.`}
+        message={`Remove "${docToDelete?.originalName}" from this developer's profile? This cannot be undone.`}
         confirmLabel="Remove"
         loading={deletingDoc}
-        onCancel={() => {
-          if (!deletingDoc) setDocToDelete(null);
-        }}
+        onCancel={() => { if (!deletingDoc) setDocToDelete(null); }}
         onConfirm={handleDeleteDoc}
       />
     </>
@@ -739,78 +646,62 @@ function ClientDetailPanel({
 
 // ─── Main panel ────────────────────────────────────────────────────────────────
 
-export default function ClientsPanel() {
-  const [clients, setClients] = useState<Client[]>([]);
+export default function DevelopersPanel() {
+  const [developers, setDevelopers] = useState<Developer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selected, setSelected] = useState<Client | null>(null);
+  const [selected, setSelected] = useState<Developer | null>(null);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
-    fetch("/api/admin/clients")
+    fetch("/api/admin/developers")
       .then((r) => r.json())
-      .then((data) => setClients(data.clients ?? []))
-      .catch(() => setError("Failed to load clients."))
+      .then((data) => setDevelopers(data.developers ?? []))
+      .catch(() => setError("Failed to load developers."))
       .finally(() => setLoading(false));
   }, []);
 
   function handleStatusUpdate(id: string, status: AccountStatus) {
-    setClients((prev) =>
-      prev.map((c) => (c._id === id ? { ...c, accountStatus: status } : c))
+    setDevelopers((prev) =>
+      prev.map((d) => (d._id === id ? { ...d, accountStatus: status } : d))
     );
-    setSelected((prev) =>
-      prev?._id === id ? { ...prev, accountStatus: status } : prev
-    );
+    setSelected((prev) => (prev?._id === id ? { ...prev, accountStatus: status } : prev));
   }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return clients.filter((c) => {
-      if (statusFilter !== "all" && c.accountStatus !== statusFilter)
-        return false;
-      if (
-        typeFilter !== "all" &&
-        (c.clientType || "") !== typeFilter
-      )
-        return false;
+    return developers.filter((d) => {
+      if (statusFilter !== "all" && d.accountStatus !== statusFilter) return false;
       if (q) {
-        const phone = formatPhone(c.phoneCountryCode, c.phone).toLowerCase();
+        const phone = formatPhone(d.phoneCountryCode, d.phone).toLowerCase();
         if (
-          !c.name.toLowerCase().includes(q) &&
-          !c.email.toLowerCase().includes(q) &&
+          !d.name.toLowerCase().includes(q) &&
+          !d.email.toLowerCase().includes(q) &&
+          !(d.companyName ?? "").toLowerCase().includes(q) &&
           !phone.includes(q)
         )
           return false;
       }
       return true;
     });
-  }, [clients, statusFilter, typeFilter, search]);
+  }, [developers, statusFilter, search]);
 
   const counts = useMemo(
     () => ({
-      total: clients.length,
-      active: clients.filter((c) => c.accountStatus === "active").length,
-      pending: clients.filter(
-        (c) => c.accountStatus === "pending-existing-client"
-      ).length,
-      approved: clients.filter(
-        (c) => c.accountStatus === "approved-existing-client"
-      ).length,
+      total: developers.length,
+      active: developers.filter((d) => d.accountStatus === "active").length,
+      verified: developers.filter((d) => d.accountStatus === "approved-existing-client").length,
     }),
-    [clients]
+    [developers]
   );
 
-  const hasFilters =
-    search.trim() !== "" || statusFilter !== "all" || typeFilter !== "all";
+  const hasFilters = search.trim() !== "" || statusFilter !== "all";
 
   if (loading) {
     return (
-      <div className="mt-10 text-center text-sm text-neutral-400">
-        Loading clients…
-      </div>
+      <div className="mt-10 text-center text-sm text-neutral-400">Loading developers…</div>
     );
   }
 
@@ -825,20 +716,11 @@ export default function ClientsPanel() {
   return (
     <div className="mt-10">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
-          { label: "Active", value: counts.active, color: "text-emerald-700" },
-          {
-            label: "Pending Approval",
-            value: counts.pending,
-            color: "text-amber-700",
-          },
-          {
-            label: "Approved Existing",
-            value: counts.approved,
-            color: "text-blue-700",
-          },
+          { label: "Active", value: counts.active, color: "text-neutral-700" },
+          { label: "Verified", value: counts.verified, color: "text-blue-700" },
         ].map((s) => (
           <div
             key={s.label}
@@ -847,16 +729,13 @@ export default function ClientsPanel() {
             <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
               {s.label}
             </p>
-            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>
-              {s.value}
-            </p>
+            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 bg-white px-5 py-4">
-        {/* Search */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
             Search
@@ -865,12 +744,11 @@ export default function ClientsPanel() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Name, email, or phone…"
-            className="w-56 rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
+            placeholder="Name, company, email, or phone…"
+            className="w-64 rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           />
         </div>
 
-        {/* Status filter */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
             Status
@@ -882,34 +760,13 @@ export default function ClientsPanel() {
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
-            <option value="pending-existing-client">Pending Approval</option>
-            <option value="approved-existing-client">Approved Existing</option>
-          </select>
-        </div>
-
-        {/* Type filter */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            Type
-          </label>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
-          >
-            <option value="all">All types</option>
-            <option value="buyer">Buyer</option>
-            <option value="investor">Investor</option>
+            <option value="approved-existing-client">Verified</option>
           </select>
         </div>
 
         {hasFilters && (
           <button
-            onClick={() => {
-              setSearch("");
-              setStatusFilter("all");
-              setTypeFilter("all");
-            }}
+            onClick={() => { setSearch(""); setStatusFilter("all"); }}
             className="self-end rounded border border-neutral-200 px-3 py-1.5 text-[12px] text-neutral-500 transition hover:border-neutral-400 hover:text-neutral-700"
           >
             Clear filters
@@ -917,7 +774,7 @@ export default function ClientsPanel() {
         )}
 
         <span className="ml-auto self-end text-[12px] text-neutral-400">
-          {filtered.length} of {clients.length} clients
+          {filtered.length} of {developers.length} developers
         </span>
       </div>
 
@@ -925,56 +782,51 @@ export default function ClientsPanel() {
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-neutral-400">
-            {clients.length === 0
-              ? "No registered clients yet."
-              : "No clients match the current filters."}
+            {developers.length === 0
+              ? "No registered developers yet."
+              : "No developers match the current filters."}
           </div>
         ) : (
           <table className="w-full text-left text-[13px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
                 <th className="px-5 py-3">Name</th>
+                <th className="px-5 py-3">Company</th>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
-                <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Registered</th>
                 <th className="px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c, i) => (
+              {filtered.map((d, i) => (
                 <tr
-                  key={c._id}
-                  onClick={() => setSelected(c)}
+                  key={d._id}
+                  onClick={() => setSelected(d)}
                   className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
                     i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
                   }`}
                 >
                   <td className="px-5 py-3.5 font-medium text-neutral-900">
-                    {c.name || "—"}
+                    {d.name || "—"}
                   </td>
-                  <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
+                  <td className="px-5 py-3.5 text-neutral-600">
+                    {d.companyName || <span className="text-neutral-300">—</span>}
+                  </td>
+                  <td className="px-5 py-3.5 text-neutral-600">{d.email}</td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
-                    {c.phone
-                      ? formatPhone(c.phoneCountryCode, c.phone)
-                      : "—"}
+                    {d.phone ? formatPhone(d.phoneCountryCode, d.phone) : "—"}
                   </td>
                   <td className="px-5 py-3.5">
-                    <TypeBadge clientType={c.clientType} />
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <AccountStatusBadge status={c.accountStatus} />
+                    <StatusBadge status={d.accountStatus} />
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
-                    {formatDate(c.createdAt)}
+                    {formatDate(d.createdAt)}
                   </td>
-                  <td
-                    className="px-5 py-3.5"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() => setSelected(c)}
+                      onClick={() => setSelected(d)}
                       className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
                     >
                       View
@@ -988,8 +840,8 @@ export default function ClientsPanel() {
       </div>
 
       {selected && (
-        <ClientDetailPanel
-          client={selected}
+        <DeveloperDetailPanel
+          developer={selected}
           onClose={() => setSelected(null)}
           onStatusUpdate={handleStatusUpdate}
         />

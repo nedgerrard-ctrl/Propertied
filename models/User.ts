@@ -1,7 +1,7 @@
 import mongoose, { Schema, models, model } from "mongoose";
 
 export type UserRole = "admin" | "client";
-export type ClientType = "buyer" | "investor" | "";
+export type ClientType = "buyer" | "investor" | "developer" | "";
 export type AccountStatus =
   | "active"
   | "pending-existing-client"
@@ -24,6 +24,7 @@ export interface IUser {
   accountStatus?: AccountStatus;
   phone?: string;
   phoneCountryCode?: string;
+  companyName?: string;
   adminNotes?: string;
   assignedDocuments?: AssignedDocument[];
   resetPasswordTokenHash?: string | null;
@@ -69,8 +70,14 @@ const userSchema = new Schema<IUser>(
     },
     clientType: {
       type: String,
-      enum: ["buyer", "investor", ""],
+      enum: ["buyer", "investor", "developer", ""],
       default: "",
+    },
+    companyName: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 120,
     },
     accountStatus: {
       type: String,
