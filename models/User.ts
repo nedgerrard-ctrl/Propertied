@@ -1,6 +1,19 @@
 import { Schema, models, model } from "mongoose";
 
 export type UserRole = "admin" | "client";
+export type ClientType = "buyer" | "investor" | "";
+export type AccountStatus =
+  | "active"
+  | "pending-existing-client"
+  | "approved-existing-client";
+
+export interface AssignedDocument {
+  originalName: string;
+  storedName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+}
 export type UserType = "buyer_investor" | "developer" | "existing_client";
 export type LocationType = "local" | "overseas";
 
@@ -11,6 +24,12 @@ export interface IUser {
   email: string;
   passwordHash: string;
   role: UserRole;
+  clientType?: ClientType;
+  accountStatus?: AccountStatus;
+  phone?: string;
+  phoneCountryCode?: string;
+  adminNotes?: string;
+  assignedDocuments?: AssignedDocument[];
   userType?: UserType;
   phone?: string;
   location?: {
@@ -25,6 +44,17 @@ export interface IUser {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+const assignedDocumentSchema = new Schema(
+  {
+    originalName: { type: String, required: true, trim: true, maxlength: 200 },
+    storedName: { type: String, required: true, trim: true, maxlength: 255 },
+    fileType: { type: String, required: true, trim: true, maxlength: 100 },
+    fileSize: { type: Number, required: true, min: 0 },
+    fileUrl: { type: String, required: true, trim: true, maxlength: 500 },
+  },
+  { _id: false }
+);
 
 const assignedDocumentSchema = new Schema(
   {
@@ -68,6 +98,36 @@ const userSchema = new Schema<IUser>(
       required: true,
       enum: ["admin", "client"],
       default: "client",
+    },
+    clientType: {
+      type: String,
+      enum: ["buyer", "investor", ""],
+      default: "",
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "pending-existing-client", "approved-existing-client"],
+      default: "active",
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    phoneCountryCode: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    adminNotes: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 2000,
+    },
+    assignedDocuments: {
+      type: [assignedDocumentSchema],
+      default: [],
     },
     userType: {
       type: String,
