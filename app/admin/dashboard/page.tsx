@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
-import EnquiriesPanel from "./enquiries-panel";
+import AdminTabs from "./admin-tabs";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -20,17 +20,16 @@ export default async function AdminDashboardPage() {
               PPM Admin
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-neutral-900">
-              Enquiries
+              Dashboard
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Review and manage submitted enquiries.
+              Manage enquiries and registered clients.
             </p>
           </div>
           <LogoutButton />
         </div>
 
-        {/* Enquiries */}
-        <EnquiriesPanel />
+        <AdminTabs />
       </div>
     </main>
   );
