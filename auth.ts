@@ -49,8 +49,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return {
           id: user._id.toString(),
           email: user.email,
-          name: user.name || "Admin",
+          name: user.name || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User",
           role: user.role,
+          userType: user.userType,
+          pendingApproval: user.pendingApproval ?? false,
         };
       },
     }),
@@ -58,15 +60,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        const u = user as { role?: string; userType?: string; pendingApproval?: boolean };
+        token.role = u.role;
+        token.userType = u.userType;
+        token.pendingApproval = u.pendingApproval;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string }).role = token.role as
-          | string
-          | undefined;
+        session.user.role = token.role as string | undefined;
+        session.user.userType = token.userType as string | undefined;
+        session.user.pendingApproval = token.pendingApproval as boolean | undefined;
       }
       return session;
     },
