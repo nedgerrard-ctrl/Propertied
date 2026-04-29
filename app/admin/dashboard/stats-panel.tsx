@@ -205,7 +205,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="group rounded-lg border border-neutral-200 bg-white px-6 pb-6 pt-5">
+    <div className="rounded-lg border border-neutral-200 bg-white px-6 pb-6 pt-5">
       <div className="mb-1 flex items-start justify-between gap-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
@@ -219,7 +219,7 @@ function ChartCard({
           <button
             onClick={onExpand}
             title="Expand chart"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-200 text-neutral-400 opacity-0 transition hover:border-neutral-400 hover:text-neutral-700 group-hover:opacity-100"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-300 bg-white text-neutral-500 shadow-sm transition hover:border-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:shadow"
           >
             <IconExpand />
           </button>
