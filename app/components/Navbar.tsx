@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 // ─── Tunables ─────────────────────────────────────────────────────────────────
 
@@ -28,10 +29,30 @@ const UTIL_LINKS = [
   { href: '/contact', label: 'Contact', cta: true  },
 ]
 
+function getInitials(name?: string | null) {
+  if (!name) return '?'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0][0].toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+function ProfileIcon({ name, dashboardHref }: { name?: string | null; dashboardHref: string }) {
+  return (
+    <Link
+      href={dashboardHref}
+      title="My Portal"
+      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c8a96e] text-[10px] font-bold uppercase tracking-wide text-[#0f0c0a] transition hover:opacity-80"
+    >
+      {getInitials(name)}
+    </Link>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   const [visible,    setVisible]    = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -41,6 +62,9 @@ export default function Navbar() {
   const lastScrollY   = useRef(0)
   const isMobileRef   = useRef(false)
   const mobileOpenRef = useRef(false)
+
+  const isLoggedIn = !!session?.user
+  const dashboardHref = session?.user?.role === 'admin' ? '/admin/dashboard' : '/client/dashboard'
 
   // ── Active-link helper ────────────────────────────────────────────────────
 
@@ -191,37 +215,49 @@ export default function Navbar() {
           {/* Separator */}
           <span className={`mx-3 h-4 w-px ${sepColor}`} />
 
-          {/* Utility links */}
-          {UTIL_LINKS.map((link) => {
-            const active = isActive(link.href)
-            if (link.cta) {
+          {/* Utility links — Login replaced by profile icon when signed in */}
+          {isLoggedIn ? (
+            <>
+              <ProfileIcon name={session.user?.name} dashboardHref={dashboardHref} />
+              <Link
+                href="/contact"
+                className="ml-3 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]"
+              >
+                Contact
+              </Link>
+            </>
+          ) : (
+            UTIL_LINKS.map((link) => {
+              const active = isActive(link.href)
+              if (link.cta) {
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={[
+                      'ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition',
+                      'border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]',
+                    ].join(' ')}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              }
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   className={[
-                    'ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition',
-                    'border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]',
+                    'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition',
+                    active ? linkActive : linkBase,
                   ].join(' ')}
                 >
                   {link.label}
+                  {active && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
                 </Link>
               )
-            }
-            return (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={[
-                  'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition',
-                  active ? linkActive : linkBase,
-                ].join(' ')}
-              >
-                {link.label}
-                {active && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
-              </Link>
-            )
-          })}
+            })
+          )}
         </nav>
 
         {/* ── Mobile hamburger ──────────────────────────────────────────── */}
@@ -259,11 +295,9 @@ export default function Navbar() {
         <div className="h-px bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/40 to-transparent" />
 
         <nav className="flex flex-col px-8 pb-4 pt-2 bg-[#0f0c0a]">
-          {[...PRIMARY_LINKS, ...UTIL_LINKS].map((link) => {
+          {PRIMARY_LINKS.map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
-            const isCta       = 'cta' in link && !!(link as { cta?: unknown }).cta
-
             return (
               <Link
                 key={link.label}
@@ -275,8 +309,6 @@ export default function Navbar() {
                   'border-b border-white/[0.06] transition',
                   placeholder
                     ? 'text-[#2d2218] pointer-events-none cursor-default'
-                    : isCta
-                    ? 'text-[#c8a96e]'
                     : active
                     ? 'text-white'
                     : 'text-[#9e8d7a]',
@@ -287,12 +319,46 @@ export default function Navbar() {
                 {active && !placeholder && (
                   <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />
                 )}
-                {isCta && !active && (
-                  <span className="text-[#c8a96e]">→</span>
-                )}
               </Link>
             )
           })}
+
+          {/* Contact always shown */}
+          <Link
+            href="/contact"
+            className="flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] border-b border-white/[0.06] text-[#c8a96e] transition"
+            onClick={closeMobile}
+          >
+            <span>Contact</span>
+            <span className="text-[#c8a96e]">→</span>
+          </Link>
+
+          {/* Portal link / Login depending on session */}
+          {isLoggedIn ? (
+            <Link
+              href={dashboardHref}
+              className="flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] text-[#9e8d7a] transition hover:text-white"
+              onClick={closeMobile}
+            >
+              <span>My Portal</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#c8a96e] text-[9px] font-bold text-[#0f0c0a]">
+                {getInitials(session.user?.name)}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className={[
+                'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
+                'border-b border-white/[0.06] transition',
+                isActive('/login') ? 'text-white' : 'text-[#9e8d7a]',
+              ].join(' ')}
+              onClick={closeMobile}
+            >
+              <span>Login</span>
+              {isActive('/login') && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+            </Link>
+          )}
         </nav>
       </div>
     </header>
