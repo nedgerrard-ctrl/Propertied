@@ -98,6 +98,36 @@ function IconClose() {
   );
 }
 
+type ExpandedChart = "trends" | "monthly" | "source" | "status" | null;
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+function IconExpand() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      className="h-3.5 w-3.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 16.25v-4.5m0 4.5h4.5m-4.5 0L9 11M16.25 3.75h-4.5m4.5 0v4.5m0-4.5L11 9M16.25 16.25h-4.5m4.5 0v-4.5m0 4.5L11 11"
+      />
+    </svg>
+  );
+}
+
+function IconClose() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
+      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+    </svg>
+  );
+}
+
 // ─── Shared chart tooltip ─────────────────────────────────────────────────────
 
 function ChartTooltip({
@@ -165,15 +195,17 @@ function ChartCard({
   title,
   subtitle,
   onExpand,
+  onExpand,
   children,
 }: {
   title: string;
   subtitle?: string;
   onExpand?: () => void;
+  onExpand?: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white px-6 pb-6 pt-5">
+    <div className="group rounded-lg border border-neutral-200 bg-white px-6 pb-6 pt-5">
       <div className="mb-1 flex items-start justify-between gap-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
@@ -187,7 +219,7 @@ function ChartCard({
           <button
             onClick={onExpand}
             title="Expand chart"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-300 bg-white text-neutral-500 shadow-sm transition hover:border-neutral-500 hover:bg-neutral-50 hover:text-neutral-800 hover:shadow"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-200 text-neutral-400 opacity-0 transition hover:border-neutral-400 hover:text-neutral-700 group-hover:opacity-100"
           >
             <IconExpand />
           </button>

@@ -9,6 +9,13 @@ import DevelopersPanel from "./developers-panel";
 
 type Tab = "overview" | "enquiries" | "clients" | "developers";
 
+const TABS: { id: Tab; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "enquiries", label: "Enquiries" },
+  { id: "clients", label: "Clients" },
+  { id: "developers", label: "Developers" },
+];
+
 export default function AdminTabs() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
