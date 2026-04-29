@@ -4,13 +4,15 @@ import { useState } from "react";
 import StatsPanel from "./stats-panel";
 import EnquiriesPanel from "./enquiries-panel";
 import ClientsPanel from "./clients-panel";
+import DevelopersPanel from "./developers-panel";
 
-type Tab = "overview" | "enquiries" | "clients";
+type Tab = "overview" | "enquiries" | "clients" | "developers";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "enquiries", label: "Enquiries" },
   { id: "clients", label: "Clients" },
+  { id: "developers", label: "Developers" },
 ];
 
 export default function AdminTabs() {
@@ -40,6 +42,7 @@ export default function AdminTabs() {
       {activeTab === "overview" && <StatsPanel />}
       {activeTab === "enquiries" && <EnquiriesPanel />}
       {activeTab === "clients" && <ClientsPanel />}
+      {activeTab === "developers" && <DevelopersPanel />}
     </div>
   );
 }

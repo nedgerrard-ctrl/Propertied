@@ -31,6 +31,8 @@ export async function POST(request: Request) {
       typeof body.confirmPassword === "string" ? body.confirmPassword : "";
     const clientType =
       typeof body.clientType === "string" ? body.clientType : "";
+    const companyName =
+      typeof body.companyName === "string" ? body.companyName.trim() : "";
     const phone = typeof body.phone === "string" ? body.phone.trim() : "";
     const phoneCountryCode =
       typeof body.phoneCountryCode === "string"
@@ -66,8 +68,12 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!clientType || !["buyer", "investor"].includes(clientType)) {
-      fieldErrors.clientType = "Select whether you are a buyer or investor";
+    if (!clientType || !["buyer", "investor", "developer"].includes(clientType)) {
+      fieldErrors.clientType = "Select your account type";
+    }
+
+    if (clientType === "developer" && companyName && companyName.length > 120) {
+      fieldErrors.companyName = "Company name is too long (max 120 characters)";
     }
 
     if (!password) {
@@ -117,7 +123,10 @@ export async function POST(request: Request) {
       passwordHash,
       role: "client",
       clientType,
-      accountStatus: isExistingClient ? "pending-existing-client" : "active",
+      companyName: clientType === "developer" ? companyName : "",
+      accountStatus: isExistingClient && clientType !== "developer"
+        ? "pending-existing-client"
+        : "active",
       phone: normalizedPhone,
       phoneCountryCode,
     });

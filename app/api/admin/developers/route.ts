@@ -11,12 +11,10 @@ export async function GET() {
 
   await connectDB();
 
-  const clients = await User.find({ role: "client", clientType: { $in: ["buyer", "investor"] } })
-    .select(
-      "_id name email phone phoneCountryCode clientType accountStatus createdAt"
-    )
+  const developers = await User.find({ role: "client", clientType: "developer" })
+    .select("_id name email phone phoneCountryCode companyName accountStatus createdAt")
     .sort({ createdAt: -1 })
     .lean();
 
-  return NextResponse.json({ clients });
+  return NextResponse.json({ developers });
 }
