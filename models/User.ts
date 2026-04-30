@@ -37,6 +37,17 @@ const assignedDocumentSchema = new Schema(
   { _id: false }
 );
 
+const assignedDocumentSchema = new Schema(
+  {
+    originalName: { type: String, required: true, trim: true, maxlength: 200 },
+    storedName: { type: String, required: true, trim: true, maxlength: 255 },
+    fileType: { type: String, required: true, trim: true, maxlength: 100 },
+    fileSize: { type: Number, required: true, min: 0 },
+    fileUrl: { type: String, required: true, trim: true, maxlength: 500 },
+  },
+  { _id: false }
+);
+
 const userSchema = new Schema<IUser>(
   {
     name: {
