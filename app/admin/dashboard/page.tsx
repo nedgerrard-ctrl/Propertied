@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
@@ -13,8 +14,7 @@ export default async function AdminDashboardPage() {
   return (
     <main className="min-h-screen bg-neutral-100 px-6 py-10">
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">
               PPM Admin
@@ -26,7 +26,22 @@ export default async function AdminDashboardPage() {
               Manage enquiries and registered clients.
             </p>
           </div>
-          <LogoutButton />
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/dashboard/pages/new"
+              className="inline-flex border border-[#5f5245] bg-[#2f2a24] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"
+            >
+              Add Guide Page
+            </Link>
+            <Link
+              href="/admin/dashboard/pages"
+              className="border border-[#5f5245] px-4 py-2 text-sm"
+            >
+              Manage Pages
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
 
         <AdminTabs />
