@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type AccountStatus = "active" | "pending-existing-client" | "approved-existing-client";
-
 type AssignedDocument = {
   originalName: string;
   storedName: string;
@@ -17,9 +15,8 @@ type Developer = {
   name: string;
   email: string;
   phone: string;
-  phoneCountryCode: string;
   companyName: string;
-  accountStatus: AccountStatus;
+  pendingApproval: boolean;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
   createdAt: string;
@@ -46,25 +43,26 @@ type Enquiry = {
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const DEV_STATUS_OPTIONS: AccountStatus[] = ["active", "approved-existing-client"];
-
-const DEV_STATUS_LABEL: Record<AccountStatus, string> = {
+const DEV_STATUS_LABEL: Record<string, string> = {
   active: "Active",
-  "pending-existing-client": "Pending",
-  "approved-existing-client": "Verified",
+  pending: "Pending",
 };
 
-const DEV_STATUS_BADGE: Record<AccountStatus, string> = {
+const DEV_STATUS_BADGE: Record<string, string> = {
   active: "bg-neutral-100 text-neutral-600",
-  "pending-existing-client": "bg-amber-100 text-amber-800",
-  "approved-existing-client": "bg-blue-100 text-blue-800",
+  pending: "bg-amber-100 text-amber-800",
 };
 
-const DEV_STATUS_BUTTON: Record<AccountStatus, string> = {
+const DEV_STATUS_BUTTON: Record<string, string> = {
   active: "border-neutral-400 bg-neutral-50 text-neutral-800",
-  "pending-existing-client": "border-amber-400 bg-amber-50 text-amber-800",
-  "approved-existing-client": "border-blue-400 bg-blue-50 text-blue-800",
+  pending: "border-amber-400 bg-amber-50 text-amber-800",
 };
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function getDeveloperStatus(developer: Pick<Developer, "pendingApproval">): string {
+  return developer.pendingApproval ? "pending" : "active";
+}
 
 // ─── Utilities ─────────────────────────────────────────────────────────────────
 
@@ -76,12 +74,6 @@ function formatDate(iso: string) {
   });
 }
 
-function formatPhone(countryCode?: string, phone?: string) {
-  const safePhone = phone?.trim() ?? "";
-  const safeCode = countryCode?.trim() ?? "";
-  return [safeCode, safePhone].filter(Boolean).join(" ") || "—";
-}
-
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -90,7 +82,7 @@ function formatFileSize(bytes: number) {
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function StatusBadge({ status }: { status: AccountStatus }) {
+function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
@@ -184,15 +176,15 @@ function DeveloperDetailPanel({
 }: {
   developer: Developer;
   onClose: () => void;
-  onStatusUpdate: (id: string, status: AccountStatus) => void;
+  onStatusUpdate: (id: string, pendingApproval: boolean) => void;
 }) {
   const [developer, setDeveloper] = useState<Developer>(initialDeveloper);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
-  const [loadingDetail, setLoadingDetail] = useState(true); // true on mount — detail fetch starts immediately
+  const [loadingDetail, setLoadingDetail] = useState(true);
   const [detailError, setDetailError] = useState("");
 
-  const [pendingStatus, setPendingStatus] = useState<AccountStatus>(
-    initialDeveloper.accountStatus
+  const [pendingStatus, setPendingStatus] = useState<string>(
+    getDeveloperStatus(initialDeveloper)
   );
   const [savingStatus, setSavingStatus] = useState(false);
   const [savedStatus, setSavedStatus] = useState(false);
@@ -215,24 +207,27 @@ function DeveloperDetailPanel({
         if (data.developer) setDeveloper(data.developer);
         if (data.enquiries) setEnquiries(data.enquiries);
         setNotes(data.developer?.adminNotes ?? "");
-        setPendingStatus(data.developer?.accountStatus ?? "active");
+        setPendingStatus(
+          data.developer ? getDeveloperStatus(data.developer) : getDeveloperStatus(initialDeveloper)
+        );
       })
       .catch(() => setDetailError("Failed to load developer details."))
       .finally(() => setLoadingDetail(false));
   }, [initialDeveloper._id]);
 
   async function handleSaveStatus() {
-    if (pendingStatus === developer.accountStatus) return;
+    if (pendingStatus === getDeveloperStatus(developer)) return;
     setSavingStatus(true);
+    const newPendingApproval = pendingStatus === "pending";
     const res = await fetch(`/api/admin/developers/${developer._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accountStatus: pendingStatus }),
+      body: JSON.stringify({ pendingApproval: newPendingApproval }),
     });
     if (res.ok) {
       const data = await res.json();
       setDeveloper(data.developer);
-      onStatusUpdate(developer._id, pendingStatus);
+      onStatusUpdate(developer._id, newPendingApproval);
       setSavedStatus(true);
       setTimeout(() => setSavedStatus(false), 2000);
     }
@@ -378,10 +373,10 @@ function DeveloperDetailPanel({
                     <dd className="font-medium text-neutral-900">
                       {developer.phone ? (
                         <a
-                          href={`tel:${formatPhone(developer.phoneCountryCode, developer.phone).replace(/\s/g, "")}`}
+                          href={`tel:${developer.phone.replace(/\s/g, "")}`}
                           className="hover:underline"
                         >
-                          {formatPhone(developer.phoneCountryCode, developer.phone)}
+                          {developer.phone}
                         </a>
                       ) : (
                         "—"
@@ -391,7 +386,7 @@ function DeveloperDetailPanel({
                   <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Status</dt>
                     <dd>
-                      <StatusBadge status={developer.accountStatus} />
+                      <StatusBadge status={getDeveloperStatus(developer)} />
                     </dd>
                   </div>
                   <div className="flex gap-3">
@@ -411,7 +406,7 @@ function DeveloperDetailPanel({
                   Update Status
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  {DEV_STATUS_OPTIONS.map((s) => (
+                  {["active", "pending"].map((s) => (
                     <button
                       key={s}
                       onClick={() => setPendingStatus(s)}
@@ -427,7 +422,7 @@ function DeveloperDetailPanel({
                 </div>
                 <button
                   onClick={handleSaveStatus}
-                  disabled={savingStatus || pendingStatus === developer.accountStatus}
+                  disabled={savingStatus || pendingStatus === getDeveloperStatus(developer)}
                   className="mt-3 w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {savingStatus ? "Saving…" : savedStatus ? "Saved" : "Save Status"}
@@ -663,24 +658,23 @@ export default function DevelopersPanel() {
       .finally(() => setLoading(false));
   }, []);
 
-  function handleStatusUpdate(id: string, status: AccountStatus) {
+  function handleStatusUpdate(id: string, pendingApproval: boolean) {
     setDevelopers((prev) =>
-      prev.map((d) => (d._id === id ? { ...d, accountStatus: status } : d))
+      prev.map((d) => (d._id === id ? { ...d, pendingApproval } : d))
     );
-    setSelected((prev) => (prev?._id === id ? { ...prev, accountStatus: status } : prev));
+    setSelected((prev) => (prev?._id === id ? { ...prev, pendingApproval } : prev));
   }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return developers.filter((d) => {
-      if (statusFilter !== "all" && d.accountStatus !== statusFilter) return false;
+      if (statusFilter !== "all" && getDeveloperStatus(d) !== statusFilter) return false;
       if (q) {
-        const phone = formatPhone(d.phoneCountryCode, d.phone).toLowerCase();
         if (
           !d.name.toLowerCase().includes(q) &&
           !d.email.toLowerCase().includes(q) &&
           !(d.companyName ?? "").toLowerCase().includes(q) &&
-          !phone.includes(q)
+          !(d.phone ?? "").toLowerCase().includes(q)
         )
           return false;
       }
@@ -691,8 +685,8 @@ export default function DevelopersPanel() {
   const counts = useMemo(
     () => ({
       total: developers.length,
-      active: developers.filter((d) => d.accountStatus === "active").length,
-      verified: developers.filter((d) => d.accountStatus === "approved-existing-client").length,
+      active: developers.filter((d) => !d.pendingApproval).length,
+      pending: developers.filter((d) => d.pendingApproval).length,
     }),
     [developers]
   );
@@ -720,7 +714,7 @@ export default function DevelopersPanel() {
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
           { label: "Active", value: counts.active, color: "text-neutral-700" },
-          { label: "Verified", value: counts.verified, color: "text-blue-700" },
+          { label: "Pending", value: counts.pending, color: "text-amber-700" },
         ].map((s) => (
           <div
             key={s.label}
@@ -760,7 +754,7 @@ export default function DevelopersPanel() {
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
-            <option value="approved-existing-client">Verified</option>
+            <option value="pending">Pending</option>
           </select>
         </div>
 
@@ -816,10 +810,10 @@ export default function DevelopersPanel() {
                   </td>
                   <td className="px-5 py-3.5 text-neutral-600">{d.email}</td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
-                    {d.phone ? formatPhone(d.phoneCountryCode, d.phone) : "—"}
+                    {d.phone || "—"}
                   </td>
                   <td className="px-5 py-3.5">
-                    <StatusBadge status={d.accountStatus} />
+                    <StatusBadge status={getDeveloperStatus(d)} />
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
                     {formatDate(d.createdAt)}

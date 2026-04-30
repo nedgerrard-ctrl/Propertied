@@ -50,20 +50,16 @@ export async function PATCH(
 
   const update: Record<string, unknown> = {};
 
-  const validStatuses = [
-    "active",
-    "pending-existing-client",
-    "approved-existing-client",
-  ];
-
-  if ("accountStatus" in body) {
-    if (!validStatuses.includes(body.accountStatus as string)) {
-      return NextResponse.json(
-        { message: "Invalid account status" },
-        { status: 400 }
-      );
+  if ("userType" in body) {
+    const validUserTypes = ["buyer_investor", "existing_client"];
+    if (!validUserTypes.includes(body.userType as string)) {
+      return NextResponse.json({ message: "Invalid user type" }, { status: 400 });
     }
-    update.accountStatus = body.accountStatus;
+    update.userType = body.userType;
+  }
+
+  if ("pendingApproval" in body) {
+    update.pendingApproval = Boolean(body.pendingApproval);
   }
 
   if ("adminNotes" in body) {
