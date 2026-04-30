@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       syncStatus: "never_synced",
     });
 
-    // Optional: immediately create a staged Webflow item even for drafts
+   
     const fieldData = mapPageToWebflowFieldData(page);
     const webflowResult = await createStagedPage(fieldData);
     const webflowItemId = webflowResult.items?.[0]?.id || "";

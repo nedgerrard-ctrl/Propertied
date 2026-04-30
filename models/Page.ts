@@ -34,7 +34,7 @@ const PageSchema = new Schema(
     ctaLink: { type: String, default: "" },
 
     navLabel: { type: String, default: "" },
-    pageGroup: { type: String, default: "insights" },
+    pageGroup: { type: String, default: "more" },
     statusLabel: { type: String, default: "" },
     showInNavbar: { type: Boolean, default: false },
     sortOrder: { type: Number, default: 100 },
