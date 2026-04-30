@@ -4,6 +4,14 @@ export type UserRole = "admin" | "client";
 export type UserType = "buyer_investor" | "developer" | "existing_client";
 export type LocationType = "local" | "overseas";
 
+export interface IAssignedDocument {
+  originalName: string;
+  storedName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+}
+
 export interface IUser {
   name?: string;
   firstName?: string;
@@ -20,22 +28,13 @@ export interface IUser {
   pendingApproval?: boolean;
   companyName?: string;
   abn?: string;
+  adminNotes?: string;
+  assignedDocuments?: IAssignedDocument[];
   resetPasswordTokenHash?: string | null;
   resetPasswordExpiresAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
-
-const assignedDocumentSchema = new Schema(
-  {
-    originalName: { type: String, required: true, trim: true, maxlength: 200 },
-    storedName: { type: String, required: true, trim: true, maxlength: 255 },
-    fileType: { type: String, required: true, trim: true, maxlength: 100 },
-    fileSize: { type: Number, required: true, min: 0 },
-    fileUrl: { type: String, required: true, trim: true, maxlength: 500 },
-  },
-  { _id: false }
-);
 
 const assignedDocumentSchema = new Schema(
   {
@@ -111,6 +110,16 @@ const userSchema = new Schema<IUser>(
     abn: {
       type: String,
       trim: true,
+    },
+    adminNotes: {
+      type: String,
+      trim: true,
+      maxlength: 2000,
+      default: "",
+    },
+    assignedDocuments: {
+      type: [assignedDocumentSchema],
+      default: [],
     },
     resetPasswordTokenHash: {
       type: String,

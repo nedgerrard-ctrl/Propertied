@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type ClientType = "buyer" | "investor" | "";
 type AccountStatus =
   | "active"
   | "pending-existing-client"
@@ -21,9 +20,8 @@ type Client = {
   name: string;
   email: string;
   phone: string;
-  phoneCountryCode: string;
-  clientType: ClientType;
-  accountStatus: AccountStatus;
+  userType: "buyer_investor" | "existing_client";
+  pendingApproval: boolean;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
   createdAt: string;
@@ -48,6 +46,22 @@ type Enquiry = {
   legalDocuments: LegalDocument[];
   createdAt: string;
 };
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function getAccountStatus(client: Pick<Client, "userType" | "pendingApproval">): AccountStatus {
+  if (client.userType === "existing_client") return "approved-existing-client";
+  if (client.pendingApproval) return "pending-existing-client";
+  return "active";
+}
+
+function statusToPatch(status: AccountStatus): Record<string, unknown> {
+  if (status === "approved-existing-client")
+    return { userType: "existing_client", pendingApproval: false };
+  if (status === "pending-existing-client")
+    return { pendingApproval: true };
+  return { userType: "buyer_investor", pendingApproval: false };
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -83,12 +97,6 @@ function formatDate(iso: string) {
     month: "short",
     year: "numeric",
   });
-}
-
-function formatPhone(countryCode?: string, phone?: string) {
-  const safePhone = phone?.trim() ?? "";
-  const safeCode = countryCode?.trim() ?? "";
-  return [safeCode, safePhone].filter(Boolean).join(" ") || "—";
 }
 
 function formatFileSize(fileSize: number) {
@@ -141,15 +149,6 @@ function EnquiryStatusBadge({ status }: { status: string }) {
       }`}
     >
       {label[status] ?? status}
-    </span>
-  );
-}
-
-function TypeBadge({ clientType }: { clientType: ClientType }) {
-  if (!clientType) return <span className="text-neutral-400">—</span>;
-  return (
-    <span className="inline-block rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-600">
-      {clientType === "buyer" ? "Buyer" : "Investor"}
     </span>
   );
 }
@@ -220,7 +219,7 @@ function ClientDetailPanel({
   const [detailError, setDetailError] = useState("");
 
   const [pendingStatus, setPendingStatus] = useState<AccountStatus>(
-    initialClient.accountStatus
+    getAccountStatus(initialClient)
   );
   const [savingStatus, setSavingStatus] = useState(false);
   const [savedStatus, setSavedStatus] = useState(false);
@@ -246,24 +245,29 @@ function ClientDetailPanel({
         if (data.client) setClient(data.client);
         if (data.enquiries) setEnquiries(data.enquiries);
         setNotes(data.client?.adminNotes ?? "");
-        setPendingStatus(data.client?.accountStatus ?? initialClient.accountStatus);
+        setPendingStatus(
+          data.client ? getAccountStatus(data.client) : getAccountStatus(initialClient)
+        );
       })
       .catch(() => setDetailError("Failed to load client details."))
       .finally(() => setLoadingDetail(false));
   }, [initialClient._id]);
 
   async function handleApprovalAction(action: "approve" | "reject") {
-    const newStatus: AccountStatus =
-      action === "approve" ? "approved-existing-client" : "active";
+    const patch =
+      action === "approve"
+        ? { userType: "existing_client", pendingApproval: false }
+        : { pendingApproval: false };
     setActionLoading(action);
     const res = await fetch(`/api/admin/clients/${client._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accountStatus: newStatus }),
+      body: JSON.stringify(patch),
     });
     if (res.ok) {
       const data = await res.json();
       setClient(data.client);
+      const newStatus = getAccountStatus(data.client);
       setPendingStatus(newStatus);
       onStatusUpdate(client._id, newStatus);
     }
@@ -271,12 +275,12 @@ function ClientDetailPanel({
   }
 
   async function handleSaveStatus() {
-    if (pendingStatus === client.accountStatus) return;
+    if (pendingStatus === getAccountStatus(client)) return;
     setSavingStatus(true);
     const res = await fetch(`/api/admin/clients/${client._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accountStatus: pendingStatus }),
+      body: JSON.stringify(statusToPatch(pendingStatus)),
     });
     if (res.ok) {
       const data = await res.json();
@@ -419,10 +423,10 @@ function ClientDetailPanel({
                     <dd className="font-medium text-neutral-900">
                       {client.phone ? (
                         <a
-                          href={`tel:${formatPhone(client.phoneCountryCode, client.phone).replace(/\s/g, "")}`}
+                          href={`tel:${client.phone.replace(/\s/g, "")}`}
                           className="hover:underline"
                         >
-                          {formatPhone(client.phoneCountryCode, client.phone)}
+                          {client.phone}
                         </a>
                       ) : (
                         "—"
@@ -430,15 +434,9 @@ function ClientDetailPanel({
                     </dd>
                   </div>
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-neutral-400">Type</dt>
-                    <dd>
-                      <TypeBadge clientType={client.clientType} />
-                    </dd>
-                  </div>
-                  <div className="flex gap-3">
                     <dt className="w-32 shrink-0 text-neutral-400">Status</dt>
                     <dd>
-                      <AccountStatusBadge status={client.accountStatus} />
+                      <AccountStatusBadge status={getAccountStatus(client)} />
                     </dd>
                   </div>
                   <div className="flex gap-3">
@@ -453,7 +451,7 @@ function ClientDetailPanel({
               <hr className="border-neutral-100" />
 
               {/* Pending existing-client approval actions */}
-              {client.accountStatus === "pending-existing-client" && (
+              {getAccountStatus(client) === "pending-existing-client" && (
                 <section>
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -512,7 +510,7 @@ function ClientDetailPanel({
                 <button
                   onClick={handleSaveStatus}
                   disabled={
-                    savingStatus || pendingStatus === client.accountStatus
+                    savingStatus || pendingStatus === getAccountStatus(client)
                   }
                   className="mt-3 w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -747,7 +745,6 @@ export default function ClientsPanel() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     fetch("/api/admin/clients")
@@ -758,53 +755,52 @@ export default function ClientsPanel() {
   }, []);
 
   function handleStatusUpdate(id: string, status: AccountStatus) {
+    const updates: Partial<Client> =
+      status === "approved-existing-client"
+        ? { userType: "existing_client", pendingApproval: false }
+        : status === "pending-existing-client"
+        ? { pendingApproval: true }
+        : { userType: "buyer_investor", pendingApproval: false };
     setClients((prev) =>
-      prev.map((c) => (c._id === id ? { ...c, accountStatus: status } : c))
+      prev.map((c) => (c._id === id ? { ...c, ...updates } : c))
     );
     setSelected((prev) =>
-      prev?._id === id ? { ...prev, accountStatus: status } : prev
+      prev?._id === id ? ({ ...prev, ...updates } as Client) : prev
     );
   }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return clients.filter((c) => {
-      if (statusFilter !== "all" && c.accountStatus !== statusFilter)
-        return false;
-      if (
-        typeFilter !== "all" &&
-        (c.clientType || "") !== typeFilter
-      )
+      if (statusFilter !== "all" && getAccountStatus(c) !== statusFilter)
         return false;
       if (q) {
-        const phone = formatPhone(c.phoneCountryCode, c.phone).toLowerCase();
         if (
           !c.name.toLowerCase().includes(q) &&
           !c.email.toLowerCase().includes(q) &&
-          !phone.includes(q)
+          !(c.phone ?? "").toLowerCase().includes(q)
         )
           return false;
       }
       return true;
     });
-  }, [clients, statusFilter, typeFilter, search]);
+  }, [clients, statusFilter, search]);
 
   const counts = useMemo(
     () => ({
       total: clients.length,
-      active: clients.filter((c) => c.accountStatus === "active").length,
+      active: clients.filter((c) => getAccountStatus(c) === "active").length,
       pending: clients.filter(
-        (c) => c.accountStatus === "pending-existing-client"
+        (c) => getAccountStatus(c) === "pending-existing-client"
       ).length,
       approved: clients.filter(
-        (c) => c.accountStatus === "approved-existing-client"
+        (c) => getAccountStatus(c) === "approved-existing-client"
       ).length,
     }),
     [clients]
   );
 
-  const hasFilters =
-    search.trim() !== "" || statusFilter !== "all" || typeFilter !== "all";
+  const hasFilters = search.trim() !== "" || statusFilter !== "all";
 
   if (loading) {
     return (
@@ -887,28 +883,11 @@ export default function ClientsPanel() {
           </select>
         </div>
 
-        {/* Type filter */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            Type
-          </label>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
-          >
-            <option value="all">All types</option>
-            <option value="buyer">Buyer</option>
-            <option value="investor">Investor</option>
-          </select>
-        </div>
-
         {hasFilters && (
           <button
             onClick={() => {
               setSearch("");
               setStatusFilter("all");
-              setTypeFilter("all");
             }}
             className="self-end rounded border border-neutral-200 px-3 py-1.5 text-[12px] text-neutral-500 transition hover:border-neutral-400 hover:text-neutral-700"
           >
@@ -936,7 +915,6 @@ export default function ClientsPanel() {
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
-                <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Registered</th>
                 <th className="px-5 py-3">Actions</th>
@@ -956,15 +934,10 @@ export default function ClientsPanel() {
                   </td>
                   <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
-                    {c.phone
-                      ? formatPhone(c.phoneCountryCode, c.phone)
-                      : "—"}
+                    {c.phone || "—"}
                   </td>
                   <td className="px-5 py-3.5">
-                    <TypeBadge clientType={c.clientType} />
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <AccountStatusBadge status={c.accountStatus} />
+                    <AccountStatusBadge status={getAccountStatus(c)} />
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
                     {formatDate(c.createdAt)}

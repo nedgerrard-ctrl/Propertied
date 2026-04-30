@@ -11,8 +11,8 @@ export async function GET() {
 
   await connectDB();
 
-  const developers = await User.find({ role: "client", clientType: "developer" })
-    .select("_id name email phone phoneCountryCode companyName accountStatus createdAt")
+  const developers = await User.find({ role: "client", userType: "developer" })
+    .select("_id name email phone companyName pendingApproval createdAt")
     .sort({ createdAt: -1 })
     .lean();
 

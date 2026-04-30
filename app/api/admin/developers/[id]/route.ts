@@ -17,7 +17,7 @@ export async function GET(
 
   await connectDB();
 
-  const developer = await User.findOne({ _id: id, role: "client", clientType: "developer" })
+  const developer = await User.findOne({ _id: id, role: "client", userType: "developer" })
     .select("-passwordHash -resetPasswordTokenHash -resetPasswordExpiresAt")
     .lean();
 
@@ -50,13 +50,8 @@ export async function PATCH(
 
   const update: Record<string, unknown> = {};
 
-  const validStatuses = ["active", "pending-existing-client", "approved-existing-client"];
-
-  if ("accountStatus" in body) {
-    if (!validStatuses.includes(body.accountStatus as string)) {
-      return NextResponse.json({ message: "Invalid account status" }, { status: 400 });
-    }
-    update.accountStatus = body.accountStatus;
+  if ("pendingApproval" in body) {
+    update.pendingApproval = Boolean(body.pendingApproval);
   }
 
   if ("adminNotes" in body) {
@@ -77,7 +72,7 @@ export async function PATCH(
   await connectDB();
 
   const developer = await User.findOneAndUpdate(
-    { _id: id, role: "client", clientType: "developer" },
+    { _id: id, role: "client", userType: "developer" },
     update,
     { new: true }
   )
