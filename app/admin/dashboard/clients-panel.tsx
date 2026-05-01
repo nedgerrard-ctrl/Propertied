@@ -50,8 +50,8 @@ type Enquiry = {
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function getAccountStatus(client: Pick<Client, "userType" | "pendingApproval">): AccountStatus {
-  if (client.userType === "existing_client") return "approved-existing-client";
   if (client.pendingApproval) return "pending-existing-client";
+  if (client.userType === "existing_client") return "approved-existing-client";
   return "active";
 }
 
