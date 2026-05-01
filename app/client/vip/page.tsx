@@ -9,7 +9,7 @@ export default async function VipPage() {
     redirect("/login");
   }
 
-  if (session.user?.userType !== "existing_client") {
+  if (session.user?.userType !== "existing_client" || session.user?.pendingApproval) {
     notFound();
   }
 
