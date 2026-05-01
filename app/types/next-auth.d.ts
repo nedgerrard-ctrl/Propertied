@@ -6,6 +6,7 @@ declare module "next-auth" {
       role?: string;
       userType?: string;
       pendingApproval?: boolean;
+      phone?: string;
     };
   }
 
@@ -13,6 +14,7 @@ declare module "next-auth" {
     role?: string;
     userType?: string;
     pendingApproval?: boolean;
+    phone?: string;
   }
 }
 
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     role?: string;
     userType?: string;
     pendingApproval?: boolean;
+    phone?: string;
   }
 }

@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { useCountryCodes } from "../useCountryCodes";
@@ -514,6 +515,7 @@ function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { countries, defaultDialCode } = useCountryCodes("+61");
+  const { data: session } = useSession();
 
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
   const [selectedDocuments, setSelectedDocuments] = useState<
@@ -533,15 +535,22 @@ function BuyersInvestorsContactContent() {
     success: false,
   });
   useEffect(() => {
-  setFormData((prev) =>
-    prev.phoneCountryCode
-      ? prev
-      : {
-          ...prev,
-          phoneCountryCode: defaultDialCode,
-        }
-  );
-}, [defaultDialCode]);
+    setFormData((prev) =>
+      prev.phoneCountryCode
+        ? prev
+        : { ...prev, phoneCountryCode: defaultDialCode }
+    );
+  }, [defaultDialCode]);
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || session.user?.name || "",
+        email: prev.email || session.user?.email || "",
+      }));
+    }
+  }, [session]);
   useEffect(() => {
     const hasPrefillParams =
       searchParams.get("projectName") ||

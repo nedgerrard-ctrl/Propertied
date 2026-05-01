@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { useCountryCodes } from "../useCountryCodes";
@@ -164,8 +165,19 @@ function validateForm(formData: DeveloperFormData): DeveloperFieldErrors {
 }
 
 export default function DevelopersContactPage() {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<DeveloperFormData>(initialFormData);
   const [fieldErrors, setFieldErrors] = useState<DeveloperFieldErrors>({});
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || session.user?.name || "",
+        email: prev.email || session.user?.email || "",
+      }));
+    }
+  }, [session]);
   const [loading, setLoading] = useState(false);
   const { countries, defaultDialCode } = useCountryCodes("+61");
   const [feedbackModal, setFeedbackModal] = useState<{
