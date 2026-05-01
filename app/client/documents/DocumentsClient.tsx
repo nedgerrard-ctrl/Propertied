@@ -111,6 +111,18 @@ function XIcon() {
   );
 }
 
+function TrashIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4h6v2" />
+    </svg>
+  );
+}
+
 export default function DocumentsClient() {
   const [documents, setDocuments] = useState<ApiDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,6 +134,8 @@ export default function DocumentsClient() {
   const [isDragging, setIsDragging] = useState(false);
   const [signDoc, setSignDoc] = useState<ApiDocument | null>(null);
   const [signSent, setSignSent] = useState(false);
+  const [deleteDoc, setDeleteDoc] = useState<ApiDocument | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -218,6 +232,30 @@ export default function DocumentsClient() {
   function closeSignModal() {
     setSignDoc(null);
     setSignSent(false);
+  }
+
+  async function handleDelete() {
+    if (!deleteDoc) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/client/documents", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storedName: deleteDoc.storedName }),
+      });
+      if (res.ok) {
+        setDocuments((prev) => prev.filter((d) => d.storedName !== deleteDoc.storedName));
+        setUploadFeedback({ kind: "success", text: `"${deleteDoc.originalName}" deleted.` });
+      } else {
+        const data = await res.json();
+        setUploadFeedback({ kind: "error", text: data.message ?? "Delete failed." });
+      }
+    } catch {
+      setUploadFeedback({ kind: "error", text: "Delete failed. Please try again." });
+    } finally {
+      setDeleting(false);
+      setDeleteDoc(null);
+    }
   }
 
   return (
@@ -455,6 +493,15 @@ export default function DocumentsClient() {
                               <PenIcon />
                             </button>
                           )}
+                          {doc.uploadedByClient && (
+                            <button
+                              onClick={() => setDeleteDoc(doc)}
+                              className="rounded p-1 hover:bg-red-50 hover:text-red-600 transition"
+                              title="Delete"
+                            >
+                              <TrashIcon />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -465,6 +512,41 @@ export default function DocumentsClient() {
           </table>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
+                <TrashIcon />
+              </div>
+              <h2 className="text-base font-semibold text-neutral-900">Delete Document</h2>
+            </div>
+            <p className="text-sm text-neutral-600 mb-1">Are you sure you want to delete:</p>
+            <p className="text-sm font-medium text-neutral-900 mb-5 truncate">
+              {deleteDoc.originalName}
+            </p>
+            <p className="text-xs text-neutral-400 mb-6">This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteDoc(null)}
+                disabled={deleting}
+                className="flex-1 rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DocuSign Modal */}
       {signDoc && (
