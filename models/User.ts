@@ -23,6 +23,10 @@ export interface IAssignedDocument {
   fileType: string;
   fileSize: number;
   fileUrl: string;
+  uploadedByClient?: boolean;
+  docType?: string;
+  docStatus?: string;
+  uploadedAt?: Date;
 }
 
 export interface IUser {
@@ -59,6 +63,10 @@ const assignedDocumentSchema = new Schema(
     fileType: { type: String, required: true, trim: true, maxlength: 100 },
     fileSize: { type: Number, required: true, min: 0 },
     fileUrl: { type: String, required: true, trim: true, maxlength: 500 },
+    uploadedByClient: { type: Boolean, default: false },
+    docType: { type: String, trim: true, maxlength: 50, default: "Legal" },
+    docStatus: { type: String, trim: true, maxlength: 50, default: "Pending" },
+    uploadedAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
