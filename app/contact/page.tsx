@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useCountryCodes } from "./useCountryCodes";
@@ -120,8 +121,19 @@ function validateForm(formData: ContactFormData): FieldErrors {
 }
 
 export default function ContactPage() {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<ContactFormData>(initialFormData);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || session.user?.name || "",
+        email: prev.email || session.user?.email || "",
+      }));
+    }
+  }, [session]);
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
     open: boolean;
