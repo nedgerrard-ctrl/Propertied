@@ -1,14 +1,10 @@
-const WEBFLOW_API_BASE = "https://api.webflow.com/v2";
-const WEBFLOW_API_TOKEN = process.env.WEBFLOW_API_TOKEN!;
-const WEBFLOW_COLLECTION_ID = process.env.WEBFLOW_COLLECTION_ID!;
+const WEBFLOW_API = "https://api.webflow.com/v2";
 
-type WebflowFieldData = Record<string, unknown>;
-
-async function webflowFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${WEBFLOW_API_BASE}${path}`, {
+async function webflowFetch(url: string, options: RequestInit = {}) {
+  const res = await fetch(url, {
     ...options,
     headers: {
-      Authorization: `Bearer ${WEBFLOW_API_TOKEN}`,
+      Authorization: `Bearer ${process.env.WEBFLOW_API_TOKEN}`,
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
@@ -22,79 +18,120 @@ async function webflowFetch<T>(path: string, options: RequestInit = {}): Promise
   return res.json();
 }
 
-export function mapPageToWebflowFieldData(page: {
-  title: string;
-  slug: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  heroEyebrow?: string;
-  heroTitle?: string;
-  heroSummary?: string;
-  body?: string;
-  ctaTitle?: string;
-  ctaText?: string;
-  ctaLink?: string;
-  navLabel?: string;
-  pageGroup?: string;
-  statusLabel?: string;
-  templateKey?: string;
-  showInNavbar?: boolean;
-  sortOrder?: number;
-  featuredImage?: string;
-}): WebflowFieldData {
+
+export function mapPageToWebflow(page: any) {
+  return {
+    fieldData: {
+      name: page.title,
+      slug: page.slug,
+
+      "page-title": page.title,
+      subtitle: page.subtitle || "",
+
+      "paragraph-1-title": page.paragraph1Title || "",
+      "paragraph-1": page.paragraph1 || "",
+
+      "paragraph-2-title": page.paragraph2Title || "",
+      "paragraph-2": page.paragraph2 || "",
+
+      "paragraph-3-title": page.paragraph3Title || "",
+      "paragraph-3": page.paragraph3 || "",
+
+      "paragraph-4-title": page.paragraph4Title || "",
+      "paragraph-4": page.paragraph4 || "",
+    },
+  };
+}
+
+// Create item
+export async function createWebflowItem(collectionId: string, page: any) {
+  return webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items`,
+    {
+      method: "POST",
+      body: JSON.stringify(mapPageToWebflow(page)),
+    }
+  );
+}
+
+// Update item
+export async function updateWebflowItem(
+  collectionId: string,
+  itemId: string,
+  page: any
+) {
+  return webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items/${itemId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(mapPageToWebflow(page)),
+    }
+  );
+}
+
+// Publish item
+export async function publishWebflowItem(collectionId: string, itemId: string) {
+  return webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items/publish`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        itemIds: [itemId],
+      }),
+    }
+  );
+}
+
+export function mapPageToWebflowFieldData(page: any) {
   return {
     name: page.title,
     slug: page.slug,
     "page-title": page.title,
-    "seo-title": page.seoTitle || "",
-    "seo-description": page.seoDescription || "",
-    "hero-eyebrow": page.heroEyebrow || "",
-    "hero-title": page.heroTitle || "",
-    "hero-summary": page.heroSummary || "",
-    body: page.body || "",
-    "cta-title": page.ctaTitle || "",
-    "cta-text": page.ctaText || "",
-    "cta-link": page.ctaLink || "",
-    "nav-label": page.navLabel || "",
-    "page-group": page.pageGroup || "insights",
-    "status-label": page.statusLabel || "",
-    "template-key": page.templateKey || "simple-info-page",
-    "show-in-navbar": page.showInNavbar || false,
-    "sort-order": page.sortOrder || 100,
-    "featured-image": page.featuredImage || "",
+    subtitle: page.subtitle || "",
+    "paragraph-1-title": page.paragraph1Title || "",
+    "paragraph-1": page.paragraph1 || "",
+    "paragraph-2-title": page.paragraph2Title || "",
+    "paragraph-2": page.paragraph2 || "",
+    "paragraph-3-title": page.paragraph3Title || "",
+    "paragraph-3": page.paragraph3 || "",
+    "paragraph-4-title": page.paragraph4Title || "",
+    "paragraph-4": page.paragraph4 || "",
   };
 }
 
-export async function createStagedPage(fieldData: WebflowFieldData) {
-  return webflowFetch<{
-    items: Array<{ id: string; fieldData: Record<string, unknown> }>;
-  }>(`/collections/${WEBFLOW_COLLECTION_ID}/items`, {
-    method: "POST",
-    body: JSON.stringify({
-      items: [{ fieldData }],
-    }),
-  });
+export async function createStagedPage(fieldData: Record<string, unknown>) {
+  const collectionId = process.env.WEBFLOW_COLLECTION_ID!;
+  const result = await webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items`,
+    {
+      method: "POST",
+      body: JSON.stringify({ fieldData }),
+    }
+  );
+  return { items: [result] };
 }
 
-export async function updateStagedPage(itemId: string, fieldData: WebflowFieldData) {
-  return webflowFetch<{
-    items: Array<{ id: string; fieldData: Record<string, unknown> }>;
-  }>(`/collections/${WEBFLOW_COLLECTION_ID}/items`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      items: [{ id: itemId, fieldData }],
-    }),
-  });
+export async function updateStagedPage(
+  itemId: string,
+  fieldData: Record<string, unknown>
+) {
+  const collectionId = process.env.WEBFLOW_COLLECTION_ID!;
+  return webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items/${itemId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ fieldData }),
+    }
+  );
 }
 
 export async function publishPageItems(itemIds: string[]) {
-  return webflowFetch<unknown>(
-    `/collections/${WEBFLOW_COLLECTION_ID}/items/publish`,
+  const collectionId = process.env.WEBFLOW_COLLECTION_ID!;
+  return webflowFetch(
+    `${WEBFLOW_API}/collections/${collectionId}/items/publish`,
     {
       method: "POST",
-      body: JSON.stringify({
-        itemIds,
-      }),
+      body: JSON.stringify({ itemIds }),
     }
   );
 }
