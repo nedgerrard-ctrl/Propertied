@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
+import User from "@/models/User";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -428,6 +429,27 @@ export async function POST(request: Request) {
     );
 
     await connectDB();
+
+    if (enquiryType === "developer") {
+      const isBuyerInvestor = await User.findOne({
+        userType: "buyer_investor",
+        $or: [
+          { email: email.trim().toLowerCase() },
+          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+        ],
+      }).lean();
+
+      if (isBuyerInvestor) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "You are not allowed to send this type of enquiry.",
+            fieldErrors: {},
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     const enquiry = await Enquiry.create({
       enquiryType,
