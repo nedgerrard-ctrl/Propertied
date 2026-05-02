@@ -2,16 +2,13 @@ import { Schema, model, models } from "mongoose";
 
 const PageSchema = new Schema(
   {
-    templateKey: {
-      type: String,
-      required: true,
-      default: "simple-info-page",
-    },
+    // Core
     title: {
       type: String,
       required: true,
       trim: true,
     },
+
     slug: {
       type: String,
       required: true,
@@ -20,32 +17,34 @@ const PageSchema = new Schema(
       unique: true,
     },
 
-    seoTitle: { type: String, default: "" },
-    seoDescription: { type: String, default: "" },
+    subtitle: { type: String, default: "" },
 
-    heroEyebrow: { type: String, default: "" },
-    heroTitle: { type: String, default: "" },
-    heroSummary: { type: String, default: "" },
+    // Paragraph blocks
+    paragraph1Title: { type: String, default: "" },
+    paragraph1: { type: String, default: "" },
 
-    body: { type: String, default: "" },
+    paragraph2Title: { type: String, default: "" },
+    paragraph2: { type: String, default: "" },
 
-    ctaTitle: { type: String, default: "" },
-    ctaText: { type: String, default: "" },
-    ctaLink: { type: String, default: "" },
+    paragraph3Title: { type: String, default: "" },
+    paragraph3: { type: String, default: "" },
 
-    navLabel: { type: String, default: "" },
-    pageGroup: { type: String, default: "more" },
-    statusLabel: { type: String, default: "" },
+    paragraph4Title: { type: String, default: "" },
+    paragraph4: { type: String, default: "" },
+
+    // Optional controls
     showInNavbar: { type: Boolean, default: false },
+    navLabel: { type: String, default: "" },
     sortOrder: { type: Number, default: 100 },
-    featuredImage: { type: String, default: "" },
 
+    // Status
     status: {
       type: String,
       enum: ["draft", "published"],
       default: "draft",
     },
 
+    // Webflow sync
     webflowItemId: { type: String, default: "" },
     syncStatus: {
       type: String,
