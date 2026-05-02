@@ -1,88 +1,48 @@
-'use client'
-import dynamic from 'next/dynamic'
+export const dynamic = 'force-dynamic'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import OverseasReachSection from '../components/OverseasReachSection'
+import ThreadsBackground from './ThreadsBackground'
+import { connectDB } from '@/lib/mongodb'
+import AboutContent from '@/models/AboutContent'
+import { mergeAboutContent } from '@/lib/about-defaults'
 
-const Threads = dynamic(() => import('../components/ui/Threads'), {
-  ssr: false,
-  loading: () => null,
-})
+export default async function AboutPage() {
+  await connectDB()
+  const doc = await AboutContent.findOne().lean()
+  const c = mergeAboutContent(doc as Record<string, unknown> | null)
 
-// ─── Page data ──────────────────────────────────────────────────────────────
+  const cycleSteps = [
+    { step: '01', title: c.step1Title, description: c.step1Desc },
+    { step: '02', title: c.step2Title, description: c.step2Desc },
+    { step: '03', title: c.step3Title, description: c.step3Desc },
+    { step: '04', title: c.step4Title, description: c.step4Desc },
+    { step: '05', title: c.step5Title, description: c.step5Desc },
+    { step: '06', title: c.step6Title, description: c.step6Desc },
+  ]
 
-const cycleSteps = [
-  {
-    step: '01',
-    title: 'Source',
-    description:
-      'We identify and curate the finest off-the-plan developments across Melbourne — from boutique townhouses to high-rise apartments.',
-  },
-  {
-    step: '02',
-    title: 'Buy',
-    description:
-      'We match you to the right property, organise display suite visits, and guide you through purchase. Our fee is paid by the developer — not by you.',
-  },
-  {
-    step: '03',
-    title: 'Manage',
-    description:
-      'Through our sister division Online Property Services, we steward your residential asset as a premium portfolio — maximising returns, not just collecting rent.',
-  },
-  {
-    step: '04',
-    title: 'Maximise',
-    description:
-      'We actively protect and grow the value of your investment, keeping you informed and consistently ahead of the market.',
-  },
-  {
-    step: '05',
-    title: 'Resell',
-    description:
-      'When the time is right, we leverage deep market knowledge to appraise and resell your property — achieving the best possible outcome.',
-  },
-  {
-    step: '06',
-    title: 'Reinvest',
-    description:
-      'We identify your next opportunity, keeping your capital working and your portfolio growing for the long term.',
-  },
-]
+  const stats = [
+    { value: c.stat1Value, label: c.stat1Label },
+    { value: c.stat2Value, label: c.stat2Label },
+    { value: c.stat3Value, label: c.stat3Label },
+  ]
 
-const developerServices = [
-  'Project Marketing & Sales Management',
-  'Independent Sales Agency & Qualified Buyer Network',
-  'Feasibility & Pricing Strategy Advisory',
-  'Campaign Reporting & Settlement Support',
-]
+  const team = [
+    { name: c.member1Name, role: c.member1Role, image: c.member1Image, bio: c.member1Bio },
+    { name: c.member2Name, role: c.member2Role, image: c.member2Image, bio: c.member2Bio },
+  ]
 
-const featuredProjects = [
-  { location: 'Southbank, Melbourne', type: 'High-Rise Apartments',    status: 'Sold Out' },
-  { location: 'Richmond, Melbourne',  type: 'Boutique Townhouses',      status: 'Sold Out' },
-  { location: 'Docklands, Melbourne', type: 'Mixed-Use Residential',    status: 'Sold Out' },
-]
+  const developerServices = [c.service1, c.service2, c.service3, c.service4]
 
-const team = [
-  {
-    name: 'Ned Gerrard',
-    role: 'Co-Founder & Director',
-    image: '/images/Ned Gerrard_ai_placeholder.png',
-    bio: 'With a background in management consulting, accounting, and marketing, Ned brings strategic discipline to every engagement — from developer feasibility to long-term client strategy. He built PPM into Melbourne\'s silent engine for over a decade before bringing the brand to market.',
-  },
-  {
-    name: 'Joan Alcock',
-    role: 'Director & Officer in Effective Control',
-    image: '/images/Joan Alcock_ai_placeholder.png',
-    bio: 'Ranked nationally in the Top 2% of sales professionals, Joan holds the agency licence and leads all client relationships. Multi-award winning, her approach is direct, experienced, and entirely client-first.',
-  },
-]
+  const featuredProjects = [
+    { location: c.project1Location, type: c.project1Type, status: c.project1Status },
+    { location: c.project2Location, type: c.project2Type, status: c.project2Status },
+    { location: c.project3Location, type: c.project3Type, status: c.project3Status },
+  ]
 
-// ─── Page ───────────────────────────────────────────────────────────────────
-
-export default function AboutPage() {
   return (
     <main className="min-h-screen w-full text-[#1f1a17]">
       <Navbar />
@@ -90,12 +50,7 @@ export default function AboutPage() {
       {/* ── S1: Opening Statement ─────────────────────────────────────────── */}
       <section className="relative min-h-[88vh] bg-[#1c1814] flex flex-col justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <Threads
-            color={[0.722, 0.584, 0.392]}
-            amplitude={1.8}
-            distance={0.3}
-            enableMouseInteraction
-          />
+          <ThreadsBackground />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-8 py-24">
@@ -110,9 +65,8 @@ export default function AboutPage() {
 
           <div className="mt-8 border-t border-[#3a302a] pt-12 lg:pt-16">
             <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-light leading-[1.06] text-white max-w-4xl">
-              The trusted name behind<br />
-              Melbourne&apos;s most significant<br />
-              <span className="text-[#c8a96e]">residential developments.</span>
+              {c.heroHeadingMain}{' '}
+              <span className="text-[#c8a96e]">{c.heroHeadingAccent}</span>
             </h1>
           </div>
 
@@ -127,36 +81,19 @@ export default function AboutPage() {
       <section className="bg-white py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-8">
           <div className="grid lg:grid-cols-[5fr_7fr] gap-16 lg:gap-24 lg:items-start">
-
-            {/* Pull quote */}
             <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-10 pt-1">
               <p className="text-2xl lg:text-[1.85rem] font-light italic text-[#1f1a17] leading-snug">
-                &ldquo;For over a decade,<br />we were<br />the silent engine.&rdquo;
+                &ldquo;{c.pullQuote}&rdquo;
               </p>
             </div>
 
-            {/* Body */}
             <div className="space-y-5 text-[14px] leading-[1.95] text-[#3d3530]">
-              <p>
-                Property Project Marketing Pty Ltd (PPM) was founded in April 2013 and for
-                over a decade operated invisibly behind Melbourne&apos;s major residential
-                developers — delivering more than{' '}
-                <strong className="text-[#1f1a17] font-medium">$1.5 billion</strong> in
-                off-the-plan property sales with zero public presence.
-              </p>
-              <p className="font-medium text-[#1f1a17]">We are now changing that.</p>
-              <p>
-                After years of working exclusively under developers&apos; names, we are
-                bringing that same expertise directly to buyers, investors, and developers
-                who want a trusted, end-to-end partner for the full investment lifecycle.
-              </p>
-              <p>
-                Our approach goes far beyond a transaction. We source, sell, manage, and
-                resell — a closed-loop service that keeps working for you long after
-                settlement.
-              </p>
+              {[c.storyP1, c.storyP2, c.storyP3, c.storyP4]
+                .filter(Boolean)
+                .map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
             </div>
-
           </div>
         </div>
       </section>
@@ -165,11 +102,7 @@ export default function AboutPage() {
       <section className="bg-[#f6f2eb] py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-8">
           <div className="flex flex-col sm:flex-row sm:divide-x divide-[#ddd3c6]">
-            {[
-              { value: '$1.5B+', label: 'In Delivered Sales' },
-              { value: '$50M+',  label: 'Assets Under Management' },
-              { value: '10+',    label: 'Years of Industry Experience' },
-            ].map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="flex-1 py-10 sm:py-0 sm:px-12 first:sm:pl-0 last:sm:pr-0 border-b sm:border-b-0 border-[#ddd3c6] last:border-b-0"
@@ -190,7 +123,6 @@ export default function AboutPage() {
       {/* ── S4: The Approach ──────────────────────────────────────────────── */}
       <section className="bg-white py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-8">
-
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2 mb-16">
             <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
               Our Approach
@@ -218,12 +150,22 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
       {/* ── S5: Globe (overseas investors) ────────────────────────────────── */}
-      <OverseasReachSection />
+      <OverseasReachSection content={{
+        headingMain: c.overseasHeadingMain,
+        headingAccent: c.overseasHeadingAccent,
+        p1: c.overseasP1,
+        p2: c.overseasP2,
+        stat1Value: c.overseasStat1Value,
+        stat1Label: c.overseasStat1Label,
+        stat2Value: c.overseasStat2Value,
+        stat2Label: c.overseasStat2Label,
+        stat3Value: c.overseasStat3Value,
+        stat3Label: c.overseasStat3Label,
+      }} />
 
       {/* ── S6: The People ────────────────────────────────────────────────── */}
       <section className="bg-[#f6f2eb]">
@@ -241,7 +183,6 @@ export default function AboutPage() {
             key={member.name}
             className="grid lg:grid-cols-2 mt-14 border-t border-[#ddd3c6] first:mt-10"
           >
-            {/* Portrait */}
             <div
               className={`relative min-h-[360px] lg:min-h-[480px] bg-[#e4dbd1] overflow-hidden ${
                 i % 2 === 1 ? 'lg:order-2' : ''
@@ -256,7 +197,6 @@ export default function AboutPage() {
               />
             </div>
 
-            {/* Text */}
             <div
               className={`flex flex-col justify-center px-8 py-14 lg:px-14 xl:px-20 ${
                 i % 2 === 1 ? 'lg:order-1' : ''
@@ -279,36 +219,24 @@ export default function AboutPage() {
       <section className="bg-[#2f2a24] py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-8">
           <div className="grid lg:grid-cols-[5fr_7fr] gap-16 lg:gap-24 lg:items-start">
-
-            {/* Heading */}
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d] mb-6">
                 Developer Services
               </p>
               <h2 className="text-3xl lg:text-[2.75rem] font-light leading-[1.2] text-white">
-                The team behind Melbourne&apos;s most successful launches.
+                {c.devHeading}
               </h2>
             </div>
 
-            {/* Body + service list */}
             <div>
               <div className="space-y-5 text-[14px] leading-[1.9] text-[#9e8d7a]">
-                <p>
-                  For over a decade, PPM was the silent force behind some of
-                  Melbourne&apos;s most significant residential projects — managing
-                  campaigns from launch strategy to final settlement, with no public
-                  credit taken.
-                </p>
-                <p>
-                  We now offer that same capability directly. An independent agency
-                  with a qualified buyer network spanning local owner-occupiers, local
-                  investors, and overseas investors across Asia-Pacific — with
-                  transparent reporting from day one.
-                </p>
+                {[c.devP1, c.devP2].filter(Boolean).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
               </div>
 
               <div className="mt-12">
-                {developerServices.map((service) => (
+                {developerServices.filter(Boolean).map((service) => (
                   <div key={service} className="py-5 border-t border-[#3d3530]">
                     <p className="text-[13px] tracking-[0.05em] text-[#9e8d7a]">
                       {service}
@@ -327,7 +255,6 @@ export default function AboutPage() {
                 </Link>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -339,7 +266,7 @@ export default function AboutPage() {
             Our Track Record
           </p>
           <h2 className="mt-6 text-4xl lg:text-6xl font-light leading-[1.1] text-[#1f1a17] max-w-3xl">
-            $1.5 billion delivered across Southbank&nbsp;&middot; Docklands&nbsp;&middot; Richmond and beyond.
+            {c.trackHeading}
           </h2>
 
           <div className="mt-16">

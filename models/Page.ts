@@ -19,7 +19,24 @@ const PageSchema = new Schema(
 
     subtitle: { type: String, default: "" },
 
-    // Paragraph blocks
+    // SEO
+    seoTitle: { type: String, default: "" },
+    seoDescription: { type: String, default: "" },
+
+    // Hero section
+    heroEyebrow: { type: String, default: "" },
+    heroTitle: { type: String, default: "" },
+    heroSummary: { type: String, default: "" },
+
+    // Main body (double-newline separated paragraphs)
+    body: { type: String, default: "" },
+
+    // CTA section
+    ctaTitle: { type: String, default: "" },
+    ctaText: { type: String, default: "" },
+    ctaLink: { type: String, default: "" },
+
+    // Paragraph blocks (legacy)
     paragraph1Title: { type: String, default: "" },
     paragraph1: { type: String, default: "" },
 
@@ -35,6 +52,9 @@ const PageSchema = new Schema(
     // Optional controls
     showInNavbar: { type: Boolean, default: false },
     navLabel: { type: String, default: "" },
+    pageGroup: { type: String, default: "more" },
+    statusLabel: { type: String, default: "" },
+    featuredImage: { type: String, default: "" },
     sortOrder: { type: Number, default: 100 },
 
     // Status
