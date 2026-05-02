@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
 import AdminTabs from "./admin-tabs";
+import EditPagesButton from "./EditPagesButton";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -40,6 +41,7 @@ export default async function AdminDashboardPage() {
             >
               Manage Pages
             </Link>
+            <EditPagesButton />
             <LogoutButton />
           </div>
         </div>
