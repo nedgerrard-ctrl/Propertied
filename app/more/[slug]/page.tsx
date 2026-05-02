@@ -4,6 +4,7 @@ import FloatingDust from "@/app/components/FloatingDust";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/mongodb";
 import Page from "@/models/Page";
+import Link from "next/link";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -21,24 +22,12 @@ export default async function GuidePage({ params }: Props) {
 
   if (!page) notFound();
 
-  const paragraphs = [
-    {
-      title: page.paragraph1Title,
-      text: page.paragraph1,
-    },
-    {
-      title: page.paragraph2Title,
-      text: page.paragraph2,
-    },
-    {
-      title: page.paragraph3Title,
-      text: page.paragraph3,
-    },
-    {
-      title: page.paragraph4Title,
-      text: page.paragraph4,
-    },
-  ].filter((item) => item.title || item.text);
+  const bodyParagraphs = page.body
+    ? page.body
+        .split(/\n\n+/)
+        .map((p: string) => p.trim())
+        .filter(Boolean)
+    : [];
 
   return (
     <main className="min-h-screen w-full text-[#1f1a17]">
@@ -51,7 +40,7 @@ export default async function GuidePage({ params }: Props) {
         <div className="relative z-10 mx-auto w-full max-w-7xl px-8 py-24">
           <div className="flex items-baseline justify-between">
             <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
-              Guide
+              {page.heroEyebrow || "Guide"}
             </p>
 
             <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
@@ -61,13 +50,13 @@ export default async function GuidePage({ params }: Props) {
 
           <div className="mt-8 border-t border-[#3a302a] pt-12 lg:pt-16">
             <h1 className="max-w-4xl text-5xl md:text-6xl lg:text-[4.5rem] font-light leading-[1.06] text-white">
-              {page.title}
+              {page.heroTitle || page.title}
             </h1>
           </div>
 
-          {page.subtitle && (
+          {page.heroSummary && (
             <p className="mt-8 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d]">
-              {page.subtitle}
+              {page.heroSummary}
             </p>
           )}
 
@@ -78,39 +67,57 @@ export default async function GuidePage({ params }: Props) {
         </div>
       </section>
 
-      {/* TEXT CONTENT */}
-      <section className="bg-[#f6f2eb] py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-8">
-          <div className="grid gap-12 lg:grid-cols-[4fr_8fr]">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
-                Overview
-              </p>
-            </div>
+      {/* BODY */}
+      {bodyParagraphs.length > 0 && (
+        <section className="bg-[#f6f2eb] py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl px-8">
+            <div className="grid gap-12 lg:grid-cols-[4fr_8fr]">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">
+                  Overview
+                </p>
+              </div>
 
-            <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-14">
-              {paragraphs.map((item, index) => (
-                <div
-                  key={index}
-                  className="grid gap-4 border-b border-[#e8e2da] py-10 last:border-b-0 lg:grid-cols-[4rem_12rem_1fr] lg:gap-x-10"
-                >
-                  <p className="text-[2.6rem] font-thin text-[#e0d8d0] tabular-nums leading-none select-none">
-                    {String(index + 1).padStart(2, "0")}
+              <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-14 space-y-8">
+                {bodyParagraphs.map((paragraph: string, index: number) => (
+                  <p
+                    key={index}
+                    className="max-w-[58ch] text-[13px] leading-[1.9] text-[#5b5147]"
+                  >
+                    {paragraph}
                   </p>
-
-                  <h2 className="text-[15px] font-semibold leading-7 text-[#1f1a17]">
-                    {item.title}
-                  </h2>
-
-                  <p className="max-w-[58ch] text-[13px] leading-[1.9] text-[#5b5147]">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* CTA */}
+      {(page.ctaTitle || page.ctaText) && (
+        <section className="bg-[#1c1814] py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-8">
+            {page.ctaTitle && (
+              <h2 className="text-[2rem] font-light text-white">
+                {page.ctaTitle}
+              </h2>
+            )}
+            {page.ctaText && (
+              <p className="mt-4 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d]">
+                {page.ctaText}
+              </p>
+            )}
+            {page.ctaLink && (
+              <Link
+                href={page.ctaLink}
+                className="mt-8 inline-block border border-[#8a7b6d] px-8 py-3 text-[12px] uppercase tracking-[0.22em] text-[#c7bbb0] transition hover:border-white hover:text-white"
+              >
+                Get in touch
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       <Footer />
     </main>
