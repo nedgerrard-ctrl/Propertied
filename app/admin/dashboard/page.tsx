@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
               Add Guide Page
             </Link>
             <Link
-              href="/admin/dashboard/pages"
+              href="/admin/dashboard/cms-pages"
               className="border border-[#5f5245] px-4 py-2 text-sm"
             >
               Manage Pages

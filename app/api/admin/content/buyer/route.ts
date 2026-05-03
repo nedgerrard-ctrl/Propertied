@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import LandingContent from "@/models/LandingContent";
-import { mergeLandingContent } from "@/lib/landing-defaults";
+import BuyerContent from "@/models/BuyerContent";
+import { mergeBuyerContent } from "@/lib/buyer-defaults";
 import { touchCmsPage } from "@/lib/touch-cms-page";
 
 export async function GET() {
   await connectDB();
-  const doc = await LandingContent.findOne().lean();
-  const content = mergeLandingContent(doc as Record<string, unknown> | null);
+  const doc = await BuyerContent.findOne().lean();
+  const content = mergeBuyerContent(doc as Record<string, unknown> | null);
   return NextResponse.json(content);
 }
 
@@ -21,11 +21,11 @@ export async function PATCH(req: NextRequest) {
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
   }
-  const content = await LandingContent.findOneAndUpdate(
+  const content = await BuyerContent.findOneAndUpdate(
     {},
     { $set: updates },
     { upsert: true, returnDocument: "after", runValidators: true }
   );
-  await touchCmsPage("landing");
+  await touchCmsPage("buyer");
   return NextResponse.json(content);
 }

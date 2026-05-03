@@ -13,6 +13,8 @@ type DynamicTestimonial = {
   rating: number;
 };
 
+type ToastData = { type: "success" | "error"; message: string } | null;
+
 const EDIT_DARK = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
 function EditBadge() {
@@ -23,6 +25,33 @@ function EditBadge() {
       </svg>
       Editable
     </span>
+  );
+}
+
+// ── Toast notification ─────────────────────────────────────────────────────────
+
+function Toast({ toast, onClose }: { toast: ToastData; onClose: () => void }) {
+  if (!toast) return null;
+  return (
+    <div
+      className={`fixed top-20 left-1/2 z-[300] -translate-x-1/2 flex w-full max-w-sm items-center gap-3 rounded-xl px-5 py-4 shadow-2xl ${
+        toast.type === "success" ? "bg-green-600" : "bg-red-600"
+      } text-white`}
+    >
+      {toast.type === "success" ? (
+        <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      ) : (
+        <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      )}
+      <p className="flex-1 text-sm font-semibold">{toast.message}</p>
+      <button onClick={onClose} className="text-white/70 hover:text-white transition text-xl leading-none">
+        ×
+      </button>
+    </div>
   );
 }
 
@@ -50,15 +79,32 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
   const [quote, setQuote]   = useState("");
   const [client, setClient] = useState("");
   const [rating, setRating] = useState(5);
-  const [error, setError]   = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Live validation wrappers
+  function handleQuote(v: string) {
+    setQuote(v);
+    setErrors((p) => ({ ...p, quote: v.trim() ? "" : "Required" }));
+  }
+
+  function handleClient(v: string) {
+    setClient(v);
+    setErrors((p) => ({ ...p, client: v.trim() ? "" : "Required" }));
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!quote.trim() || !client.trim()) {
-      setError("Quote and client name are required.");
-      return;
-    }
+    setApiError("");
+
+    const newErrors = {
+      quote: quote.trim() ? "" : "Required",
+      client: client.trim() ? "" : "Required",
+    };
+    setErrors(newErrors);
+    if (Object.values(newErrors).some((e) => e)) return;
+
     setSaving(true);
     const res = await fetch("/api/admin/testimonials", {
       method: "POST",
@@ -68,12 +114,14 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
     const data = await res.json();
     setSaving(false);
     if (!res.ok) {
-      setError(data.error || "Failed to add testimonial.");
+      setApiError(data.error || "Failed to add testimonial.");
     } else {
       onAdded({ _id: data._id, quote: data.quote, client: data.client, rating: data.rating });
       onClose();
     }
   }
+
+  const inputBase = "w-full rounded border px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:outline-none transition-colors";
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
@@ -85,31 +133,42 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
         <h2 className="text-lg font-semibold text-neutral-900">Add Testimonial</h2>
         <p className="mt-1 text-sm text-neutral-500">Appears in the &ldquo;More Reviews&rdquo; grid on the public page.</p>
 
+        {apiError && (
+          <div className="mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M7.018 1.49A.75.75 0 0 1 8 .75h.002a.75.75 0 0 1 .75.748v.002l-.112 6.502a.75.75 0 0 1-1.498 0L7.018 1.49ZM8 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Z" />
+            </svg>
+            <p className="text-[12px] font-medium text-red-700">{apiError}</p>
+          </div>
+        )}
+
         <div className="mt-6 space-y-4">
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5">
-              Quote
+              Quote *
             </label>
             <textarea
               value={quote}
-              onChange={(e) => setQuote(e.target.value)}
+              onChange={(e) => handleQuote(e.target.value)}
               rows={4}
               placeholder="What the client said…"
-              className="w-full rounded border border-neutral-200 px-3 py-2.5 text-[13px] leading-[1.7] text-neutral-800 placeholder-neutral-300 focus:border-amber-400 focus:outline-none resize-none"
+              className={`${inputBase} resize-none ${errors.quote ? "border-red-400 bg-red-50/30 focus:border-red-500" : "border-neutral-200 focus:border-amber-400"}`}
             />
+            {errors.quote && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.quote}</p>}
           </div>
 
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5">
-              Client Name
+              Client Name *
             </label>
             <input
               type="text"
               value={client}
-              onChange={(e) => setClient(e.target.value)}
+              onChange={(e) => handleClient(e.target.value)}
               placeholder="e.g. Sarah T. — Property Investor"
-              className="w-full rounded border border-neutral-200 px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:border-amber-400 focus:outline-none"
+              className={`${inputBase} ${errors.client ? "border-red-400 bg-red-50/30 focus:border-red-500" : "border-neutral-200 focus:border-amber-400"}`}
             />
+            {errors.client && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.client}</p>}
           </div>
 
           <div>
@@ -133,8 +192,6 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
             </div>
           </div>
         </div>
-
-        {error && <p className="mt-4 text-[12px] text-red-600">{error}</p>}
 
         <div className="mt-7 flex justify-end gap-3">
           <button
@@ -164,11 +221,18 @@ export default function TestimonialInlineEditor() {
   const [testimonials, setTestimonials] = useState<DynamicTestimonial[]>([]);
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
-  const [saved, setSaved]           = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
   const [addOpen, setAddOpen]       = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [toast, setToast]           = useState<ToastData>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refs = useRef<Partial<Record<TextField, HTMLElement | null>>>({});
+
+  function showToast(type: "success" | "error", message: string) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  }
 
   const fetchTestimonials = useCallback(async () => {
     const res = await fetch("/api/admin/testimonials");
@@ -186,6 +250,9 @@ export default function TestimonialInlineEditor() {
     });
   }, []);
 
+  // suppress unused warning — fetchTestimonials kept for future use
+  void fetchTestimonials;
+
   function r(field: TextField) {
     return (el: HTMLElement | null) => { refs.current[field] = el; };
   }
@@ -198,12 +265,12 @@ export default function TestimonialInlineEditor() {
       }
     }
     setContent(testimonialDefaults);
-    setSaved(false);
     await fetch("/api/admin/content/testimonial", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(testimonialDefaults),
     });
+    showToast("success", "Quotes reverted to defaults.");
   }
 
   async function save() {
@@ -220,10 +287,10 @@ export default function TestimonialInlineEditor() {
     setSaving(false);
     if (res.ok) {
       setContent((prev) => ({ ...prev, ...updates }));
-      setSaved(true);
+      showToast("success", "Changes saved successfully.");
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to save changes.");
+      showToast("error", data.error || "Failed to save changes.");
     }
   }
 
@@ -233,8 +300,9 @@ export default function TestimonialInlineEditor() {
     setDeletingId(null);
     if (res.ok) {
       setTestimonials((prev) => prev.filter((t) => t._id !== id));
+      showToast("success", "Testimonial deleted.");
     } else {
-      alert("Failed to delete testimonial.");
+      showToast("error", "Failed to delete testimonial.");
     }
   }
 
@@ -246,6 +314,8 @@ export default function TestimonialInlineEditor() {
 
   return (
     <>
+      <Toast toast={toast} onClose={() => setToast(null)} />
+
       {/* ── Admin toolbar ──────────────────────────────────────────────────── */}
       <div className="fixed top-0 inset-x-0 z-50 flex items-center justify-between gap-4 bg-amber-400 px-6 py-3 shadow-lg">
         <div className="flex items-center gap-4">
@@ -264,14 +334,6 @@ export default function TestimonialInlineEditor() {
           <span className="hidden sm:inline text-[11px] text-black/50">· Click any underlined text to edit</span>
         </div>
         <div className="flex items-center gap-3">
-          {saved && (
-            <span className="flex items-center gap-1.5 text-[12px] font-semibold text-black/70">
-              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
-              </svg>
-              Saved
-            </span>
-          )}
           <button onClick={() => setRevertOpen(true)} className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black">
             Revert Quotes to Default
           </button>
@@ -399,7 +461,10 @@ export default function TestimonialInlineEditor() {
       {addOpen && (
         <AddModal
           onClose={() => setAddOpen(false)}
-          onAdded={(t) => setTestimonials((prev) => [t, ...prev])}
+          onAdded={(t) => {
+            setTestimonials((prev) => [t, ...prev]);
+            showToast("success", "Testimonial added successfully.");
+          }}
         />
       )}
 
