@@ -41,7 +41,13 @@ export default async function AdminDashboardPage() {
             >
               Manage Pages
             </Link>
-            <EditPagesButton />
+            <Link
+              href="/admin/dashboard/blogs"
+              className="border border-[#5f5245] px-4 py-2 text-sm"
+            >
+              Manage Blogs
+            </Link>
+                        <EditPagesButton />
             <LogoutButton />
           </div>
         </div>
