@@ -53,6 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User",
           role: user.role,
           userType: user.userType,
+          accountStatus: user.accountStatus ?? "active",
           pendingApproval: user.pendingApproval ?? false,
           phone: user.phone ?? "",
         };
@@ -62,9 +63,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const u = user as { role?: string; userType?: string; pendingApproval?: boolean; phone?: string };
+        const u = user as { role?: string; userType?: string; accountStatus?: string; pendingApproval?: boolean; phone?: string };
         token.role = u.role;
         token.userType = u.userType;
+        token.accountStatus = u.accountStatus;
         token.pendingApproval = u.pendingApproval;
         token.phone = u.phone;
       }
@@ -74,6 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.role = token.role as string | undefined;
         session.user.userType = token.userType as string | undefined;
+        session.user.accountStatus = token.accountStatus as string | undefined;
         session.user.pendingApproval = token.pendingApproval as boolean | undefined;
         session.user.phone = token.phone as string | undefined;
       }

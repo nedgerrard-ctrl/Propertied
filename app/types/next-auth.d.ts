@@ -5,6 +5,7 @@ declare module "next-auth" {
     user?: DefaultSession["user"] & {
       role?: string;
       userType?: string;
+      accountStatus?: string;
       pendingApproval?: boolean;
       phone?: string;
     };
@@ -13,6 +14,7 @@ declare module "next-auth" {
   interface User {
     role?: string;
     userType?: string;
+    accountStatus?: string;
     pendingApproval?: boolean;
     phone?: string;
   }
@@ -22,6 +24,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     userType?: string;
+    accountStatus?: string;
     pendingApproval?: boolean;
     phone?: string;
   }

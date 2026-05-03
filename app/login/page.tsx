@@ -92,6 +92,11 @@ export default function LoginPage() {
 
       if (role === "client") {
         const userType = session?.user?.userType;
+        const accountStatus = (session?.user as { accountStatus?: string } | undefined)?.accountStatus;
+        if (accountStatus === "rejected") {
+          window.location.href = "/account-rejected";
+          return;
+        }
         if (userType === "developer") {
           window.location.href = "/developer/dashboard";
         } else {
