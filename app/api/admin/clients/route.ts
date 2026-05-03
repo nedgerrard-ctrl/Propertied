@@ -15,7 +15,7 @@ export async function GET() {
     role: "client",
     userType: { $in: ["buyer_investor", "existing_client"] },
   })
-    .select("_id name email phone userType clientType pendingApproval createdAt")
+    .select("_id name email phone userType clientType accountStatus pendingApproval createdAt")
     .sort({ createdAt: -1 })
     .lean();
 

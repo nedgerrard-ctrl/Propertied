@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type AccountStatus =
   | "active"
   | "pending-existing-client"
-  | "approved-existing-client";
+  | "approved-existing-client"
+  | "rejected";
 
 type AssignedDocument = {
   originalName: string;
@@ -24,6 +25,7 @@ type Client = {
   phone: string;
   userType: "buyer_investor" | "existing_client";
   clientType: ClientType;
+  accountStatus?: AccountStatus;
   pendingApproval: boolean;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
@@ -52,7 +54,11 @@ type Enquiry = {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-function getAccountStatus(client: Pick<Client, "userType" | "pendingApproval">): AccountStatus {
+function getAccountStatus(client: Pick<Client, "userType" | "pendingApproval" | "accountStatus">): AccountStatus {
+  if (client.accountStatus === "rejected") return "rejected";
+  if (client.accountStatus === "approved-existing-client") return "approved-existing-client";
+  if (client.accountStatus === "pending-existing-client") return "pending-existing-client";
+  // fallback for pre-migration data
   if (client.pendingApproval) return "pending-existing-client";
   if (client.userType === "existing_client") return "approved-existing-client";
   return "active";
@@ -60,10 +66,12 @@ function getAccountStatus(client: Pick<Client, "userType" | "pendingApproval">):
 
 function statusToPatch(status: AccountStatus): Record<string, unknown> {
   if (status === "approved-existing-client")
-    return { userType: "existing_client", pendingApproval: false };
+    return { accountStatus: "approved-existing-client", userType: "existing_client", pendingApproval: false };
   if (status === "pending-existing-client")
-    return { pendingApproval: true };
-  return { userType: "buyer_investor", pendingApproval: false };
+    return { accountStatus: "pending-existing-client", userType: "existing_client", pendingApproval: true };
+  if (status === "rejected")
+    return { accountStatus: "rejected", userType: "buyer_investor", pendingApproval: false };
+  return { accountStatus: "active", userType: "buyer_investor", pendingApproval: false };
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -72,18 +80,21 @@ const ACCOUNT_STATUS_OPTIONS: AccountStatus[] = [
   "active",
   "pending-existing-client",
   "approved-existing-client",
+  "rejected",
 ];
 
 const ACCOUNT_STATUS_LABEL: Record<AccountStatus, string> = {
   active: "Buyer",
   "pending-existing-client": "Pending Approval",
   "approved-existing-client": "Approved Existing",
+  rejected: "Rejected",
 };
 
 const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
   active: "bg-emerald-100 text-emerald-800",
   "pending-existing-client": "bg-amber-100 text-amber-800",
   "approved-existing-client": "bg-blue-100 text-blue-800",
+  rejected: "bg-red-100 text-red-700",
 };
 
 const CLIENT_TYPE_LABEL: Record<ClientType, string> = {
@@ -97,6 +108,7 @@ const ACCOUNT_STATUS_BUTTON: Record<AccountStatus, string> = {
   active: "border-emerald-400 bg-emerald-50 text-emerald-800",
   "pending-existing-client": "border-amber-400 bg-amber-50 text-amber-800",
   "approved-existing-client": "border-blue-400 bg-blue-50 text-blue-800",
+  rejected: "border-red-400 bg-red-50 text-red-700",
 };
 
 // ─── Utilities ─────────────────────────────────────────────────────────────────
@@ -266,8 +278,8 @@ function ClientDetailPanel({
   async function handleApprovalAction(action: "approve" | "reject") {
     const patch =
       action === "approve"
-        ? { userType: "existing_client", pendingApproval: false }
-        : { pendingApproval: false };
+        ? { accountStatus: "approved-existing-client", userType: "existing_client", pendingApproval: false }
+        : { accountStatus: "rejected", userType: "buyer_investor", pendingApproval: false };
     setActionLoading(action);
     const res = await fetch(`/api/admin/clients/${client._id}`, {
       method: "PATCH",
@@ -771,12 +783,14 @@ export default function ClientsPanel() {
   }, []);
 
   function handleStatusUpdate(id: string, status: AccountStatus) {
-    const updates: Partial<Client> =
-      status === "approved-existing-client"
+    const updates: Partial<Client> = {
+      accountStatus: status,
+      ...(status === "approved-existing-client"
         ? { userType: "existing_client", pendingApproval: false }
         : status === "pending-existing-client"
-        ? { pendingApproval: true }
-        : { userType: "buyer_investor", pendingApproval: false };
+        ? { userType: "existing_client", pendingApproval: true }
+        : { userType: "buyer_investor", pendingApproval: false }),
+    };
     setClients((prev) =>
       prev.map((c) => (c._id === id ? { ...c, ...updates } : c))
     );
@@ -812,6 +826,7 @@ export default function ClientsPanel() {
       approved: clients.filter(
         (c) => getAccountStatus(c) === "approved-existing-client"
       ).length,
+      rejected: clients.filter((c) => getAccountStatus(c) === "rejected").length,
     }),
     [clients]
   );
@@ -837,20 +852,13 @@ export default function ClientsPanel() {
   return (
     <div className="mt-10">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
           { label: "Buyer", value: counts.active, color: "text-emerald-700" },
-          {
-            label: "Pending Approval",
-            value: counts.pending,
-            color: "text-amber-700",
-          },
-          {
-            label: "Approved Existing",
-            value: counts.approved,
-            color: "text-blue-700",
-          },
+          { label: "Pending Approval", value: counts.pending, color: "text-amber-700" },
+          { label: "Approved Existing", value: counts.approved, color: "text-blue-700" },
+          { label: "Rejected", value: counts.rejected, color: "text-red-600" },
         ].map((s) => (
           <div
             key={s.label}
@@ -896,6 +904,7 @@ export default function ClientsPanel() {
             <option value="active">Buyer</option>
             <option value="pending-existing-client">Pending Approval</option>
             <option value="approved-existing-client">Approved Existing</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
 

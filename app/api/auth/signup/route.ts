@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
       passwordHash,
       role: "client",
       userType,
+      accountStatus: isExistingClient ? "pending-existing-client" : "active",
       phone: trimmedPhone,
       location: {
         type: locationKind,

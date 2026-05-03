@@ -5,7 +5,8 @@ export type ClientType = "buyer" | "investor" | "developer" | "";
 export type AccountStatus =
   | "active"
   | "pending-existing-client"
-  | "approved-existing-client";
+  | "approved-existing-client"
+  | "rejected";
 
 export interface AssignedDocument {
   originalName: string;
@@ -116,7 +117,7 @@ const userSchema = new Schema<IUser>(
     },
     accountStatus: {
       type: String,
-      enum: ["active", "pending-existing-client", "approved-existing-client"],
+      enum: ["active", "pending-existing-client", "approved-existing-client", "rejected"],
       default: "active",
     },
     phoneCountryCode: {

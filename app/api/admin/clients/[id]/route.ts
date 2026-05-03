@@ -62,6 +62,14 @@ export async function PATCH(
     update.pendingApproval = Boolean(body.pendingApproval);
   }
 
+  if ("accountStatus" in body) {
+    const validStatuses = ["active", "pending-existing-client", "approved-existing-client", "rejected"];
+    if (!validStatuses.includes(body.accountStatus as string)) {
+      return NextResponse.json({ message: "Invalid account status" }, { status: 400 });
+    }
+    update.accountStatus = body.accountStatus;
+  }
+
   if ("adminNotes" in body) {
     const notes = String(body.adminNotes ?? "").trim();
     if (notes.length > 2000) {
