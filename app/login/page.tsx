@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
@@ -33,9 +33,9 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkSession() {
       const session = await getSession();
-      if (session?.user?.role === "admin") {
-        router.push("/admin/dashboard");
-      }
+      if (session?.user?.role === "admin") router.push("/admin/dashboard");
+      else if (session?.user?.role === "developer") router.push("/developer/dashboard");
+      else if (session?.user?.role === "client") router.push("/client/dashboard");
     }
     checkSession();
   }, [router]);
@@ -91,7 +91,12 @@ export default function LoginPage() {
       }
 
       if (role === "client") {
-        window.location.href = "/client/dashboard";
+        const userType = session?.user?.userType;
+        if (userType === "developer") {
+          window.location.href = "/developer/dashboard";
+        } else {
+          window.location.href = "/client/dashboard";
+        }
         return;
       }
 

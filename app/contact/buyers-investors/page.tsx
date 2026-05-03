@@ -754,6 +754,16 @@ function BuyersInvestorsContactContent() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (session?.user?.userType === "developer") {
+      setFeedbackModal({
+        open: true,
+        title: "Not Allowed",
+        message: "As a developer, you are not permitted to submit buyer or investor enquiries. Please use the Developer Enquiry form.",
+        success: false,
+      });
+      return;
+    }
+
     const validationErrors = validateBuyerForm(formData, selectedDocuments.length);
     setFieldErrors(validationErrors);
 
