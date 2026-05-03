@@ -64,7 +64,12 @@ export default function Navbar() {
   const mobileOpenRef = useRef(false)
 
   const isLoggedIn = !!session?.user
-  const dashboardHref = session?.user?.role === 'admin' ? '/admin/dashboard' : '/client/dashboard'
+  const dashboardHref =
+    session?.user?.role === 'admin'
+      ? '/admin/dashboard'
+      : session?.user?.userType === 'developer'
+      ? '/developer/dashboard'
+      : '/client/dashboard'
 
   // ── Active-link helper ────────────────────────────────────────────────────
 

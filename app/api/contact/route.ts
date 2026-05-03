@@ -430,20 +430,38 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    if (enquiryType === "developer") {
-      const isBuyerInvestor = await User.findOne({
-        userType: "buyer_investor",
-        $or: [
-          { email: email.trim().toLowerCase() },
-          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
-        ],
-      }).lean();
+    const matchClause = {
+      $or: [
+        { email: email.trim().toLowerCase() },
+        ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+      ],
+    };
 
-      if (isBuyerInvestor) {
+    if (enquiryType === "developer") {
+      const submitter = await User.findOne(matchClause).lean();
+      const isBlocked =
+        submitter?.userType === "buyer_investor" ||
+        submitter?.userType === "existing_client";
+
+      if (isBlocked) {
         return NextResponse.json(
           {
             success: false,
-            message: "You are not allowed to send this type of enquiry.",
+            message: "You are not permitted to submit developer enquiries.",
+            fieldErrors: {},
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (enquiryType === "buyer") {
+      const submitter = await User.findOne(matchClause).lean();
+      if (submitter?.userType === "developer") {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "As a developer, you are not permitted to submit buyer or investor enquiries.",
             fieldErrors: {},
           },
           { status: 403 }

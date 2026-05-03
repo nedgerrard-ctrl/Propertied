@@ -8,10 +8,9 @@ import LogoutButton from "../dashboard/logout-button";
 const BASE_LINKS = [
   { href: "/client/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/client/enquiries", label: "Enquiries", icon: "mail" },
-  { href: "/client/portfolio", label: "Portfolio", icon: "portfolio" },
   { href: "/client/documents", label: "Documents", icon: "document" },
   { href: "/client/profile", label: "Profile", icon: "profile" },
-  { href: "/", label: "Back to Main Page", icon: "" },
+  { href: "/", label: "Back to Main Page", icon: "home" },
 ];
 
 const VIP_LINK = { href: "/client/vip", label: "VIP Content", icon: "star" };
@@ -66,6 +65,13 @@ function NavIcon({ name }: { name: string }) {
           <circle cx="12" cy="7" r="4" />
         </svg>
       );
+    case "home":
+      return (
+        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+          <path d="M9 21V12h6v9" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -86,7 +92,9 @@ export default function ClientNavbar() {
     <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-neutral-200 bg-white px-4 py-6">
       {/* Brand */}
       <div className="mb-8 px-2">
-        <p className="text-sm font-bold text-neutral-900">PPM Client Portal</p>
+        <Link href="/" className="text-sm font-bold text-neutral-900 hover:text-neutral-600 transition-colors">
+          PPM Client Portal
+        </Link>
         <p className="mt-0.5 text-xs text-neutral-400">Welcome back, {firstName}</p>
       </div>
 

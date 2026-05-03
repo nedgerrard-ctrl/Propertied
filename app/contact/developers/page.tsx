@@ -217,12 +217,16 @@ export default function DevelopersContactPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (session?.user?.userType === "buyer_investor") {
+    const userType = session?.user?.userType;
+
+    if (userType === "buyer_investor" || userType === "existing_client") {
       setFeedbackModal({
         open: true,
         title: "Not Allowed",
         message:
-          "You are not allowed to send this type of enquiry. As a buyer or investor, please use the Buyers / Investors enquiry form.",
+          userType === "buyer_investor"
+            ? "As a buyer or investor, please use the Buyers / Investors enquiry form."
+            : "As an existing client, you are not permitted to submit developer enquiries.",
         success: false,
       });
       return;
