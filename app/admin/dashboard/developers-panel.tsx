@@ -8,6 +8,10 @@ type AssignedDocument = {
   fileType: string;
   fileSize: number;
   fileUrl: string;
+  title?: string;
+  docType?: string;
+  docStatus?: string;
+  requiresSignature?: boolean;
 };
 
 type Developer = {
@@ -195,6 +199,10 @@ function DeveloperDetailPanel({
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDocType, setUploadDocType] = useState("Legal");
+  const [uploadRequiresSignature, setUploadRequiresSignature] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [docToDelete, setDocToDelete] = useState<AssignedDocument | null>(null);
@@ -248,14 +256,25 @@ function DeveloperDetailPanel({
     setSavingNotes(false);
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setUploadFile(file);
+    setUploadError("");
+  }
+
+  async function handleUploadSubmit() {
+    if (!uploadFile) {
+      setUploadError("Please select a file.");
+      return;
+    }
     setUploadError("");
     setUploading(true);
 
     const formData = new FormData();
-    formData.append("document", file);
+    formData.append("document", uploadFile);
+    formData.append("title", uploadTitle.trim());
+    formData.append("docType", uploadDocType);
+    formData.append("requiresSignature", String(uploadRequiresSignature));
 
     const res = await fetch(`/api/admin/developers/${developer._id}/documents`, {
       method: "POST",
@@ -268,13 +287,17 @@ function DeveloperDetailPanel({
         ...prev,
         assignedDocuments: [...(prev.assignedDocuments ?? []), data.document],
       }));
+      setUploadFile(null);
+      setUploadTitle("");
+      setUploadDocType("Legal");
+      setUploadRequiresSignature(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } else {
       const data = await res.json();
       setUploadError(data.message ?? "Upload failed.");
     }
 
     setUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function handleDeleteDoc() {
@@ -538,11 +561,33 @@ function DeveloperDetailPanel({
                         className="rounded border border-neutral-200 bg-neutral-50 px-4 py-3"
                       >
                         <p className="truncate text-[13px] font-medium text-neutral-900">
-                          {doc.originalName}
+                          {doc.title || doc.originalName}
                         </p>
-                        <p className="mt-1 text-[12px] text-neutral-500">
-                          {doc.fileType} · {formatFileSize(doc.fileSize)}
-                        </p>
+                        {doc.title && (
+                          <p className="truncate text-[11px] text-neutral-400">{doc.originalName}</p>
+                        )}
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-neutral-500">
+                          <span>{formatFileSize(doc.fileSize)}</span>
+                          {doc.docType && (
+                            <span className="rounded bg-neutral-200 px-1.5 py-0.5 font-medium text-neutral-600">
+                              {doc.docType}
+                            </span>
+                          )}
+                          {doc.docStatus && (
+                            <span className={`rounded px-1.5 py-0.5 font-medium ${
+                              doc.docStatus === "Signed"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}>
+                              {doc.docStatus}
+                            </span>
+                          )}
+                          {doc.requiresSignature && doc.docStatus !== "Signed" && (
+                            <span className="rounded bg-blue-50 px-1.5 py-0.5 font-medium text-blue-600">
+                              Signature Required
+                            </span>
+                          )}
+                        </div>
                         <div className="mt-2 flex gap-2">
                           <a
                             href={doc.fileUrl}
@@ -571,26 +616,64 @@ function DeveloperDetailPanel({
                   </div>
                 )}
 
-                <div>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-neutral-200 bg-white px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900">
-                    <svg viewBox="0 0 20 20" className="h-4 w-4 fill-current shrink-0">
-                      <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                    </svg>
-                    {uploading ? "Uploading…" : "Assign Document"}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      className="sr-only"
-                      disabled={uploading}
-                      onChange={handleFileUpload}
-                    />
-                  </label>
-                  <p className="mt-1.5 text-[11px] text-neutral-400">
+                {/* Upload form */}
+                <div className="rounded border border-neutral-200 bg-neutral-50 px-4 py-4 space-y-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                    Assign New Document
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="Document title (optional)"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    maxLength={200}
+                    className="w-full rounded border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-800 placeholder:text-neutral-400 outline-none focus:border-neutral-400"
+                  />
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={uploadDocType}
+                      onChange={(e) => setUploadDocType(e.target.value)}
+                      className="flex-1 rounded border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-700 outline-none focus:border-neutral-400"
+                    >
+                      <option>Legal</option>
+                      <option>Ownership</option>
+                      <option>Financial</option>
+                    </select>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-[13px] text-neutral-700">
+                      <input
+                        type="checkbox"
+                        checked={uploadRequiresSignature}
+                        onChange={(e) => setUploadRequiresSignature(e.target.checked)}
+                        className="h-4 w-4 rounded border-neutral-300 accent-neutral-800"
+                      />
+                      Requires signature
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 cursor-pointer rounded border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-500 truncate hover:border-neutral-400 transition">
+                      {uploadFile ? uploadFile.name : "Choose file…"}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        className="sr-only"
+                        disabled={uploading}
+                        onChange={handleFileSelect}
+                      />
+                    </label>
+                    <button
+                      onClick={handleUploadSubmit}
+                      disabled={uploading || !uploadFile}
+                      className="rounded border border-neutral-800 bg-neutral-800 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {uploading ? "Uploading…" : "Upload"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-neutral-400">
                     PDF, DOC, DOCX, JPG, PNG · max 10 MB
                   </p>
                   {uploadError && (
-                    <p className="mt-1 text-[12px] text-red-600">{uploadError}</p>
+                    <p className="text-[12px] text-red-600">{uploadError}</p>
                   )}
                 </div>
               </section>

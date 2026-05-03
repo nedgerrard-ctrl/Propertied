@@ -6,8 +6,9 @@ import StatsPanel from "./stats-panel";
 import EnquiriesPanel from "./enquiries-panel";
 import ClientsPanel from "./clients-panel";
 import DevelopersPanel from "./developers-panel";
+import DocumentsPanel from "./documents-panel";
 
-type Tab = "overview" | "enquiries" | "clients" | "developers";
+type Tab = "overview" | "enquiries" | "clients" | "developers" | "documents";
 
 export default function AdminTabs() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -65,6 +66,19 @@ export default function AdminTabs() {
         },
       ],
     },
+    {
+      label: "Documents",
+      bgColor: "#1e3a5f",
+      textColor: "#ffffff",
+      links: [
+        {
+          label: "All Documents",
+          href: "#",
+          ariaLabel: "Manage documents",
+          onClick: () => setActiveTab("documents"),
+        },
+      ],
+    },
   ], []);
 
   return (
@@ -83,6 +97,7 @@ export default function AdminTabs() {
         {activeTab === "enquiries" && <EnquiriesPanel />}
         {activeTab === "clients" && <ClientsPanel />}
         {activeTab === "developers" && <DevelopersPanel />}
+        {activeTab === "documents" && <DocumentsPanel />}
       </div>
     </div>
   );

@@ -8,9 +8,11 @@ interface ApiDocument {
   fileType: string;
   fileSize: number;
   fileUrl: string;
+  title?: string;
   uploadedByClient?: boolean;
   docType?: string;
   docStatus?: string;
+  requiresSignature?: boolean;
   uploadedAt?: string;
 }
 
@@ -134,6 +136,7 @@ export default function DocumentsClient() {
   const [isDragging, setIsDragging] = useState(false);
   const [signDoc, setSignDoc] = useState<ApiDocument | null>(null);
   const [signSent, setSignSent] = useState(false);
+  const [signError, setSignError] = useState("");
   const [deleteDoc, setDeleteDoc] = useState<ApiDocument | null>(null);
   const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -147,7 +150,8 @@ export default function DocumentsClient() {
   }, []);
 
   const filtered = documents.filter((doc) => {
-    const matchSearch = doc.originalName.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase();
+    const matchSearch = doc.originalName.toLowerCase().includes(q) || (doc.title ?? "").toLowerCase().includes(q);
     const matchType = typeFilter === "All Types" || (doc.docType ?? "Legal") === typeFilter;
     const matchStatus = statusFilter === "All Status" || (doc.docStatus ?? "Pending") === statusFilter;
     return matchSearch && matchType && matchStatus;
@@ -225,13 +229,35 @@ export default function DocumentsClient() {
     setSignSent(false);
   }
 
-  function handleSendForSignature() {
-    setSignSent(true);
+  async function handleSendForSignature() {
+    if (!signDoc) return;
+    setSignError("");
+    try {
+      const res = await fetch("/api/client/documents", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storedName: signDoc.storedName }),
+      });
+      if (res.ok) {
+        setDocuments((prev) =>
+          prev.map((d) =>
+            d.storedName === signDoc.storedName ? { ...d, docStatus: "Signed" } : d
+          )
+        );
+        setSignSent(true);
+      } else {
+        const data = await res.json();
+        setSignError(data.message ?? "Failed to sign document. Please try again.");
+      }
+    } catch {
+      setSignError("Something went wrong. Please try again.");
+    }
   }
 
   function closeSignModal() {
     setSignDoc(null);
     setSignSent(false);
+    setSignError("");
   }
 
   async function handleDelete() {
@@ -432,16 +458,21 @@ export default function DocumentsClient() {
                 filtered.map((doc) => {
                   const docType = (doc.docType ?? "Legal") as DocumentType;
                   const docStatus = (doc.docStatus ?? "Pending") as DocumentStatus;
-                  const needsSignature = docStatus === "Pending";
+                  const needsSignature = doc.requiresSignature === true && docStatus !== "Signed";
 
                   return (
                     <tr key={doc.storedName} className="hover:bg-neutral-50 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
                           <FileIcon />
-                          <span className="font-medium text-neutral-800 truncate max-w-xs">
-                            {doc.originalName}
-                          </span>
+                          <div className="min-w-0">
+                            <span className="font-medium text-neutral-800 truncate max-w-xs block">
+                              {doc.title || doc.originalName}
+                            </span>
+                            {doc.title && (
+                              <span className="text-xs text-neutral-400 truncate block">{doc.originalName}</span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
@@ -560,22 +591,26 @@ export default function DocumentsClient() {
                   </div>
                   <div>
                     <h2 className="text-base font-semibold text-neutral-900">
-                      Sign with DocuSign
+                      Sign Document
                     </h2>
-                    <p className="text-xs text-neutral-500">Secure electronic signature</p>
+                    <p className="text-xs text-neutral-500">Confirm your electronic signature</p>
                   </div>
                 </div>
                 <p className="text-sm text-neutral-600 mb-1">
                   You are about to sign:
                 </p>
                 <p className="text-sm font-medium text-neutral-900 mb-4 truncate">
-                  {signDoc.originalName}
+                  {signDoc.title || signDoc.originalName}
                 </p>
-                <p className="text-sm text-neutral-500 mb-6">
-                  Clicking &ldquo;Send for Signature&rdquo; will forward this document to
-                  DocuSign&rsquo;s secure signing portal. You&rsquo;ll receive an email with
-                  the signing link.
+                <p className="text-sm text-neutral-500 mb-4">
+                  By clicking &ldquo;Confirm Signature&rdquo; you agree that this constitutes
+                  your electronic signature on this document.
                 </p>
+                {signError && (
+                  <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {signError}
+                  </p>
+                )}
                 <div className="flex gap-3">
                   <button
                     onClick={closeSignModal}
@@ -587,7 +622,7 @@ export default function DocumentsClient() {
                     onClick={handleSendForSignature}
                     className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
                   >
-                    Send for Signature
+                    Confirm Signature
                   </button>
                 </div>
               </>
@@ -600,11 +635,12 @@ export default function DocumentsClient() {
                     </svg>
                   </div>
                   <h2 className="text-base font-semibold text-neutral-900 mb-2">
-                    Sent for Signature
+                    Document Signed
                   </h2>
                   <p className="text-sm text-neutral-500 mb-6">
-                    <span className="font-medium text-neutral-700">{signDoc.originalName}</span>{" "}
-                    has been sent to DocuSign. Check your email for the signing link.
+                    <span className="font-medium text-neutral-700">{signDoc.title || signDoc.originalName}</span>{" "}
+                    has been signed successfully. The status has been updated to{" "}
+                    <span className="font-medium text-emerald-600">Signed</span>.
                   </p>
                   <button
                     onClick={closeSignModal}

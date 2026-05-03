@@ -132,6 +132,40 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, document: doc }, { status: 201 });
 }
 
+export async function PATCH(req: NextRequest) {
+  const session = await auth();
+  if (!session || session.user?.role !== "client") {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json().catch(() => null);
+  const storedName = typeof body?.storedName === "string" ? body.storedName : "";
+  if (!storedName) {
+    return NextResponse.json({ message: "storedName is required" }, { status: 400 });
+  }
+
+  await connectDB();
+  const user = await User.findOne({ email: session.user.email?.toLowerCase() });
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 404 });
+  }
+
+  const doc = (user.assignedDocuments ?? []).find(
+    (d: { storedName: string }) => d.storedName === storedName
+  );
+  if (!doc) {
+    return NextResponse.json({ message: "Document not found" }, { status: 404 });
+  }
+  if (!doc.requiresSignature) {
+    return NextResponse.json({ message: "This document does not require a signature" }, { status: 400 });
+  }
+
+  doc.docStatus = "Signed";
+  await user.save();
+
+  return NextResponse.json({ success: true, document: doc });
+}
+
 export async function DELETE(req: NextRequest) {
   const session = await auth();
 

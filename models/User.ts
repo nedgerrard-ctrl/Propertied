@@ -24,9 +24,11 @@ export interface IAssignedDocument {
   fileType: string;
   fileSize: number;
   fileUrl: string;
+  title?: string;
   uploadedByClient?: boolean;
   docType?: string;
   docStatus?: string;
+  requiresSignature?: boolean;
   uploadedAt?: Date;
 }
 
@@ -64,9 +66,11 @@ const assignedDocumentSchema = new Schema(
     fileType: { type: String, required: true, trim: true, maxlength: 100 },
     fileSize: { type: Number, required: true, min: 0 },
     fileUrl: { type: String, required: true, trim: true, maxlength: 500 },
+    title: { type: String, trim: true, maxlength: 200, default: "" },
     uploadedByClient: { type: Boolean, default: false },
     docType: { type: String, trim: true, maxlength: 50, default: "Legal" },
     docStatus: { type: String, trim: true, maxlength: 50, default: "Pending" },
+    requiresSignature: { type: Boolean, default: false },
     uploadedAt: { type: Date, default: Date.now },
   },
   { _id: false }

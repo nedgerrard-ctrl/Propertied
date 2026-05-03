@@ -45,6 +45,10 @@ export async function POST(
 
   const formData = await req.formData();
   const file = formData.get("document");
+  const title = (formData.get("title") as string | null ?? "").trim().slice(0, 200);
+  const docTypeRaw = formData.get("docType") as string | null;
+  const docType = ["Legal", "Ownership", "Financial"].includes(docTypeRaw ?? "") ? docTypeRaw! : "Legal";
+  const requiresSignature = formData.get("requiresSignature") === "true";
 
   if (!(file instanceof File) || file.size === 0) {
     return NextResponse.json({ message: "No file provided" }, { status: 400 });
@@ -91,6 +95,11 @@ export async function POST(
     fileType: file.type,
     fileSize: file.size,
     fileUrl: `/uploads/developer-documents/${id}/${storedName}`,
+    title,
+    docType,
+    docStatus: "Pending",
+    requiresSignature,
+    uploadedAt: new Date(),
   };
 
   developer.assignedDocuments = [...(developer.assignedDocuments ?? []), doc];
