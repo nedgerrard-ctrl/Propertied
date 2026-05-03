@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 const pages = [
-  { label: "About Us", href: "/admin/dashboard/content/about" },
+  { label: "Home",         href: "/admin/dashboard/content/landing" },
+  { label: "About Us",    href: "/admin/dashboard/content/about" },
+  { label: "Developer",   href: "/admin/dashboard/content/developer" },
+  { label: "Testimonials",href: "/admin/dashboard/content/testimonial" },
 ];
 
 export default function EditPagesButton() {
