@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import AboutContent from "@/models/AboutContent";
 import { mergeAboutContent } from "@/lib/about-defaults";
+import { touchCmsPage } from "@/lib/touch-cms-page";
 
 export async function GET() {
   await connectDB();
@@ -25,5 +26,6 @@ export async function PATCH(req: NextRequest) {
     { $set: updates },
     { upsert: true, returnDocument: "after", runValidators: true }
   );
+  await touchCmsPage("about");
   return NextResponse.json(content);
 }

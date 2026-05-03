@@ -6,6 +6,7 @@ import Link from "next/link";
 const pages = [
   { label: "Home",         href: "/admin/dashboard/content/landing" },
   { label: "About Us",    href: "/admin/dashboard/content/about" },
+  { label: "Buyers",      href: "/admin/dashboard/content/buyer" },
   { label: "Developer",   href: "/admin/dashboard/content/developer" },
   { label: "Testimonials",href: "/admin/dashboard/content/testimonial" },
 ];
