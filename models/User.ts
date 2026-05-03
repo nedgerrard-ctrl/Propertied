@@ -1,6 +1,19 @@
 import { Schema, models, model } from "mongoose";
 
 export type UserRole = "admin" | "client";
+export type ClientType = "buyer" | "investor" | "developer" | "";
+export type AccountStatus =
+  | "active"
+  | "pending-existing-client"
+  | "approved-existing-client";
+
+export interface AssignedDocument {
+  originalName: string;
+  storedName: string;
+  fileType: string;
+  fileSize: number;
+  fileUrl: string;
+}
 export type UserType = "buyer_investor" | "developer" | "existing_client";
 export type LocationType = "local" | "overseas";
 
@@ -19,6 +32,9 @@ export interface IUser {
   email: string;
   passwordHash: string;
   role: UserRole;
+  clientType?: ClientType;
+  accountStatus?: AccountStatus;
+  phoneCountryCode?: string;
   userType?: UserType;
   phone?: string;
   location?: {
@@ -79,6 +95,37 @@ const userSchema = new Schema<IUser>(
       enum: ["admin", "client"],
       default: "client",
     },
+    clientType: {
+      type: String,
+      enum: ["buyer", "investor", "developer", ""],
+      default: "",
+    },
+    companyName: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 120,
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "pending-existing-client", "approved-existing-client"],
+      default: "active",
+    },
+    phoneCountryCode: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    adminNotes: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 2000,
+    },
+    assignedDocuments: {
+      type: [assignedDocumentSchema],
+      default: [],
+    },
     userType: {
       type: String,
       enum: ["buyer_investor", "developer", "existing_client"],
@@ -103,23 +150,9 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    companyName: {
-      type: String,
-      trim: true,
-    },
     abn: {
       type: String,
       trim: true,
-    },
-    adminNotes: {
-      type: String,
-      trim: true,
-      maxlength: 2000,
-      default: "",
-    },
-    assignedDocuments: {
-      type: [assignedDocumentSchema],
-      default: [],
     },
     resetPasswordTokenHash: {
       type: String,

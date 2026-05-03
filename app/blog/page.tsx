@@ -5,13 +5,20 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { blogPosts } from '@/lib/blog-data'
 
 // ─── Three.js: rippling particle-wave grid ────────────────────────────────────
 // Distinctly different from FloatingDust (upward drift) and NetworkScene (nodes).
 // A flat XY grid whose Z coordinate is driven by sin×cos waves, colour-shifting
 // from dark brown (troughs) to PPM amber (#c8a96e, peaks) each frame.
-
+type BlogCard = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  image?: string;
+  date: string;
+  category: string;
+};
 function ParticleWave({ cols, rows }: { cols: number; rows: number }) {
   const ref    = useRef<THREE.Points>(null)
   const SPACE  = 0.4
@@ -85,6 +92,17 @@ function ParticleWave({ cols, rows }: { cols: number; rows: number }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BlogPage() {
+  const [blogPosts, setBlogPosts] = useState<BlogCard[]>([]);
+const [loadingPosts, setLoadingPosts] = useState(true);
+
+useEffect(() => {
+  fetch("/api/blogs")
+    .then((res) => res.json())
+    .then((data) => {
+      setBlogPosts(data);
+      setLoadingPosts(false);
+    });
+}, []);
   const [mounted,  setMounted]  = useState(false)
   const [gridSize, setGridSize] = useState({ cols: 32, rows: 22 })
 
@@ -93,7 +111,32 @@ export default function BlogPage() {
     setGridSize(mobile ? { cols: 18, rows: 14 } : { cols: 32, rows: 22 })
     setMounted(true)
   }, [])
+  if (loadingPosts) {
+  return (
+    <main className="min-h-screen bg-white text-[#1f1a17]">
+      <Navbar />
+      <section className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-[#8a7b6d]">Loading insights…</p>
+      </section>
+      <Footer />
+    </main>
+  );
+}
 
+if (blogPosts.length === 0) {
+  return (
+    <main className="min-h-screen bg-white text-[#1f1a17]">
+      <Navbar />
+      <section className="flex min-h-[60vh] flex-col items-center justify-center px-8 text-center">
+        <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
+          PPM Insights
+        </p>
+        <h1 className="mt-4 text-4xl font-light">No articles published yet.</h1>
+      </section>
+      <Footer />
+    </main>
+  );
+}
   const featured = blogPosts[0]
   const secondary = blogPosts.slice(1, 3)
   const tertiary  = blogPosts.slice(3)
@@ -146,11 +189,15 @@ export default function BlogPage() {
           className="group grid lg:grid-cols-[3fr_2fr] border border-[#e8e2d9] overflow-hidden"
         >
           <div className="overflow-hidden bg-[#e3dbd0]">
-            <img
-              src={featured.image}
-              alt={featured.title}
-              className="h-[320px] lg:h-full w-full object-cover transition duration-700 group-hover:scale-105"
-            />
+            {featured.image ? (
+          <img
+            src={featured.image}
+            alt={featured.title}
+            className="h-[320px] lg:h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-[320px] lg:h-full w-full bg-[#e3dbd0]" />
+        )}
           </div>
           <div className="flex flex-col justify-between p-10 lg:p-14 bg-[#faf8f5]">
             <div>

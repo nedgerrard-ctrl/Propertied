@@ -68,6 +68,8 @@ const STATUS_COLORS: Record<string, string> = {
   closed: "#9ca3af",
 };
 
+
+
 type ExpandedChart = "trends" | "monthly" | "source" | "status" | null;
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
