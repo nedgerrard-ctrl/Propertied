@@ -15,7 +15,7 @@ export default async function AdminDashboardPage() {
   return (
     <main className="min-h-screen bg-neutral-100 px-6 py-10">
       <div className="mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">
@@ -78,7 +78,7 @@ export default async function AdminDashboardPage() {
         </div>
         </div>
         <AdminTabs />
-      </div>
+  
     </main>
   )
 };
