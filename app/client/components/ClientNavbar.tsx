@@ -11,6 +11,7 @@ const BASE_LINKS = [
   { href: "/client/portfolio", label: "Portfolio", icon: "portfolio" },
   { href: "/client/documents", label: "Documents", icon: "document" },
   { href: "/client/profile", label: "Profile", icon: "profile" },
+  { href: "/", label: "Back to Main Page", icon: "" },
 ];
 
 const VIP_LINK = { href: "/client/vip", label: "VIP Content", icon: "star" };
