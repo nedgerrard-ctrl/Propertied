@@ -15,12 +15,15 @@ type AssignedDocument = {
   fileUrl: string;
 };
 
+type ClientType = "buyer" | "investor" | "developer" | "";
+
 type Client = {
   _id: string;
   name: string;
   email: string;
   phone: string;
   userType: "buyer_investor" | "existing_client";
+  clientType: ClientType;
   pendingApproval: boolean;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
@@ -72,7 +75,7 @@ const ACCOUNT_STATUS_OPTIONS: AccountStatus[] = [
 ];
 
 const ACCOUNT_STATUS_LABEL: Record<AccountStatus, string> = {
-  active: "Active",
+  active: "Buyer",
   "pending-existing-client": "Pending Approval",
   "approved-existing-client": "Approved Existing",
 };
@@ -81,6 +84,13 @@ const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
   active: "bg-emerald-100 text-emerald-800",
   "pending-existing-client": "bg-amber-100 text-amber-800",
   "approved-existing-client": "bg-blue-100 text-blue-800",
+};
+
+const CLIENT_TYPE_LABEL: Record<ClientType, string> = {
+  buyer: "Buyer",
+  investor: "Investor",
+  developer: "Developer",
+  "": "—",
 };
 
 const ACCOUNT_STATUS_BUTTON: Record<AccountStatus, string> = {
@@ -431,6 +441,12 @@ function ClientDetailPanel({
                       ) : (
                         "—"
                       )}
+                    </dd>
+                  </div>
+                  <div className="flex gap-3">
+                    <dt className="w-32 shrink-0 text-neutral-400">Type</dt>
+                    <dd className="font-medium text-neutral-900">
+                      {CLIENT_TYPE_LABEL[client.clientType] ?? "—"}
                     </dd>
                   </div>
                   <div className="flex gap-3">
@@ -824,7 +840,7 @@ export default function ClientsPanel() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
-          { label: "Active", value: counts.active, color: "text-emerald-700" },
+          { label: "Buyer", value: counts.active, color: "text-emerald-700" },
           {
             label: "Pending Approval",
             value: counts.pending,
@@ -877,7 +893,7 @@ export default function ClientsPanel() {
             className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           >
             <option value="all">All statuses</option>
-            <option value="active">Active</option>
+            <option value="active">Buyer</option>
             <option value="pending-existing-client">Pending Approval</option>
             <option value="approved-existing-client">Approved Existing</option>
           </select>
@@ -915,6 +931,7 @@ export default function ClientsPanel() {
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
+                <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Registered</th>
                 <th className="px-5 py-3">Actions</th>
@@ -935,6 +952,9 @@ export default function ClientsPanel() {
                   <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
                     {c.phone || "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-neutral-600">
+                    {CLIENT_TYPE_LABEL[c.clientType] ?? "—"}
                   </td>
                   <td className="px-5 py-3.5">
                     <AccountStatusBadge status={getAccountStatus(c)} />
