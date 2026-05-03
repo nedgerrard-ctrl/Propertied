@@ -90,8 +90,9 @@ export type AboutContentData = typeof aboutDefaults;
 /** Merge DB doc with defaults, ignoring empty/null DB values so defaults always win for unset fields. */
 export function mergeAboutContent(doc: Record<string, unknown> | null): AboutContentData {
   if (!doc) return aboutDefaults;
+  const knownKeys = new Set(Object.keys(aboutDefaults));
   const clean = Object.fromEntries(
-    Object.entries(doc).filter(([, v]) => v !== "" && v !== null && v !== undefined)
+    Object.entries(doc).filter(([k, v]) => knownKeys.has(k) && v !== "" && v !== null && v !== undefined)
   );
   return { ...aboutDefaults, ...clean } as AboutContentData;
 }
