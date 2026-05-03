@@ -68,35 +68,7 @@ const STATUS_COLORS: Record<string, string> = {
   closed: "#9ca3af",
 };
 
-type ExpandedChart = "trends" | "monthly" | "source" | "status" | null;
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-function IconExpand() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className="h-3.5 w-3.5"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 16.25v-4.5m0 4.5h4.5m-4.5 0L9 11M16.25 3.75h-4.5m4.5 0v4.5m0-4.5L11 9M16.25 16.25h-4.5m4.5 0v-4.5m0 4.5L11 11"
-      />
-    </svg>
-  );
-}
-
-function IconClose() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-    </svg>
-  );
-}
 
 type ExpandedChart = "trends" | "monthly" | "source" | "status" | null;
 
@@ -195,12 +167,10 @@ function ChartCard({
   title,
   subtitle,
   onExpand,
-  onExpand,
   children,
 }: {
   title: string;
   subtitle?: string;
-  onExpand?: () => void;
   onExpand?: () => void;
   children: React.ReactNode;
 }) {
