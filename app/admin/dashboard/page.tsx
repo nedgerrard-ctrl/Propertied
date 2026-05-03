@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
