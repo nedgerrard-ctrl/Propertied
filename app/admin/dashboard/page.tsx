@@ -28,6 +28,8 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
 
+  
+
           <div className="flex items-center gap-3">
             <Link
               href="/admin/dashboard/pages/new"
@@ -47,7 +49,7 @@ export default async function AdminDashboardPage() {
             >
               Manage Blogs
             </Link>
-                        <EditPagesButton />
+                      
             <LogoutButton />
           </div>
         </div>
