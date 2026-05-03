@@ -9,6 +9,7 @@ const PageSchema = new Schema(
       trim: true,
     },
 
+
     slug: {
       type: String,
       required: true,
@@ -35,16 +36,6 @@ const PageSchema = new Schema(
     ctaTitle: { type: String, default: "" },
     ctaText: { type: String, default: "" },
     ctaLink: { type: String, default: "" },
-
-    // Paragraph blocks (legacy)
-    paragraph1Title: { type: String, default: "" },
-    paragraph1: { type: String, default: "" },
-
-    paragraph2Title: { type: String, default: "" },
-    paragraph2: { type: String, default: "" },
-
-    paragraph3Title: { type: String, default: "" },
-    paragraph3: { type: String, default: "" },
 
     // Paragraph blocks (legacy)
     paragraph1Title: { type: String, default: "" },
