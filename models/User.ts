@@ -34,11 +34,7 @@ export interface IUser {
   role: UserRole;
   clientType?: ClientType;
   accountStatus?: AccountStatus;
-  phone?: string;
   phoneCountryCode?: string;
-  companyName?: string;
-  adminNotes?: string;
-  assignedDocuments?: AssignedDocument[];
   userType?: UserType;
   phone?: string;
   location?: {
@@ -115,11 +111,6 @@ const userSchema = new Schema<IUser>(
       enum: ["active", "pending-existing-client", "approved-existing-client"],
       default: "active",
     },
-    phone: {
-      type: String,
-      trim: true,
-      default: "",
-    },
     phoneCountryCode: {
       type: String,
       trim: true,
@@ -159,23 +150,9 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    companyName: {
-      type: String,
-      trim: true,
-    },
     abn: {
       type: String,
       trim: true,
-    },
-    adminNotes: {
-      type: String,
-      trim: true,
-      maxlength: 2000,
-      default: "",
-    },
-    assignedDocuments: {
-      type: [assignedDocumentSchema],
-      default: [],
     },
     resetPasswordTokenHash: {
       type: String,
