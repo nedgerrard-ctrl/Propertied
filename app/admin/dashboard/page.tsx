@@ -76,9 +76,9 @@ export default async function AdminDashboardPage() {
             <LogoutButton />
           </div>
         </div>
-
+        </div>
         <AdminTabs />
       </div>
     </main>
-  );
-}
+  )
+};
