@@ -53,7 +53,7 @@ export default async function AdminDashboardPage() {
         </div>
         </div>
         <AdminTabs />
-      </div>
+  
     </main>
   )
 };
