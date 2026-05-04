@@ -321,7 +321,7 @@ function DetailPanel({
     if (ok) {
       onStatusUpdate(enquiry._id, pendingStatus);
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => onClose(), 1500);
     }
 
     setSaving(false);
@@ -646,7 +646,18 @@ function DetailPanel({
 
   {/* FIXED BOTTOM BAR */}
   <div className="border-t border-neutral-200 bg-white px-6 py-4">
-    
+
+    {saved && (
+      <div className="mb-4 flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 px-4 py-2.5">
+        <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 fill-emerald-600">
+          <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clipRule="evenodd" />
+        </svg>
+        <p className="text-[12px] font-medium text-emerald-800">
+          Status updated to <span className="font-semibold">{STATUS_LABEL[pendingStatus]}</span>. Closing…
+        </p>
+      </div>
+    )}
+
     <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
       Update Status
     </p>
@@ -677,9 +688,10 @@ function DetailPanel({
 
       <button
         onClick={handleSave}
-        className="rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white hover:bg-blue-700"
+        disabled={saving || saved}
+        className="rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Save Changes
+        {saving ? "Saving…" : "Save Changes"}
       </button>
     </div>
   </div>
