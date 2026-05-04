@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import cloudinary from "@/lib/cloudinary";
 
 const ALLOWED_MIME = new Set([
   "image/jpeg",
@@ -37,27 +36,21 @@ export async function POST(req: NextRequest) {
 
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   if (!ALLOWED_EXT.has(ext)) {
-    return NextResponse.json(
-      { error: "Invalid file extension." },
-      { status: 415 }
-    );
+    return NextResponse.json({ error: "Invalid file extension." }, { status: 415 });
   }
 
   if (file.size > MAX_BYTES) {
-    return NextResponse.json(
-      { error: "File exceeds the 5 MB limit." },
-      { status: 413 }
-    );
+    return NextResponse.json({ error: "File exceeds the 5 MB limit." }, { status: 413 });
   }
 
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const b64 = Buffer.from(bytes).toString("base64");
+  const dataUri = `data:${file.type};base64,${b64}`;
 
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "images", "uploads");
+  const result = await cloudinary.uploader.upload(dataUri, {
+    folder: "ppm/images",
+    resource_type: "image",
+  });
 
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, filename), buffer);
-
-  return NextResponse.json({ path: `/images/uploads/${filename}` });
+  return NextResponse.json({ path: result.secure_url });
 }
