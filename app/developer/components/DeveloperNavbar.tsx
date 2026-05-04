@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import LogoutButton from "../dashboard/logout-button";
+import LogoutButton from "../(portal)/dashboard/logout-button";
 
 const BASE_LINKS = [
   { href: "/developer/dashboard", label: "Dashboard", icon: "dashboard" },
