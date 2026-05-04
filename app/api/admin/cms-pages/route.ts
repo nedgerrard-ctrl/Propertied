@@ -12,10 +12,14 @@ const SEED_PAGES = [
 
 export async function GET() {
   await connectDB();
-  const count = await CmsPageConfig.countDocuments();
-  if (count === 0) {
-    await CmsPageConfig.insertMany(SEED_PAGES);
+  // Upsert each seed page by slug so missing entries are always restored
+  for (const page of SEED_PAGES) {
+    await CmsPageConfig.updateOne(
+      { slug: page.slug },
+      { $setOnInsert: page },
+      { upsert: true }
+    );
   }
-  const docs = await CmsPageConfig.find().sort({ name: 1 }).lean();
+  const docs = await CmsPageConfig.find({ archived: { $ne: true } }).sort({ name: 1 }).lean();
   return NextResponse.json(docs);
 }

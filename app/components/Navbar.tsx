@@ -15,13 +15,14 @@ const SCROLL_DEAD_PX = 4
 
 // ─── Link data ────────────────────────────────────────────────────────────────
 
-const PRIMARY_LINKS = [
-  { href: '/',            label: 'Home' },
-  { href: '/about',       label: 'About' },
-  { href: '/buyers',      label: 'Buyers' },
-  { href: '/developer',   label: 'Developers' },
-  { href: '/blog',        label: 'Blog' },
-  { href: '/testimonial', label: 'Testimonials' },
+// slug: null means no CMS entry — always visible
+const ALL_PRIMARY_LINKS = [
+  { href: '/',            label: 'Home',         slug: 'landing' },
+  { href: '/about',       label: 'About',        slug: 'about' },
+  { href: '/buyers',      label: 'Buyers',       slug: 'buyer' },
+  { href: '/developer',   label: 'Developers',   slug: 'developer' },
+  { href: '/blog',        label: 'Blog',         slug: null },
+  { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
 ]
 
 const UTIL_LINKS = [
@@ -54,9 +55,10 @@ export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
 
-  const [visible,    setVisible]    = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [mounted,    setMounted]    = useState(false)
+  const [visible,      setVisible]      = useState(false)
+  const [mobileOpen,   setMobileOpen]   = useState(false)
+  const [mounted,      setMounted]      = useState(false)
+  const [visibleSlugs, setVisibleSlugs] = useState<string[] | null>(null)
 
   const sleepTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastScrollY   = useRef(0)
@@ -113,6 +115,13 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    fetch('/api/public/cms-pages')
+      .then((r) => r.json())
+      .then((slugs: string[]) => setVisibleSlugs(slugs))
+      .catch(() => setVisibleSlugs(null))
+  }, [])
+
+  useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (isMobileRef.current) return
       if (e.clientY < WAKE_ZONE_PX) wake()
@@ -148,6 +157,10 @@ export default function Navbar() {
   const closeMobile = useCallback(() => {
     mobileOpenRef.current = false; setMobileOpen(false); scheduleSleep()
   }, [scheduleSleep])
+
+  const PRIMARY_LINKS = visibleSlugs === null
+    ? ALL_PRIMARY_LINKS
+    : ALL_PRIMARY_LINKS.filter((l) => l.slug === null || visibleSlugs.includes(l.slug))
 
   // ─── Palette tokens — always dark ────────────────────────────────────────
 

@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import BlogPost from "@/models/BlogPost";
-import { slugify } from "@/lib/blog-utils";
 
 export async function GET(
   _req: NextRequest,
@@ -41,20 +40,6 @@ export async function PATCH(
     );
   }
 
-  const slug = body.slug ? slugify(body.slug) : slugify(title);
-
-  const duplicate = await BlogPost.findOne({
-    slug,
-    _id: { $ne: id },
-  }).lean();
-
-  if (duplicate) {
-    return NextResponse.json(
-      { error: "A blog post with this slug already exists." },
-      { status: 400 }
-    );
-  }
-
   const status = body.status === "published" ? "published" : "draft";
 
   const post = await BlogPost.findByIdAndUpdate(
@@ -62,7 +47,6 @@ export async function PATCH(
     {
       $set: {
         title,
-        slug,
         description,
         publishDate: new Date(publishDate),
         category: String(body.category || "Insights").trim(),

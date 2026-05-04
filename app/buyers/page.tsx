@@ -9,6 +9,8 @@ import BuyersPage, { type DynamicProject } from './BuyersPage'
 
 export default async function BuyerServerPage() {
   await connectDB()
+  const { assertCmsPagePublished } = await import("@/lib/cms-published")
+  await assertCmsPagePublished("buyer")
 
   const [doc, count] = await Promise.all([
     BuyerContentModel.findOne().lean(),
