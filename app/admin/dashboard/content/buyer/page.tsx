@@ -26,6 +26,16 @@ type DynamicProject = {
 
 type ToastData = { type: "success" | "error"; message: string } | null;
 
+type ProjectDraft = {
+  name?: string; suburb?: string; state?: string;
+  type?: "Apartment" | "Townhouse" | "House";
+  propertyInterest?: "off-plan" | "established";
+  status?: "Current" | "Upcoming";
+  bedrooms?: string; bathrooms?: string; carSpaces?: string;
+  priceFrom?: string; description?: string; highlights?: string;
+  image?: string; imagePreview?: string;
+};
+
 const EDIT_LIGHT =
   "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 const EDIT_DARK =
@@ -226,13 +236,19 @@ function ProjectFormFields({
       </div>
       <div>
         <label className={labelClass}>Price From *</label>
-        <input
-          type="text"
-          value={priceFrom}
-          onChange={(e) => setPriceFrom(e.target.value)}
-          placeholder="From $480,000"
-          className={errors.priceFrom ? inputError : inputNormal}
-        />
+        <div className={`flex overflow-hidden rounded border ${errors.priceFrom ? "border-red-400 bg-red-50/30" : "border-neutral-200"} focus-within:border-amber-400`}>
+          <span className="flex items-center bg-neutral-100 px-3 text-[13px] font-medium text-neutral-500 select-none border-r border-neutral-200">
+            $
+          </span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={priceFrom}
+            onChange={(e) => setPriceFrom(e.target.value)}
+            placeholder="e.g. 480,000"
+            className="flex-1 bg-white px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:outline-none"
+          />
+        </div>
         <FieldError msg={errors.priceFrom} />
       </div>
       <div>
@@ -309,25 +325,40 @@ function hasErrors(errors: Record<string, string>): boolean {
 
 // ── Add Project Modal ──────────────────────────────────────────────────────────
 
-function AddProjectModal({ onClose, onAdded }: { onClose: () => void; onAdded: (p: DynamicProject) => void }) {
-  const [name, setName] = useState("");
-  const [suburb, setSuburb] = useState("");
-  const [state, setState] = useState("VIC");
-  const [type, setType] = useState<"Apartment" | "Townhouse" | "House">("Apartment");
-  const [propertyInterest, setPropertyInterest] = useState<"off-plan" | "established">("off-plan");
-  const [status, setStatus] = useState<"Current" | "Upcoming">("Current");
-  const [bedrooms, setBedrooms] = useState("");
-  const [bathrooms, setBathrooms] = useState("");
-  const [carSpaces, setCarSpaces] = useState("");
-  const [priceFrom, setPriceFrom] = useState("");
-  const [description, setDescription] = useState("");
-  const [highlights, setHighlights] = useState("");
-  const [image, setImage] = useState("");
-  const [imagePreview, setImagePreview] = useState("");
+function AddProjectModal({
+  onClose, onAdded,
+  initialValues = {}, onDraftSaved,
+}: {
+  onClose: () => void;
+  onAdded: (p: DynamicProject) => void;
+  initialValues?: ProjectDraft;
+  onDraftSaved: (d: ProjectDraft) => void;
+}) {
+  const [name, setName] = useState(initialValues.name ?? "");
+  const [suburb, setSuburb] = useState(initialValues.suburb ?? "");
+  const [state, setState] = useState(initialValues.state ?? "VIC");
+  const [type, setType] = useState<"Apartment" | "Townhouse" | "House">(initialValues.type ?? "Apartment");
+  const [propertyInterest, setPropertyInterest] = useState<"off-plan" | "established">(initialValues.propertyInterest ?? "off-plan");
+  const [status, setStatus] = useState<"Current" | "Upcoming">(initialValues.status ?? "Current");
+  const [bedrooms, setBedrooms] = useState(initialValues.bedrooms ?? "");
+  const [bathrooms, setBathrooms] = useState(initialValues.bathrooms ?? "");
+  const [carSpaces, setCarSpaces] = useState(initialValues.carSpaces ?? "");
+  const [priceFrom, setPriceFrom] = useState(initialValues.priceFrom ?? "");
+  const [description, setDescription] = useState(initialValues.description ?? "");
+  const [highlights, setHighlights] = useState(initialValues.highlights ?? "");
+  const [image, setImage] = useState(initialValues.image ?? "");
+  const [imagePreview, setImagePreview] = useState(initialValues.imagePreview ?? "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState("");
+
+  // Save draft to parent on unmount so inputs survive accidental outside-click
+  const draftRef = useRef({ name, suburb, state, type, propertyInterest, status, bedrooms, bathrooms, carSpaces, priceFrom, description, highlights, image, imagePreview });
+  useEffect(() => {
+    draftRef.current = { name, suburb, state, type, propertyInterest, status, bedrooms, bathrooms, carSpaces, priceFrom, description, highlights, image, imagePreview };
+  }, [name, suburb, state, type, propertyInterest, status, bedrooms, bathrooms, carSpaces, priceFrom, description, highlights, image, imagePreview]);
+  useEffect(() => { return () => { onDraftSaved(draftRef.current); }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Live validation wrappers
   function handleName(v: string) { setName(v); setErrors((p) => ({ ...p, name: validateRequired(v) })); }
@@ -335,7 +366,12 @@ function AddProjectModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
   function handleBedrooms(v: string) { setBedrooms(v); setErrors((p) => ({ ...p, bedrooms: validateNumeric(v) })); }
   function handleBathrooms(v: string) { setBathrooms(v); setErrors((p) => ({ ...p, bathrooms: validateNumeric(v) })); }
   function handleCarSpaces(v: string) { setCarSpaces(v); setErrors((p) => ({ ...p, carSpaces: validateNumeric(v) })); }
-  function handlePriceFrom(v: string) { setPriceFrom(v); setErrors((p) => ({ ...p, priceFrom: validateRequired(v) })); }
+  function handlePriceFrom(v: string) {
+    const digits = v.replace(/\D/g, "");
+    const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    setPriceFrom(formatted);
+    setErrors((p) => ({ ...p, priceFrom: validateRequired(formatted) }));
+  }
   function handleDescription(v: string) { setDescription(v); setErrors((p) => ({ ...p, description: validateRequired(v) })); }
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -370,12 +406,12 @@ function AddProjectModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
     const data = await res.json();
     setSaving(false);
     if (!res.ok) setApiError(data.error || "Failed to add project.");
-    else { onAdded(data as DynamicProject); onClose(); }
+    else { onDraftSaved({}); onAdded(data as DynamicProject); onClose(); }
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8" onClick={onClose}>
-      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="my-auto w-full max-w-xl rounded-xl bg-white p-7 shadow-2xl">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
+      <form onSubmit={submit} className="my-auto w-full max-w-xl rounded-xl bg-white p-7 shadow-2xl">
         <h2 className="text-lg font-semibold text-neutral-900">Add Project</h2>
         <p className="mt-1 text-sm text-neutral-500">Appears in the Available Projects grid on the public buyer page.</p>
 
@@ -447,7 +483,12 @@ function EditProjectModal({ project, onClose, onUpdated }: { project: DynamicPro
   function handleBedrooms(v: string) { setBedrooms(v); setErrors((p) => ({ ...p, bedrooms: validateNumeric(v) })); }
   function handleBathrooms(v: string) { setBathrooms(v); setErrors((p) => ({ ...p, bathrooms: validateNumeric(v) })); }
   function handleCarSpaces(v: string) { setCarSpaces(v); setErrors((p) => ({ ...p, carSpaces: validateNumeric(v) })); }
-  function handlePriceFrom(v: string) { setPriceFrom(v); setErrors((p) => ({ ...p, priceFrom: validateRequired(v) })); }
+  function handlePriceFrom(v: string) {
+    const digits = v.replace(/\D/g, "");
+    const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    setPriceFrom(formatted);
+    setErrors((p) => ({ ...p, priceFrom: validateRequired(formatted) }));
+  }
   function handleDescription(v: string) { setDescription(v); setErrors((p) => ({ ...p, description: validateRequired(v) })); }
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -486,8 +527,8 @@ function EditProjectModal({ project, onClose, onUpdated }: { project: DynamicPro
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8" onClick={onClose}>
-      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="my-auto w-full max-w-xl rounded-xl bg-white p-7 shadow-2xl">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
+      <form onSubmit={submit} className="my-auto w-full max-w-xl rounded-xl bg-white p-7 shadow-2xl">
         <h2 className="text-lg font-semibold text-neutral-900">Edit Project</h2>
         <p className="mt-1 text-sm text-neutral-500">Update details for <strong>{project.name}</strong>.</p>
 
@@ -540,6 +581,7 @@ export default function BuyerInlineEditor() {
   const [saving, setSaving] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [addDraft, setAddDraft] = useState<ProjectDraft>({});
   const [editingProject, setEditingProject] = useState<DynamicProject | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -828,7 +870,7 @@ export default function BuyerInlineEditor() {
                     <div className="p-5">
                       <p className="mb-1.5 text-[10px] uppercase tracking-[0.22em] text-neutral-500">{project.suburb}, {project.state}&nbsp;·&nbsp;{project.type}</p>
                       <h3 className="mb-2 text-xl font-light text-white">{project.name}</h3>
-                      <p className="text-[12px] text-[#c8a96e]">{project.priceFrom}</p>
+                      <p className="text-[12px] text-[#c8a96e]">From ${project.priceFrom}</p>
                     </div>
 
                     {/* Action buttons — visible on hover */}
@@ -894,6 +936,8 @@ export default function BuyerInlineEditor() {
       {addOpen && (
         <AddProjectModal
           onClose={() => setAddOpen(false)}
+          initialValues={addDraft}
+          onDraftSaved={setAddDraft}
           onAdded={(p) => {
             setProjects((prev) => [p, ...prev]);
             showToast("success", `"${p.name}" added successfully.`);

@@ -139,7 +139,7 @@ function ProjectDetailPanel({ project, onClose }: { project: DynamicProject; onC
         <div className="flex shrink-0 border-b border-white/[0.06]">
           {[
             { label: 'Bedrooms', value: project.bedrooms },
-            { label: 'Guide Price', value: project.priceFrom },
+            { label: 'Guide Price', value: `From $${project.priceFrom}` },
             { label: 'Status', value: project.status },
           ].map((s, i) => (
             <div
@@ -460,7 +460,7 @@ export default function BuyersPage({ content, projects }: BuyersPageProps) {
                 </h3>
                 <div className="mb-5 flex gap-6 text-[11px] uppercase tracking-wider text-neutral-400">
                   <span>{project.bedrooms} bed</span>
-                  <span>{project.priceFrom}</span>
+                  <span>From ${project.priceFrom}</span>
                 </div>
                 <p className="mb-8 line-clamp-2 text-[13px] leading-[1.9] text-neutral-500">
                   {project.description}

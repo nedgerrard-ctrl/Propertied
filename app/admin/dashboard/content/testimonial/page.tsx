@@ -15,6 +15,8 @@ type DynamicTestimonial = {
 
 type ToastData = { type: "success" | "error"; message: string } | null;
 
+type TestimonialDraft = { quote?: string; client?: string; rating?: number };
+
 const EDIT_DARK = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
 function EditBadge() {
@@ -75,13 +77,25 @@ const cinematicItems = [
 
 // ── Add Testimonial Modal ──────────────────────────────────────────────────────
 
-function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: DynamicTestimonial) => void }) {
-  const [quote, setQuote]   = useState("");
-  const [client, setClient] = useState("");
-  const [rating, setRating] = useState(5);
+function AddModal({
+  onClose, onAdded,
+  initialValues = {}, onDraftSaved,
+}: {
+  onClose: () => void;
+  onAdded: (t: DynamicTestimonial) => void;
+  initialValues?: TestimonialDraft;
+  onDraftSaved: (d: TestimonialDraft) => void;
+}) {
+  const [quote, setQuote]   = useState(initialValues.quote   ?? "");
+  const [client, setClient] = useState(initialValues.client  ?? "");
+  const [rating, setRating] = useState(initialValues.rating  ?? 5);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const draftRef = useRef({ quote, client, rating });
+  useEffect(() => { draftRef.current = { quote, client, rating }; }, [quote, client, rating]);
+  useEffect(() => { return () => { onDraftSaved(draftRef.current); }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Live validation wrappers
   function handleQuote(v: string) {
@@ -116,6 +130,7 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
     if (!res.ok) {
       setApiError(data.error || "Failed to add testimonial.");
     } else {
+      onDraftSaved({});
       onAdded({ _id: data._id, quote: data.quote, client: data.client, rating: data.rating });
       onClose();
     }
@@ -124,10 +139,9 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (t: Dyna
   const inputBase = "w-full rounded border px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:outline-none transition-colors";
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4">
       <form
         onSubmit={submit}
-        onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg rounded-xl bg-white p-7 shadow-2xl"
       >
         <h2 className="text-lg font-semibold text-neutral-900">Add Testimonial</h2>
@@ -223,6 +237,7 @@ export default function TestimonialInlineEditor() {
   const [saving, setSaving]         = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
   const [addOpen, setAddOpen]       = useState(false);
+  const [addDraft, setAddDraft]     = useState<TestimonialDraft>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast]           = useState<ToastData>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -461,6 +476,8 @@ export default function TestimonialInlineEditor() {
       {addOpen && (
         <AddModal
           onClose={() => setAddOpen(false)}
+          initialValues={addDraft}
+          onDraftSaved={setAddDraft}
           onAdded={(t) => {
             setTestimonials((prev) => [t, ...prev]);
             showToast("success", "Testimonial added successfully.");
