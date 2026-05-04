@@ -12,6 +12,8 @@ import { mergeAboutContent } from '@/lib/about-defaults'
 
 export default async function AboutPage() {
   await connectDB()
+  const { assertCmsPagePublished } = await import("@/lib/cms-published")
+  await assertCmsPagePublished("about")
   const doc = await AboutContent.findOne().lean()
   const c = mergeAboutContent(doc as Record<string, unknown> | null)
 

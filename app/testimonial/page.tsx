@@ -43,6 +43,8 @@ const SEED_TESTIMONIALS = [
 
 export default async function TestimonialServerPage() {
   await connectDB()
+  const { assertCmsPagePublished } = await import("@/lib/cms-published")
+  await assertCmsPagePublished("testimonial")
 
   const [doc, count] = await Promise.all([
     TestimonialContent.findOne().lean(),
