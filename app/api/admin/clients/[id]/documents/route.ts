@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
-import fs from "fs/promises";
-import path from "path";
-import crypto from "crypto";
+import cloudinary from "@/lib/cloudinary";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -13,19 +11,7 @@ const ALLOWED_TYPES = [
   "image/jpeg",
   "image/png",
 ];
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
-
-function sanitizeFilename(name: string) {
-  const ext = path.extname(name);
-  const base = path.basename(name, ext);
-  const safeBase = base
-    .replace(/[^a-zA-Z0-9-_ ]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .slice(0, 80);
-  const safeExt = ext.replace(/[^a-zA-Z0-9.]/g, "").toLowerCase();
-  return `${safeBase || "document"}${safeExt}`;
-}
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 export async function POST(
   req: NextRequest,
@@ -40,10 +26,7 @@ export async function POST(
 
   const contentType = req.headers.get("content-type") || "";
   if (!contentType.includes("multipart/form-data")) {
-    return NextResponse.json(
-      { message: "Expected multipart/form-data" },
-      { status: 400 }
-    );
+    return NextResponse.json({ message: "Expected multipart/form-data" }, { status: 400 });
   }
 
   const formData = await req.formData();
@@ -58,17 +41,11 @@ export async function POST(
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json(
-      { message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed" },
-      { status: 400 }
-    );
+    return NextResponse.json({ message: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed" }, { status: 400 });
   }
 
   if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json(
-      { message: "File must be 10 MB or smaller" },
-      { status: 400 }
-    );
+    return NextResponse.json({ message: "File must be 10 MB or smaller" }, { status: 400 });
   }
 
   await connectDB();
@@ -79,28 +56,22 @@ export async function POST(
   }
 
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const b64 = Buffer.from(bytes).toString("base64");
+  const dataUri = `data:${file.type};base64,${b64}`;
 
-  const safeOriginalName = sanitizeFilename(file.name);
-  const uniquePrefix = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
-  const storedName = `${uniquePrefix}-${safeOriginalName}`;
-
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "client-documents",
-    id
-  );
-  await fs.mkdir(uploadDir, { recursive: true });
-  await fs.writeFile(path.join(uploadDir, storedName), buffer);
+  const result = await cloudinary.uploader.upload(dataUri, {
+    folder: `ppm/client-documents/${id}`,
+    resource_type: "auto",
+    use_filename: true,
+    unique_filename: true,
+  });
 
   const doc = {
     originalName: file.name,
-    storedName,
+    storedName: result.public_id,
     fileType: file.type,
     fileSize: file.size,
-    fileUrl: `/uploads/client-documents/${id}/${storedName}`,
+    fileUrl: result.secure_url,
     title,
     docType,
     docStatus: "Pending",
@@ -111,10 +82,7 @@ export async function POST(
   client.assignedDocuments = [...(client.assignedDocuments ?? []), doc];
   await client.save();
 
-  return NextResponse.json(
-    { success: true, document: doc },
-    { status: 201 }
-  );
+  return NextResponse.json({ success: true, document: doc }, { status: 201 });
 }
 
 export async function DELETE(
@@ -147,15 +115,8 @@ export async function DELETE(
   );
 
   if (doc) {
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "client-documents",
-      id,
-      storedName
-    );
-    await fs.unlink(filePath).catch(() => {});
+    const resourceType = doc.fileType?.startsWith("image/") ? "image" : "raw";
+    await cloudinary.uploader.destroy(storedName, { resource_type: resourceType }).catch(() => {});
   }
 
   client.assignedDocuments = (client.assignedDocuments ?? []).filter(

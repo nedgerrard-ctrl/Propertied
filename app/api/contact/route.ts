@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
 import User from "@/models/User";
-import fs from "fs/promises";
-import path from "path";
-import crypto from "crypto";
+import cloudinary from "@/lib/cloudinary";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
@@ -50,47 +48,25 @@ function toNumberOrNull(value: string) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-function sanitizeFilename(name: string) {
-  const ext = path.extname(name);
-  const base = path.basename(name, ext);
-
-  const safeBase = base
-    .replace(/[^a-zA-Z0-9-_ ]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .slice(0, 80);
-
-  const safeExt = ext.replace(/[^a-zA-Z0-9.]/g, "").toLowerCase();
-
-  return `${safeBase || "document"}${safeExt}`;
-}
 
 async function saveLegalDocument(file: File): Promise<SavedLegalDocument> {
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const b64 = Buffer.from(bytes).toString("base64");
+  const dataUri = `data:${file.type};base64,${b64}`;
 
-  const safeOriginalName = sanitizeFilename(file.name);
-  const uniquePrefix = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
-  const storedName = `${uniquePrefix}-${safeOriginalName}`;
-
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "legal-documents"
-  );
-
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  const filePath = path.join(uploadDir, storedName);
-  await fs.writeFile(filePath, buffer);
+  const result = await cloudinary.uploader.upload(dataUri, {
+    folder: "ppm/legal-documents",
+    resource_type: "auto",
+    use_filename: true,
+    unique_filename: true,
+  });
 
   return {
     originalName: file.name,
-    storedName,
+    storedName: result.public_id,
     fileType: file.type,
     fileSize: file.size,
-    fileUrl: `/uploads/legal-documents/${storedName}`,
+    fileUrl: result.secure_url,
   };
 }
 
