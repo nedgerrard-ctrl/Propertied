@@ -86,6 +86,7 @@ export default function AdminTabs() {
       <CardNav
         logoText="PPM"
         logoAlt="PPM"
+        logoHref="/"
         items={navItems}
         containerClassName="relative w-full"
         baseColor="#ffffff"

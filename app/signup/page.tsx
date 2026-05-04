@@ -273,7 +273,7 @@ export default function SignupPage() {
                     type="text"
                     placeholder="Jane"
                     value={firstName}
-                    onChange={(e) => { setFirstName(e.target.value); clearFieldError("firstName"); }}
+                    onChange={(e) => { setFirstName(e.target.value.replace(/[0-9]/g, "")); clearFieldError("firstName"); }}
                     className={getFieldClass(Boolean(fieldErrors.firstName))}
                   />
                   <FieldError msg={fieldErrors.firstName} />
@@ -286,7 +286,7 @@ export default function SignupPage() {
                     type="text"
                     placeholder="Smith"
                     value={lastName}
-                    onChange={(e) => { setLastName(e.target.value); clearFieldError("lastName"); }}
+                    onChange={(e) => { setLastName(e.target.value.replace(/[0-9]/g, "")); clearFieldError("lastName"); }}
                     className={getFieldClass(Boolean(fieldErrors.lastName))}
                   />
                   <FieldError msg={fieldErrors.lastName} />

@@ -32,6 +32,12 @@ export default async function AdminDashboardPage() {
   
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="border border-[#5f5245] px-4 py-2 text-sm transition hover:bg-neutral-200"
+            >
+              ← Main Page
+            </Link>
             {/* <Link
               href="/admin/dashboard/pages/new"
               className="inline-flex border border-[#5f5245] bg-[#2f2a24] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"

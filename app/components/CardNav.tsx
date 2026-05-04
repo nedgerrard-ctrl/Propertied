@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 // use your own icon import if react-icons is not available
 import { GoArrowUpRight } from 'react-icons/go';
@@ -21,6 +22,7 @@ export interface CardNavProps {
   logo?: string;
   logoAlt?: string;
   logoText?: string;
+  logoHref?: string;
   items: CardNavItem[];
   className?: string;
   containerClassName?: string;
@@ -37,6 +39,7 @@ const CardNav: React.FC<CardNavProps> = ({
   logo,
   logoAlt = 'Logo',
   logoText,
+  logoHref,
   items,
   className = '',
   containerClassName,
@@ -203,14 +206,29 @@ const CardNav: React.FC<CardNavProps> = ({
           </div>
 
           <div className="logo-container flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 order-1 md:order-none">
-            {logo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} alt={logoAlt} className="logo h-[28px]" />
-            )}
-            {!logo && (
-              <span className="text-[15px] font-semibold tracking-[0.12em]" style={{ color: menuColor || '#000' }}>
-                {logoText ?? logoAlt}
-              </span>
+            {logoHref ? (
+              <Link href={logoHref} className="flex items-center">
+                {logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logo} alt={logoAlt} className="logo h-[28px]" />
+                ) : (
+                  <span className="text-[15px] font-semibold tracking-[0.12em]" style={{ color: menuColor || '#000' }}>
+                    {logoText ?? logoAlt}
+                  </span>
+                )}
+              </Link>
+            ) : (
+              <>
+                {logo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logo} alt={logoAlt} className="logo h-[28px]" />
+                )}
+                {!logo && (
+                  <span className="text-[15px] font-semibold tracking-[0.12em]" style={{ color: menuColor || '#000' }}>
+                    {logoText ?? logoAlt}
+                  </span>
+                )}
+              </>
             )}
           </div>
 
