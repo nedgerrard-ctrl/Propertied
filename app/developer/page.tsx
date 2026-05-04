@@ -7,6 +7,8 @@ import DeveloperPage from './DeveloperPage'
 
 export default async function DeveloperServerPage() {
   await connectDB()
+  const { assertCmsPagePublished } = await import("@/lib/cms-published")
+  await assertCmsPagePublished("developer")
   const doc = await DeveloperContent.findOne().lean()
   const content = mergeDeveloperContent(doc as Record<string, unknown> | null)
 

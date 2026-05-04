@@ -1,12 +1,27 @@
+export const dynamic = 'force-dynamic'
+
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
-import { blogPosts, getBlogPost } from '@/lib/blog-data'
+import { connectDB } from '@/lib/mongodb'
+import BlogPost from '@/models/BlogPost'
 
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }))
+type BlogSection = { heading?: string; body: string; image?: string }
+type Post = {
+  _id: string
+  slug: string
+  title: string
+  description: string
+  image: string
+  publishDate: Date
+  category: string
+  content: BlogSection[]
+}
+
+function formatDate(d: Date) {
+  return new Date(d).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })
 }
 
 export async function generateMetadata({
@@ -14,8 +29,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
+  await connectDB()
   const { slug } = await params
-  const post = getBlogPost(slug)
+  const post = await BlogPost.findOne({ slug, status: 'published' }).lean() as Post | null
   if (!post) return {}
   return {
     title: `${post.title} | PPM`,
@@ -29,10 +45,16 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = getBlogPost(slug)
+  await connectDB()
+
+  const post = await BlogPost.findOne({ slug, status: 'published' }).lean() as Post | null
   if (!post) notFound()
 
-  const postIndex = blogPosts.findIndex((p) => p.slug === slug) + 1
+  const allPosts = await BlogPost.find({ status: 'published' })
+    .sort({ publishDate: -1 })
+    .select('slug')
+    .lean() as { slug: string }[]
+  const postIndex = allPosts.findIndex((p) => p.slug === slug) + 1
 
   return (
     <main className="min-h-screen w-full bg-white text-[#1f1a17]">
@@ -42,7 +64,6 @@ export default async function BlogPostPage({
       <header className="bg-[#0a0806]">
         <div className="mx-auto max-w-7xl px-8 pt-28 pb-16">
 
-          {/* Back link — top of the header so it's the first thing seen */}
           <Link
             href="/blog"
             className="group inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.22em] text-[#4a3f37] transition hover:text-[#8a7b6d] mb-10"
@@ -51,44 +72,44 @@ export default async function BlogPostPage({
             <span>All Articles</span>
           </Link>
 
-          {/* Metadata row */}
           <div className="flex items-baseline justify-between border-b border-[#2d2218] pb-6">
             <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
               {post.category}
             </p>
             <div className="flex items-center gap-6">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">{post.date}</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
+                {formatDate(post.publishDate)}
+              </p>
               <p className="text-[10px] uppercase tracking-[0.22em] text-[#4a3f37]">
                 No.&nbsp;{String(postIndex).padStart(2, '0')}
               </p>
             </div>
           </div>
 
-          {/* Title */}
           <h1 className="mt-10 text-4xl md:text-5xl lg:text-[3.8rem] font-light leading-[1.1] text-white max-w-4xl">
             {post.title}
           </h1>
 
-          {/* Deck / description */}
           <p className="mt-7 max-w-[54ch] text-[14px] leading-[1.9] text-[#8a7b6d]">
             {post.description}
           </p>
 
-          {/* Amber rule */}
           <div className="mt-10 h-px w-full bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/30 to-transparent" />
         </div>
       </header>
 
       {/* ── Featured image ────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-8 mt-10">
-        <div className="overflow-hidden">
-          <img
-            src={post.image}
-            alt={post.title}
-            className="h-[300px] md:h-[420px] w-full object-cover"
-          />
+      {post.image && (
+        <div className="mx-auto max-w-5xl px-8 mt-10">
+          <div className="overflow-hidden">
+            <img
+              src={post.image}
+              alt={post.title}
+              className="h-[300px] md:h-[420px] w-full object-cover"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Article body ──────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-2xl px-8 py-14">
@@ -102,16 +123,22 @@ export default async function BlogPostPage({
               )}
               <p className={`leading-[1.95] text-[#3d3530] ${
                 i === 0 && !section.heading
-                  ? 'text-[16px] text-[#2a2420]'  // lead paragraph — slightly larger + darker
+                  ? 'text-[16px] text-[#2a2420]'
                   : 'text-[14.5px]'
               }`}>
                 {section.body}
               </p>
+              {section.image && (
+                <img
+                  src={section.image}
+                  alt=""
+                  className="mt-4 w-full rounded object-cover"
+                />
+              )}
             </div>
           ))}
         </article>
 
-        {/* Amber divider */}
         <div className="mt-6 h-px bg-gradient-to-r from-[#c8a96e]/50 via-[#e8e2d9] to-transparent" />
       </div>
 

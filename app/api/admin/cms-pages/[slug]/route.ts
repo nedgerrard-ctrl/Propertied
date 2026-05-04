@@ -10,8 +10,9 @@ export async function PATCH(
   const { slug } = await params;
   const body = await req.json();
   const allowed: Record<string, unknown> = {};
-  if ("published"    in body) allowed.published    = body.published;
-  if ("description"  in body) allowed.description  = body.description;
+  if ("published"   in body) allowed.published   = body.published;
+  if ("description" in body) allowed.description = body.description;
+  if ("archived"    in body) allowed.archived    = body.archived;
 
   const doc = await CmsPageConfig.findOneAndUpdate(
     { slug },

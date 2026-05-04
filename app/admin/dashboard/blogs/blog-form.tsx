@@ -153,6 +153,7 @@ export default function BlogForm({
   initialData?: Partial<BlogFormData>;
 }) {
   const router = useRouter();
+  const isEditing = Boolean(initialData?._id);
 
   const [form, setForm] = useState<BlogFormData>({
     _id: initialData?._id,
@@ -205,11 +206,11 @@ export default function BlogForm({
     setForm((prev) => {
       const next = { ...prev, [field]: value };
 
-      if (field === "title" && !prev.slug.trim()) {
+      if (field === "title" && !isEditing && !prev.slug.trim()) {
         next.slug = makeSlug(value);
       }
 
-      if (field === "slug") {
+      if (field === "slug" && !isEditing) {
         next.slug = makeSlug(value);
       }
 
@@ -379,20 +380,23 @@ export default function BlogForm({
               <FieldLabel>Slug</FieldLabel>
               <input
                 value={form.slug}
-                onBlur={() => markTouched("slug")}
-                onChange={(e) => updateField("slug", e.target.value)}
+                onBlur={() => !isEditing && markTouched("slug")}
+                onChange={(e) => !isEditing && updateField("slug", e.target.value)}
+                disabled={isEditing}
                 className={`rounded border px-3 py-2 text-sm outline-none transition ${
-                  touched.slug && errors.slug
-                    ? "border-red-300 bg-red-50"
-                    : "border-neutral-300 focus:border-amber-400"
+                  isEditing
+                    ? "cursor-not-allowed border-neutral-200 bg-neutral-50 text-neutral-400"
+                    : touched.slug && errors.slug
+                      ? "border-red-300 bg-red-50"
+                      : "border-neutral-300 focus:border-amber-400"
                 }`}
                 placeholder="understanding-off-the-plan-property-in-melbourne"
               />
-              <ErrorText message={touched.slug ? errors.slug : undefined} />
-              <p className="text-[11px] text-neutral-400">
-                Used in the public URL. Example: /blog/
-                {form.slug || "your-blog-slug"}
-              </p>
+              {isEditing
+                ? <p className="text-[11px] text-neutral-400">Slug is locked after creation and cannot be changed.</p>
+                : <p className="text-[11px] text-neutral-400">Used in the public URL. Example: /blog/{form.slug || "your-blog-slug"}</p>
+              }
+              <ErrorText message={!isEditing && touched.slug ? errors.slug : undefined} />
             </label>
 
             <label className="grid gap-2">

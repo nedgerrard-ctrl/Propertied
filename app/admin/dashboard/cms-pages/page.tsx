@@ -9,6 +9,7 @@ type CmsPage = {
   name: string;
   description: string;
   published: boolean;
+  archived: boolean;
   contentUpdatedAt: string | null;
   updatedAt: string;
 };
@@ -67,10 +68,14 @@ export default function ManageCmsPagesPage() {
     } else alert("Failed to update page status.");
   }
 
-  async function deletePage(page: CmsPage) {
-    if (!confirm(`Remove "${page.name}" from the managed pages list? The page will still exist on the site.`)) return;
+  async function archivePage(page: CmsPage) {
+    if (!confirm(`Archive "${page.name}"? It will be hidden from this list and the public site will show a 404. You can restore it from the Archived Pages view.`)) return;
     setDeletingSlug(page.slug);
-    await fetch(`/api/admin/cms-pages/${page.slug}`, { method: "DELETE" });
+    await fetch(`/api/admin/cms-pages/${page.slug}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archived: true }),
+    });
     setDeletingSlug(null);
     setPages((prev) => prev.filter((p) => p.slug !== page.slug));
   }
@@ -109,6 +114,12 @@ export default function ManageCmsPagesPage() {
               Control the live status and content of each CMS page.
             </p>
           </div>
+          <Link
+            href="/admin/dashboard/cms-pages/archived"
+            className="rounded border border-neutral-300 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 transition hover:border-neutral-500 hover:text-neutral-700"
+          >
+            Archived Pages
+          </Link>
         </div>
 
         {/* Table */}
@@ -229,13 +240,13 @@ export default function ManageCmsPagesPage() {
                         >
                           {togglingSlug === page.slug ? "…" : page.published ? "Unpublish" : "Publish"}
                         </button>
-                        {/* Delete */}
+                        {/* Archive */}
                         <button
-                          onClick={() => deletePage(page)}
+                          onClick={() => archivePage(page)}
                           disabled={deletingSlug === page.slug}
-                          className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                          className="rounded border border-orange-200 bg-orange-50 px-3 py-1.5 text-[11px] font-medium text-orange-600 transition hover:bg-orange-100 disabled:opacity-50"
                         >
-                          {deletingSlug === page.slug ? "…" : "Delete"}
+                          {deletingSlug === page.slug ? "…" : "Archive"}
                         </button>
                       </div>
                     </td>
