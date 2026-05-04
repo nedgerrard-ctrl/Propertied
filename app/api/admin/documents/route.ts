@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import type { IAssignedDocument } from "@/models/User";
 
 export async function GET() {
   const session = await auth();
@@ -17,7 +18,7 @@ export async function GET() {
   ).lean();
 
   const documents = users.flatMap((user) =>
-    (user.assignedDocuments ?? []).map((doc) => ({
+    (user.assignedDocuments ?? [] as IAssignedDocument[]).map((doc: IAssignedDocument) => ({
       ...doc,
       uploadedAt: doc.uploadedAt ? doc.uploadedAt.toISOString() : undefined,
       userId: (user._id as { toString(): string }).toString(),
