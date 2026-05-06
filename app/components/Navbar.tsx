@@ -42,7 +42,7 @@ function ProfileIcon({ name, dashboardHref }: { name?: string | null; dashboardH
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function Navbar() {
+export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
   const pathname = usePathname()
   const { data: session } = useSession()
 
@@ -118,6 +118,8 @@ export default function Navbar() {
   const isLoginPage = pathname === '/login'
   const bg          = scrolled
     ? 'bg-white border-b border-gray-200 shadow-sm'
+    : blackBg
+    ? 'bg-[#0f0c0a]'
     : isLoginPage
     ? 'bg-[#0f0c0a]/50 backdrop-blur-md'
     : 'bg-transparent'
