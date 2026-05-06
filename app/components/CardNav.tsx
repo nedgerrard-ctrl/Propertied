@@ -33,6 +33,7 @@ export interface CardNavProps {
   buttonTextColor?: string;
   buttonLabel?: string;
   onButtonClick?: () => void;
+  alwaysOpen?: boolean;
 }
 
 const CardNav: React.FC<CardNavProps> = ({
@@ -50,9 +51,10 @@ const CardNav: React.FC<CardNavProps> = ({
   buttonTextColor,
   buttonLabel = 'Get Started',
   onButtonClick,
+  alwaysOpen = false,
 }) => {
-  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(alwaysOpen);
+  const [isExpanded, setIsExpanded] = useState(alwaysOpen);
   const navRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
@@ -113,6 +115,15 @@ const CardNav: React.FC<CardNavProps> = ({
   };
 
   useLayoutEffect(() => {
+    if (alwaysOpen) {
+      if (navRef.current) {
+        gsap.set(navRef.current, { height: calculateHeight(), overflow: 'visible' });
+      }
+      gsap.set(cardsRef.current, { y: 0, opacity: 1 });
+      tlRef.current = null;
+      return;
+    }
+
     const tl = createTimeline();
     tlRef.current = tl;
 
@@ -160,6 +171,7 @@ const CardNav: React.FC<CardNavProps> = ({
   };
 
   const toggleMenu = () => {
+    if (alwaysOpen) return;
     const tl = tlRef.current;
     if (!tl) return;
     if (!isExpanded) {
@@ -186,7 +198,7 @@ const CardNav: React.FC<CardNavProps> = ({
       >
         <div className="card-nav-top absolute inset-x-0 top-0 h-[60px] flex items-center justify-between p-2 pl-[1.1rem] z-[2]">
           <div
-            className={`hamburger-menu ${isHamburgerOpen ? 'open' : ''} group h-full flex flex-col items-center justify-center cursor-pointer gap-[6px] order-2 md:order-none`}
+            className={`hamburger-menu ${isHamburgerOpen ? 'open' : ''} group h-full flex flex-col items-center justify-center cursor-pointer gap-[6px] order-2 md:order-none ${alwaysOpen ? 'invisible pointer-events-none' : ''}`}
             onClick={toggleMenu}
             role="button"
             aria-label={isExpanded ? 'Close menu' : 'Open menu'}
@@ -218,17 +230,21 @@ const CardNav: React.FC<CardNavProps> = ({
                 )}
               </Link>
             ) : (
-              <>
-                {logo && (
+              <button
+                type="button"
+                onClick={toggleMenu}
+                className="flex items-center cursor-pointer"
+                aria-label={isExpanded ? 'Close menu' : 'Open menu'}
+              >
+                {logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={logo} alt={logoAlt} className="logo h-[28px]" />
-                )}
-                {!logo && (
+                ) : (
                   <span className="text-[15px] font-semibold tracking-[0.12em]" style={{ color: menuColor || '#000' }}>
                     {logoText ?? logoAlt}
                   </span>
                 )}
-              </>
+              </button>
             )}
           </div>
 

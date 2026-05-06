@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 
-export default function LogoutButton() {
+export default function LogoutButton({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +16,11 @@ export default function LogoutButton() {
     <>
       <button
         onClick={() => setConfirmOpen(true)}
-        className="rounded border border-neutral-300 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-500 hover:text-neutral-900"
+        className={
+          variant === 'dark'
+            ? 'text-[11px] font-medium uppercase tracking-[0.14em] text-white/50 transition hover:text-white'
+            : 'rounded border border-neutral-300 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-500 hover:text-neutral-900'
+        }
       >
         Log out
       </button>

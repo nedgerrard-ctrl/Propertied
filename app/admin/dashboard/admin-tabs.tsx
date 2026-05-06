@@ -7,7 +7,6 @@ import EnquiriesPanel from "./enquiries-panel";
 import ClientsPanel from "./clients-panel";
 import DevelopersPanel from "./developers-panel";
 import DocumentsPanel from "./documents-panel";
-
 type Tab = "overview" | "enquiries" | "clients" | "developers" | "documents";
 
 export default function AdminTabs() {
@@ -79,6 +78,23 @@ export default function AdminTabs() {
         },
       ],
     },
+    {
+      label: "CMS",
+      bgColor: "#3b1f4a",
+      textColor: "#ffffff",
+      links: [
+        {
+          label: "Manage Pages",
+          href: "/admin/dashboard/cms-pages",
+          ariaLabel: "Manage CMS pages",
+        },
+        {
+          label: "Manage Blogs",
+          href: "/admin/dashboard/blogs",
+          ariaLabel: "Manage blog posts",
+        },
+      ],
+    },
   ], []);
 
   return (
@@ -86,11 +102,11 @@ export default function AdminTabs() {
       <CardNav
         logoText="PPM"
         logoAlt="PPM"
-        logoHref="/"
         items={navItems}
         containerClassName="relative w-full"
         baseColor="#ffffff"
         menuColor="#171717"
+        alwaysOpen
       />
 
       <div className="mt-4">

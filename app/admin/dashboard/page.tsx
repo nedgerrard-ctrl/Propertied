@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
 import AdminTabs from "./admin-tabs";
-import EditPagesButton from "./EditPagesButton";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -13,56 +12,45 @@ export default async function AdminDashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 px-6 py-10">
-      <div className="mx-auto max-w-6xl">
-        
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">
-              PPM Admin
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-neutral-900">
-              Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              Review enquiries and manage content templates.
-            </p>
+    <main className="min-h-screen bg-neutral-100">
+
+      {/* ── Brand header bar ──────────────────────────────────────────────── */}
+      <div className="bg-[#0f0c0a] px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
+
+          {/* Left: PPM branding */}
+          <div className="flex items-center gap-3">
+            <span className="block h-7 w-px bg-[#c8a96e]" />
+            <div>
+              <span className="block text-[12px] font-bold uppercase tracking-[0.22em] leading-none text-white">
+                PPM
+              </span>
+              <span className="mt-1 block text-[8.5px] uppercase tracking-[0.14em] leading-none text-[#c8a96e]/70">
+                Admin Dashboard
+              </span>
+            </div>
           </div>
 
-  
-
-          <div className="flex items-center gap-3">
+          {/* Right: actions */}
+          <div className="flex items-center gap-5">
             <Link
               href="/"
-              className="border border-[#5f5245] px-4 py-2 text-sm transition hover:bg-neutral-200"
+              className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/40 transition hover:text-white/80"
             >
-              ← Main Page
+              <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M7.5 1.5 2 6l5.5 4.5M2 6h9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              View Site
             </Link>
-            {/* <Link
-              href="/admin/dashboard/pages/new"
-              className="inline-flex border border-[#5f5245] bg-[#2f2a24] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"
-            >
-              Add Pages
-            </Link> */}
-            <Link
-              href="/admin/dashboard/cms-pages"
-              className="border border-[#5f5245] px-4 py-2 text-sm"
-            >
-              Manage Pages
-            </Link>
-            <Link
-              href="/admin/dashboard/blogs"
-              className="border border-[#5f5245] px-4 py-2 text-sm"
-            >
-              Manage Blogs
-            </Link>
-                      
-            <LogoutButton />
+            <span className="h-4 w-px bg-white/10" />
+            <LogoutButton variant="dark" />
           </div>
         </div>
-        </div>
-        <AdminTabs />
-  
+      </div>
+
+{/* ── CardNav + tab panels ──────────────────────────────────────────── */}
+      <AdminTabs />
+
     </main>
-  )
-};
+  );
+}
