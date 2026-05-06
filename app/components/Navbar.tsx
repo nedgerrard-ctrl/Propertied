@@ -3,19 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-
-// ─── Tunables ─────────────────────────────────────────────────────────────────
-
-/** px from the viewport top that wakes the navbar on mouse proximity */
-const WAKE_ZONE_PX   = 30
-/** ms of inactivity before the navbar auto-hides */
-const SLEEP_DELAY_MS = 3500
-/** Scroll delta (px) required before we react to direction */
-const SCROLL_DEAD_PX = 4
+import { motion } from 'framer-motion'
 
 // ─── Link data ────────────────────────────────────────────────────────────────
 
-// slug: null means no CMS entry — always visible
 const ALL_PRIMARY_LINKS = [
   { href: '/',            label: 'Home',         slug: 'landing' },
   { href: '/about',       label: 'About',        slug: 'about' },
@@ -55,14 +46,12 @@ export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
 
-  const [visible,      setVisible]      = useState(false)
+  // hasLoaded gates the entrance animation — flips true after ~1.6 s
+  const [hasLoaded,    setHasLoaded]    = useState(false)
+  const [scrolled,     setScrolled]     = useState(false)
   const [mobileOpen,   setMobileOpen]   = useState(false)
-  const [mounted,      setMounted]      = useState(false)
   const [visibleSlugs, setVisibleSlugs] = useState<string[] | null>(null)
 
-  const sleepTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastScrollY   = useRef(0)
-  const isMobileRef   = useRef(false)
   const mobileOpenRef = useRef(false)
 
   const isLoggedIn = !!session?.user
@@ -73,46 +62,32 @@ export default function Navbar() {
       ? '/developer/dashboard'
       : '/client/dashboard'
 
-  // ── Active-link helper ────────────────────────────────────────────────────
-
   const isActive = (href: string) =>
     href !== '#' &&
     (href === '/' ? pathname === '/' : pathname.startsWith(href))
 
-  // ── Sleep / wake ──────────────────────────────────────────────────────────
-
-  const clearSleep = useCallback(() => {
-    if (sleepTimer.current) { clearTimeout(sleepTimer.current); sleepTimer.current = null }
-  }, [])
-
-  const scheduleSleep = useCallback((delay = SLEEP_DELAY_MS) => {
-    clearSleep()
-    sleepTimer.current = setTimeout(() => {
-      if (!mobileOpenRef.current) {
-        setVisible(false); setMobileOpen(false); mobileOpenRef.current = false
-      }
-    }, delay)
-  }, [clearSleep])
-
-  const wake = useCallback(() => {
-    setVisible(true); scheduleSleep()
-  }, [scheduleSleep])
-
-  // ── Lifecycle effects ─────────────────────────────────────────────────────
+  // ── Entrance delay — only on the home page ────────────────────────────────
 
   useEffect(() => {
-    setMounted(true)
-    isMobileRef.current = window.innerWidth < 768
-    lastScrollY.current = window.scrollY
-    if (isMobileRef.current) {
-      setVisible(true)
-    } else {
-      setVisible(true)
-      const t = setTimeout(() => setVisible(false), SLEEP_DELAY_MS)
-      return () => clearTimeout(t)
+    if (pathname !== '/') {
+      setHasLoaded(true)
+      return
     }
+    const t = setTimeout(() => setHasLoaded(true), 500)
+    return () => clearTimeout(t)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // ── Scroll detection ──────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50)
+    setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // ── CMS page visibility ───────────────────────────────────────────────────
 
   useEffect(() => {
     fetch('/api/public/cms-pages')
@@ -121,91 +96,95 @@ export default function Navbar() {
       .catch(() => setVisibleSlugs(null))
   }, [])
 
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (isMobileRef.current) return
-      if (e.clientY < WAKE_ZONE_PX) wake()
-    }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [wake])
-
-  const onNavEnter = useCallback(() => { if (!isMobileRef.current) clearSleep()     }, [clearSleep])
-  const onNavLeave = useCallback(() => { if (!isMobileRef.current) scheduleSleep()  }, [scheduleSleep])
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (mobileOpenRef.current) return
-      const y     = window.scrollY
-      const delta = y - lastScrollY.current
-      if (Math.abs(delta) < SCROLL_DEAD_PX) return
-      if (delta < 0) wake()
-      else scheduleSleep(isMobileRef.current ? 0 : 150)
-      lastScrollY.current = y
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [wake, scheduleSleep])
+  // ── Mobile menu ───────────────────────────────────────────────────────────
 
   const toggleMobile = useCallback(() => {
     const next = !mobileOpenRef.current
     mobileOpenRef.current = next
     setMobileOpen(next)
-    if (next) clearSleep(); else scheduleSleep()
-  }, [clearSleep, scheduleSleep])
+  }, [])
 
   const closeMobile = useCallback(() => {
-    mobileOpenRef.current = false; setMobileOpen(false); scheduleSleep()
-  }, [scheduleSleep])
+    mobileOpenRef.current = false
+    setMobileOpen(false)
+  }, [])
 
   const PRIMARY_LINKS = visibleSlugs === null
     ? ALL_PRIMARY_LINKS
     : ALL_PRIMARY_LINKS.filter((l) => l.slug === null || visibleSlugs.includes(l.slug))
 
-  // ─── Palette tokens — always dark ────────────────────────────────────────
+  // ─── Palette tokens ───────────────────────────────────────────────────────
 
-  const bg         = 'bg-[#0f0c0a]/90 backdrop-blur-md border-b border-white/[0.06]'
-  const logoColor  = 'text-white'
-  const subColor   = 'text-[#6b5e54]'
-  const linkBase   = 'text-[#9e8d7a] hover:text-white'
-  const linkActive = 'text-white'
-  const sepColor   = 'bg-white/10'
-  const barColor   = 'bg-[#e8d8c4]'
+  const isLoginPage = pathname === '/login'
+  const bg          = scrolled
+    ? 'bg-white border-b border-gray-200 shadow-sm'
+    : isLoginPage
+    ? 'bg-[#0f0c0a]/50 backdrop-blur-md'
+    : 'bg-transparent'
+  const logoColor  = scrolled ? 'text-[#0f0c0a]'                      : 'text-white'
+  const subColor   = scrolled ? 'text-[#6b5e54]'                      : 'text-[#c8a96e]/70'
+  const linkBase   = scrolled ? 'text-[#4a3d35] hover:text-[#0f0c0a]' : 'text-white/70 hover:text-white'
+  const linkActive = scrolled ? 'text-[#0f0c0a]'                      : 'text-white'
+  const sepColor   = scrolled ? 'bg-[#0f0c0a]/15'                     : 'bg-white/10'
+  const barColor   = scrolled ? 'bg-[#0f0c0a]'                        : 'bg-[#e8d8c4]'
+
+  // ─── Framer Motion variants ───────────────────────────────────────────────
+
+  const navVariants = {
+    hidden:  { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+    },
+  }
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <header
-      onMouseEnter={onNavEnter}
-      onMouseLeave={onNavLeave}
+    <motion.header
+      variants={navVariants}
+      initial="hidden"
+      animate={hasLoaded ? 'visible' : 'hidden'}
       className={[
         'fixed top-0 left-0 right-0 z-50',
-        mounted ? 'transition-[transform,opacity] duration-300 ease-in-out' : 'transition-none',
-        visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0',
+        'transition-[background-color,border-color,box-shadow] duration-500 ease-in-out',
         bg,
       ].join(' ')}
     >
       {/* ── Main row ──────────────────────────────────────────────────────── */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3.5">
 
-        {/* Logo — PPM mark + full name below */}
-        <Link href="/" className="group flex items-center gap-3 shrink-0">
-          {/* Amber left accent */}
+        {/* Logo — fades and collapses on desktop when scrolled */}
+        <Link
+          href="/"
+          tabIndex={scrolled ? -1 : undefined}
+          className={[
+            'group flex items-center gap-3 shrink-0 overflow-hidden',
+            'transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+            scrolled
+              ? 'opacity-0 pointer-events-none lg:max-w-0'
+              : 'opacity-100 max-w-[200px]',
+          ].join(' ')}
+        >
           <span className="block h-7 w-0.5 bg-[#c8a96e]" />
           <span>
-            <span className={`block text-[13px] font-bold uppercase tracking-[0.22em] leading-none transition ${logoColor} group-hover:opacity-70`}>
+            <span className={`block text-[13px] font-bold uppercase tracking-[0.22em] leading-none transition-colors duration-500 ${logoColor} group-hover:opacity-70`}>
               PPM
             </span>
-            <span className={`block text-[8.5px] uppercase tracking-[0.14em] mt-1 leading-none transition ${subColor} group-hover:opacity-70`}>
+            <span className={`block text-[8.5px] uppercase tracking-[0.14em] mt-1 leading-none transition-colors duration-500 ${subColor} group-hover:opacity-70`}>
               Property Project Marketing
             </span>
           </span>
         </Link>
 
-        {/* ── Desktop nav ───────────────────────────────────────────────── */}
-        <nav className="hidden lg:flex items-center gap-1">
+        {/* ── Desktop nav — centers when scrolled ───────────────────────── */}
+        <nav className={[
+          'hidden lg:flex items-center gap-1',
+          'transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          scrolled ? 'flex-1 justify-center' : '',
+        ].join(' ')}>
 
-          {/* Primary links */}
           {PRIMARY_LINKS.map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
@@ -214,7 +193,7 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 className={[
-                  'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition',
+                  'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
                   placeholder ? 'text-[#3d3530] cursor-default pointer-events-none' :
                     active ? linkActive : linkBase,
                 ].join(' ')}
@@ -222,7 +201,6 @@ export default function Navbar() {
                 aria-disabled={placeholder}
               >
                 {link.label}
-                {/* Amber underline for active page */}
                 {active && (
                   <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />
                 )}
@@ -230,10 +208,8 @@ export default function Navbar() {
             )
           })}
 
-          {/* Separator */}
-          <span className={`mx-3 h-4 w-px ${sepColor}`} />
+          <span className={`mx-3 h-4 w-px transition-colors duration-500 ${sepColor}`} />
 
-          {/* Utility links — Login replaced by profile icon when signed in */}
           {isLoggedIn ? (
             <>
               <ProfileIcon name={session.user?.name} dashboardHref={dashboardHref} />
@@ -252,10 +228,7 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className={[
-                      'ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition',
-                      'border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]',
-                    ].join(' ')}
+                    className="ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]"
                   >
                     {link.label}
                   </Link>
@@ -266,7 +239,7 @@ export default function Navbar() {
                   key={link.label}
                   href={link.href}
                   className={[
-                    'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition',
+                    'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
                     active ? linkActive : linkBase,
                   ].join(' ')}
                 >
@@ -309,7 +282,6 @@ export default function Navbar() {
           mobileOpen ? 'max-h-[700px] opacity-100' : 'max-h-0 opacity-0',
         ].join(' ')}
       >
-        {/* Amber accent rule at top of drawer */}
         <div className="h-px bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/40 to-transparent" />
 
         <nav className="flex flex-col px-8 pb-4 pt-2 bg-[#0f0c0a]">
@@ -341,7 +313,6 @@ export default function Navbar() {
             )
           })}
 
-          {/* Contact always shown */}
           <Link
             href="/contact"
             className="flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] border-b border-white/[0.06] text-[#c8a96e] transition"
@@ -351,7 +322,6 @@ export default function Navbar() {
             <span className="text-[#c8a96e]">→</span>
           </Link>
 
-          {/* Portal link / Login depending on session */}
           {isLoggedIn ? (
             <Link
               href={dashboardHref}
@@ -379,6 +349,6 @@ export default function Navbar() {
           )}
         </nav>
       </div>
-    </header>
+    </motion.header>
   )
 }
