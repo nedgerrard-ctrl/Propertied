@@ -546,7 +546,7 @@ export default function StatsPanel() {
           <EmptyChart message="No enquiries recorded in the last 12 months." />
         ) : (
           <div className="mt-4">
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={400}>
               <LineChart
                 data={monthly}
                 margin={{ top: 8, right: 16, left: -18, bottom: 0 }}
@@ -560,55 +560,18 @@ export default function StatsPanel() {
                 />
                 <YAxis
                   allowDecimals={false}
+                  domain={[0, (dataMax: number) => dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3)]}
+                  tickCount={8}
                   tick={{ fontSize: 11, fill: "#a49a8d" }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip content={<ChartTooltip />} />
-                <Legend
-                  wrapperStyle={{
-                    fontSize: 11,
-                    paddingTop: 16,
-                    color: "#7a7166",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="total"
-                  name="Total"
-                  stroke="#2f2923"
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: "#2f2923", stroke: "white", strokeWidth: 1.5 }}
-                  activeDot={{ r: 5, fill: "#2f2923", stroke: "white", strokeWidth: 2 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="buyer"
-                  name="Buyer / Investor"
-                  stroke={GOLD}
-                  strokeWidth={1.5}
-                  dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }}
-                  activeDot={{ r: 4, fill: GOLD, stroke: "white", strokeWidth: 2 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="developer"
-                  name="Developer"
-                  stroke="#6b7280"
-                  strokeWidth={1.5}
-                  dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }}
-                  activeDot={{ r: 4, fill: "#6b7280", stroke: "white", strokeWidth: 2 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="general"
-                  name="General"
-                  stroke={MID}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 3"
-                  dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }}
-                  activeDot={{ r: 4, fill: MID, stroke: "white", strokeWidth: 2 }}
-                />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
+                <Line type="monotone" dataKey="total" name="Total" stroke="#2f2923" strokeWidth={2.5} dot={{ r: 3, fill: "#2f2923", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5, fill: "#2f2923", stroke: "white", strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="buyer" name="Buyer / Investor" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: GOLD, stroke: "white", strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="developer" name="Developer" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "#6b7280", stroke: "white", strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="general" name="General" stroke={MID} strokeWidth={1.5} strokeDasharray="4 3" dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: MID, stroke: "white", strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -625,7 +588,7 @@ export default function StatsPanel() {
           <EmptyChart />
         ) : (
           <div className="mt-4">
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={380}>
               <BarChart
                 data={monthly}
                 margin={{ top: 4, right: 16, left: -18, bottom: 0 }}
@@ -640,6 +603,7 @@ export default function StatsPanel() {
                 />
                 <YAxis
                   allowDecimals={false}
+                  domain={[0, (dataMax: number) => dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3)]}
                   tick={{ fontSize: 11, fill: "#a49a8d" }}
                   axisLine={false}
                   tickLine={false}
@@ -780,11 +744,11 @@ export default function StatsPanel() {
         {!hasMonthlyData ? (
           <EmptyChart message="No enquiries recorded in the last 12 months." />
         ) : (
-          <ResponsiveContainer width="100%" height={440}>
+          <ResponsiveContainer width="100%" height={500}>
             <LineChart data={monthly} margin={{ top: 8, right: 16, left: -18, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0ede8" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={{ stroke: LIGHT }} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} domain={[0, (dataMax: number) => dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3)]} tickCount={8} tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
               <Line type="monotone" dataKey="total" name="Total" stroke={DARK} strokeWidth={2.5} dot={{ r: 3, fill: DARK, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
@@ -816,7 +780,7 @@ export default function StatsPanel() {
             <BarChart data={monthly} margin={{ top: 4, right: 16, left: -18, bottom: 0 }} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" stroke="#f0ede8" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={{ stroke: LIGHT }} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} domain={[0, (dataMax: number) => dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3)]} tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f9f7f4" }} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: "#7a7166" }} />
               <Bar dataKey="buyer" name="Buyer / Investor" stackId="a" fill={GOLD} />
