@@ -117,6 +117,44 @@ export async function POST(
   );
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || session.user?.role !== "admin") {
+    return NextResponse.json({ message: "Unauthorised" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const body = await req.json().catch(() => null);
+  const storedName = typeof body?.storedName === "string" ? body.storedName : "";
+  const docStatus = typeof body?.docStatus === "string" ? body.docStatus : "";
+
+  if (!storedName || !["Approved", "Rejected", "Pending", "Signed", "Draft"].includes(docStatus)) {
+    return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+  }
+
+  await connectDB();
+
+  const client = await User.findOne({ _id: id, role: "client" });
+  if (!client) {
+    return NextResponse.json({ message: "Client not found" }, { status: 404 });
+  }
+
+  const doc = (client.assignedDocuments ?? []).find(
+    (d: { storedName: string }) => d.storedName === storedName
+  );
+  if (!doc) {
+    return NextResponse.json({ message: "Document not found" }, { status: 404 });
+  }
+
+  doc.docStatus = docStatus;
+  await client.save();
+
+  return NextResponse.json({ success: true, docStatus });
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

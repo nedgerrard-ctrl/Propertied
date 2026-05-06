@@ -108,6 +108,44 @@ export async function POST(
   return NextResponse.json({ success: true, document: doc }, { status: 201 });
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || session.user?.role !== "admin") {
+    return NextResponse.json({ message: "Unauthorised" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const body = await req.json().catch(() => null);
+  const storedName = typeof body?.storedName === "string" ? body.storedName : "";
+  const docStatus = typeof body?.docStatus === "string" ? body.docStatus : "";
+
+  if (!storedName || !["Approved", "Rejected", "Pending", "Signed", "Draft"].includes(docStatus)) {
+    return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+  }
+
+  await connectDB();
+
+  const developer = await User.findOne({ _id: id, role: "client", clientType: "developer" });
+  if (!developer) {
+    return NextResponse.json({ message: "Developer not found" }, { status: 404 });
+  }
+
+  const doc = (developer.assignedDocuments ?? []).find(
+    (d: { storedName: string }) => d.storedName === storedName
+  );
+  if (!doc) {
+    return NextResponse.json({ message: "Document not found" }, { status: 404 });
+  }
+
+  doc.docStatus = docStatus;
+  await developer.save();
+
+  return NextResponse.json({ success: true, docStatus });
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

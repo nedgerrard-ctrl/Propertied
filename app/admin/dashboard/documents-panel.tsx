@@ -36,9 +36,11 @@ const DOC_TYPE_BADGE: Record<string, string> = {
 };
 
 const DOC_STATUS_BADGE: Record<string, string> = {
-  Signed: "bg-emerald-100 text-emerald-700",
-  Pending: "bg-amber-100 text-amber-700",
-  Draft: "bg-neutral-100 text-neutral-500",
+  Signed:   "bg-emerald-100 text-emerald-700",
+  Approved: "bg-blue-100 text-blue-700",
+  Pending:  "bg-amber-100 text-amber-700",
+  Rejected: "bg-red-100 text-red-700",
+  Draft:    "bg-neutral-100 text-neutral-500",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -137,6 +139,9 @@ export default function DocumentsPanel() {
   // Delete
   const [docToDelete, setDocToDelete] = useState<DocumentWithUser | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Approve / Reject
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -247,6 +252,28 @@ export default function DocumentsPanel() {
       setUploadError(data.message ?? "Upload failed.");
     }
     setUploading(false);
+  }
+
+  // ── Approve / Reject handler ──────────────────────────────────────────────────
+
+  async function handleStatusChange(doc: DocumentWithUser, newStatus: "Approved" | "Rejected") {
+    const key = `${doc.userId}-${doc.storedName}`;
+    setUpdatingStatus(key);
+    const res = await fetch(docEndpoint(doc), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storedName: doc.storedName, docStatus: newStatus }),
+    });
+    setUpdatingStatus(null);
+    if (res.ok) {
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.storedName === doc.storedName && d.userId === doc.userId
+            ? { ...d, docStatus: newStatus }
+            : d
+        )
+      );
+    }
   }
 
   // ── Delete handler ────────────────────────────────────────────────────────────
@@ -616,7 +643,25 @@ export default function DocumentsPanel() {
 
                     {/* Actions */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                        {docStatus === "Pending" && (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(doc, "Approved")}
+                              disabled={updatingStatus === `${doc.userId}-${doc.storedName}`}
+                              className="rounded border border-blue-300 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-blue-700 transition hover:bg-blue-100 disabled:opacity-50"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleStatusChange(doc, "Rejected")}
+                              disabled={updatingStatus === `${doc.userId}-${doc.storedName}`}
+                              className="rounded border border-orange-300 bg-orange-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-orange-700 transition hover:bg-orange-100 disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                         <a
                           href={doc.fileUrl}
                           target="_blank"
