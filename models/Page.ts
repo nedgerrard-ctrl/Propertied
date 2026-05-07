@@ -58,12 +58,31 @@ const PageSchema = new Schema(
     featuredImage: { type: String, default: "" },
     sortOrder: { type: Number, default: 100 },
 
+    // Template
+    templateKey: {
+      type: String,
+      enum: ["text-only", "text-image"],
+      default: "text-only",
+    },
+
+    // Sections (used by text-image template)
+    sections: [
+      {
+        heading: { type: String, default: "" },
+        body: { type: String, default: "" },
+        image: { type: String, default: "" },
+      },
+    ],
+
     // Status
     status: {
       type: String,
       enum: ["draft", "published"],
       default: "draft",
     },
+
+    // Archive
+    archived: { type: Boolean, default: false },
 
     // Webflow sync
     webflowItemId: { type: String, default: "" },

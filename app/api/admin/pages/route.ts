@@ -10,6 +10,14 @@ function validateSlug(slug: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
 }
 
+export async function GET() {
+  await connectDB();
+  const pages = await Page.find({ archived: { $ne: true } })
+    .sort({ createdAt: -1 })
+    .lean();
+  return NextResponse.json(pages);
+}
+
 export async function POST(req: NextRequest) {
   await connectDB();
 
@@ -32,7 +40,6 @@ export async function POST(req: NextRequest) {
 
     const page = await Page.create({
       ...body,
-      templateKey: "simple-info-page",
       syncStatus: "never_synced",
     });
 
@@ -48,10 +55,16 @@ export async function POST(req: NextRequest) {
     await page.save();
 
     return NextResponse.json(page, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+    if (error?.code === 11000 && error?.keyPattern?.slug) {
+      return NextResponse.json(
+        { error: "A page with that URL slug already exists. Please choose a different slug." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to create page." },
+      { error: "Failed to create page. Please try again." },
       { status: 500 }
     );
   }
