@@ -42,19 +42,6 @@ export default async function AdminDashboardPage() {
               </svg>
               View Site
             </Link>
-            <Link
-              href="/admin/dashboard/pages"
-              className="inline-flex border border-[#5f5245] bg-[#2f2a24] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#1f1a17]"
-            >
-              Manage Pages
-            </Link>
-            <Link
-              href="/admin/dashboard/blogs"
-              className="border border-[#5f5245] px-4 py-2 text-sm"
-            >
-              Manage Blogs
-            </Link>
-                      
             <LogoutButton />
           </div>
         </div>

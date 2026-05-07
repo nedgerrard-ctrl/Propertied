@@ -85,7 +85,7 @@ export default function AdminTabs() {
       links: [
         {
           label: "Manage Pages",
-          href: "/admin/dashboard/cms-pages",
+          href: "/admin/dashboard/pages",
           ariaLabel: "Manage CMS pages",
         },
         {
