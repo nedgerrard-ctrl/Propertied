@@ -349,6 +349,14 @@ export default function TestimonialInlineEditor() {
           <span className="hidden sm:inline text-[11px] text-black/50">· Click any underlined text to edit</span>
         </div>
         <div className="flex items-center gap-3">
+          <a
+            href="/testimonial"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-black/30 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/70 transition hover:border-black/60 hover:text-black"
+          >
+            Preview ↗
+          </a>
           <button onClick={() => setRevertOpen(true)} className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black">
             Revert Quotes to Default
           </button>
