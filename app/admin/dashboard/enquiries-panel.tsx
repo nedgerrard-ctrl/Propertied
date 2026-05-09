@@ -46,6 +46,8 @@ type Enquiry = {
 
   status: EnquiryStatus;
   createdAt: string;
+  agentboxEnquiryId?: string | null;
+  listingId?: string;
 };
 
 const STATUS_OPTIONS: EnquiryStatus[] = [
@@ -634,6 +636,32 @@ function DetailPanel({
               </section>
             </>
           )}
+
+          <hr className="border-neutral-100" />
+
+          <section>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+              Agentbox CRM
+            </p>
+            {enquiry.agentboxEnquiryId ? (
+              <div className="flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 fill-emerald-600">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="text-[12px] font-medium text-emerald-800">Synced to Agentbox</p>
+                  <p className="text-[11px] text-emerald-700">ID: {enquiry.agentboxEnquiryId}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 rounded border border-amber-200 bg-amber-50 px-3 py-2">
+                <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 fill-amber-500">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
+                </svg>
+                <p className="text-[12px] font-medium text-amber-800">Not yet synced to Agentbox</p>
+              </div>
+            )}
+          </section>
 
           <hr className="border-neutral-100" />
 

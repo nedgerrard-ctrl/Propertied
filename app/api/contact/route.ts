@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
 import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
+import { submitEnquiryToAgentbox } from "@/lib/agentbox";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9]{6,15}$/;
@@ -123,6 +124,7 @@ export async function POST(request: Request) {
     let projectLocation = "";
     let commissionStructureInterest = "";
 
+    let listingId = "";
     let uploadedFiles: File[] = [];
 
     if (isMultipart) {
@@ -134,6 +136,7 @@ export async function POST(request: Request) {
       phoneCountryCode = String(formData.get("phoneCountryCode") ?? "");
       phone = String(formData.get("phone") ?? "");
       message = String(formData.get("message") ?? "");
+      listingId = String(formData.get("listingId") ?? "");
 
       buyerType = String(formData.get("buyerType") ?? "");
       investorRegion = String(formData.get("investorRegion") ?? "");
@@ -189,6 +192,7 @@ export async function POST(request: Request) {
       commissionStructureInterest = String(
         body.commissionStructureInterest ?? ""
       );
+      listingId = String(body.listingId ?? "");
 
       uploadedFiles = [];
     } else {
@@ -406,6 +410,26 @@ export async function POST(request: Request) {
 
     await connectDB();
 
+    // Prevent duplicate submissions: block same email + enquiry type within 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const recentDuplicate = await Enquiry.findOne({
+      email: email.trim().toLowerCase(),
+      enquiryType,
+      createdAt: { $gte: fiveMinutesAgo },
+    }).lean();
+
+    if (recentDuplicate) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Your enquiry was already submitted. Please wait a few minutes before trying again.",
+          fieldErrors: {},
+        },
+        { status: 409 }
+      );
+    }
+
     const matchClause = {
       $or: [
         { email: email.trim().toLowerCase() },
@@ -472,7 +496,35 @@ export async function POST(request: Request) {
       projectName: projectName.trim(),
       projectLocation: projectLocation.trim(),
       commissionStructureInterest: commissionStructureInterest.trim(),
+      listingId: listingId.trim(),
     });
+
+    // Forward to Agentbox CRM — skip if this email was already synced for the same enquiry type
+    const existingSynced = await Enquiry.findOne({
+      email: email.trim().toLowerCase(),
+      enquiryType,
+      agentboxEnquiryId: { $ne: null, $exists: true },
+      _id: { $ne: enquiry._id },
+    }).lean();
+
+    if (!existingSynced) {
+      const nameParts = name.trim().split(/\s+/);
+      const firstName = nameParts[0] ?? name.trim();
+      const lastName = nameParts.slice(1).join(" ") || firstName;
+
+      const agentboxId = await submitEnquiryToAgentbox({
+        firstName,
+        lastName,
+        email: email.trim(),
+        mobile: `${phoneCountryCode.trim()} ${normalizedPhone}`.trim(),
+        comment: message.trim(),
+        listingId: listingId.trim() || undefined,
+      });
+
+      if (agentboxId) {
+        await Enquiry.findByIdAndUpdate(enquiry._id, { agentboxEnquiryId: agentboxId });
+      }
+    }
 
     return NextResponse.json(
       {

@@ -196,6 +196,18 @@ const enquirySchema = new Schema(
       enum: ["pending", "qualified", "in-progress", "closed"],
       default: "pending",
     },
+
+    agentboxEnquiryId: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
+    listingId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   {
     timestamps: true,
