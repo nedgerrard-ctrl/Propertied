@@ -70,6 +70,24 @@ function getDeveloperStatus(developer: Pick<Developer, "pendingApproval">): stri
 
 // ─── Utilities ─────────────────────────────────────────────────────────────────
 
+function cloudinaryProxyUrl(doc: AssignedDocument, attachment = false): string {
+  if (!doc.fileUrl.startsWith("https://res.cloudinary.com/")) return doc.fileUrl;
+  const resourceType = doc.fileUrl.includes("/image/upload/")
+    ? "image"
+    : doc.fileUrl.includes("/video/upload/")
+    ? "video"
+    : "raw";
+  const params = new URLSearchParams({
+    storedName: doc.storedName,
+    resourceType,
+    fileUrl: doc.fileUrl,
+    fileType: doc.fileType,
+    originalName: doc.originalName,
+  });
+  if (attachment) params.set("attachment", "1");
+  return `/api/admin/documents/serve?${params.toString()}`;
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-AU", {
     day: "2-digit",
@@ -519,7 +537,7 @@ function DeveloperDetailPanel({
                           </p>
                           <div className="mt-2 flex gap-2">
                             <a
-                              href={doc.fileUrl}
+                              href={cloudinaryProxyUrl(doc)}
                               target="_blank"
                               rel="noreferrer"
                               className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400"
@@ -527,7 +545,7 @@ function DeveloperDetailPanel({
                               Open
                             </a>
                             <a
-                              href={doc.fileUrl}
+                              href={cloudinaryProxyUrl(doc, true)}
                               download={doc.originalName}
                               className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400"
                             >
@@ -590,7 +608,7 @@ function DeveloperDetailPanel({
                         </div>
                         <div className="mt-2 flex gap-2">
                           <a
-                            href={doc.fileUrl}
+                            href={cloudinaryProxyUrl(doc)}
                             target="_blank"
                             rel="noreferrer"
                             className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400"
@@ -598,7 +616,7 @@ function DeveloperDetailPanel({
                             Open
                           </a>
                           <a
-                            href={doc.fileUrl}
+                            href={cloudinaryProxyUrl(doc, true)}
                             download={doc.originalName}
                             className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400"
                           >
