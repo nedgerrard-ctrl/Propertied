@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ESignaturePanel from "./esignature-panel";
 
 type UserOption = {
   _id: string;
@@ -460,6 +461,9 @@ export default function DocumentsPanel() {
           </div>
         )}
       </div>
+
+      {/* DocuSign eSignature */}
+      <ESignaturePanel />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
