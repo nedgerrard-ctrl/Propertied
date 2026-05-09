@@ -448,7 +448,7 @@ function BuyersInvestorsContactContent() {
     }));
   }, [searchParams]);
 
- const showPropertyPreferences =true;
+  const showPropertyPreferences = true;
 
   const filteredMaxBudgetOptions = useMemo(
     () => getFilteredRangeOptions(maxBudgetOptions, formData.minBudget),
@@ -510,8 +510,6 @@ function BuyersInvestorsContactContent() {
       ) {
         next.maxCarSpaces = "";
       }
-
-     
 
       setFieldErrors((prevErrors) => ({
         ...prevErrors,
