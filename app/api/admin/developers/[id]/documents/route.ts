@@ -59,9 +59,11 @@ export async function POST(
   const b64 = Buffer.from(bytes).toString("base64");
   const dataUri = `data:${file.type};base64,${b64}`;
 
+  const resourceType = file.type.startsWith("image/") ? "image" : "raw";
+
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: `ppm/developer-documents/${id}`,
-    resource_type: "auto",
+    resource_type: resourceType,
     use_filename: true,
     unique_filename: true,
   });
