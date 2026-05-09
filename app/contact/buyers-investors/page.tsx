@@ -7,7 +7,6 @@ import {
   Suspense,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { useSearchParams } from "next/navigation";
@@ -15,22 +14,6 @@ import { useSession } from "next-auth/react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { useCountryCodes } from "../useCountryCodes";
-
-const ALLOWED_DOCUMENT_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "image/jpeg",
-  "image/png",
-];
-
-const MAX_DOCUMENTS = 3;
-const MAX_DOCUMENT_SIZE_BYTES = 5 * 1024 * 1024;
-
-type SelectedLegalDocument = {
-  file: File;
-  previewId: string;
-};
 
 type BuyerFormData = {
   enquiryType: "buyer";
@@ -55,9 +38,7 @@ type BuyerFormData = {
   message: string;
 };
 
-type BuyerFieldErrors = Partial<
-  Record<keyof BuyerFormData | "legalDocuments", string>
->;
+type BuyerFieldErrors = Partial<Record<keyof BuyerFormData, string>>;
 
 const initialFormData: BuyerFormData = {
   enquiryType: "buyer",
@@ -134,10 +115,9 @@ function normalizePhone(value: string) {
 }
 
 function validateBuyerField(
-  name: keyof BuyerFormData | "legalDocuments",
+  name: keyof BuyerFormData,
   value: string,
-  formData: BuyerFormData,
-  documentsCount: number
+  formData: BuyerFormData
 ): string {
   const trimmedValue = value.trim();
 
@@ -225,12 +205,6 @@ function validateBuyerField(
     case "message":
       return "";
 
-    case "legalDocuments":
-      if (documentsCount > MAX_DOCUMENTS) {
-        return `Upload up to ${MAX_DOCUMENTS} files only`;
-      }
-      return "";
-
     case "enquiryType":
       return "";
 
@@ -239,116 +213,27 @@ function validateBuyerField(
   }
 }
 
-function validateBuyerForm(
-  formData: BuyerFormData,
-  documentsCount: number
-): BuyerFieldErrors {
+function validateBuyerForm(formData: BuyerFormData): BuyerFieldErrors {
   return {
-    name: validateBuyerField("name", formData.name, formData, documentsCount),
-    email: validateBuyerField("email", formData.email, formData, documentsCount),
-    phoneCountryCode: validateBuyerField(
-      "phoneCountryCode",
-      formData.phoneCountryCode,
-      formData,
-      documentsCount
-    ),
-    phone: validateBuyerField("phone", formData.phone, formData, documentsCount),
-    buyerType: validateBuyerField(
-      "buyerType",
-      formData.buyerType,
-      formData,
-      documentsCount
-    ),
-    investorRegion: validateBuyerField(
-      "investorRegion",
-      formData.investorRegion,
-      formData,
-      documentsCount
-    ),
-    minBudget: validateBuyerField(
-      "minBudget",
-      formData.minBudget,
-      formData,
-      documentsCount
-    ),
-    maxBudget: validateBuyerField(
-      "maxBudget",
-      formData.maxBudget,
-      formData,
-      documentsCount
-    ),
-    preferredLocations: validateBuyerField(
-      "preferredLocations",
-      formData.preferredLocations,
-      formData,
-      documentsCount
-    ),
-    propertyInterest: validateBuyerField(
-      "propertyInterest",
-      formData.propertyInterest,
-      formData,
-      documentsCount
-    ),
-    minBedrooms: validateBuyerField(
-      "minBedrooms",
-      formData.minBedrooms,
-      formData,
-      documentsCount
-    ),
-    maxBedrooms: validateBuyerField(
-      "maxBedrooms",
-      formData.maxBedrooms,
-      formData,
-      documentsCount
-    ),
-    minBathrooms: validateBuyerField(
-      "minBathrooms",
-      formData.minBathrooms,
-      formData,
-      documentsCount
-    ),
-    maxBathrooms: validateBuyerField(
-      "maxBathrooms",
-      formData.maxBathrooms,
-      formData,
-      documentsCount
-    ),
-    minCarSpaces: validateBuyerField(
-      "minCarSpaces",
-      formData.minCarSpaces,
-      formData,
-      documentsCount
-    ),
-    maxCarSpaces: validateBuyerField(
-      "maxCarSpaces",
-      formData.maxCarSpaces,
-      formData,
-      documentsCount
-    ),
-    propertyType: validateBuyerField(
-      "propertyType",
-      formData.propertyType,
-      formData,
-      documentsCount
-    ),
-    keywords: validateBuyerField(
-      "keywords",
-      formData.keywords,
-      formData,
-      documentsCount
-    ),
-    message: validateBuyerField(
-      "message",
-      formData.message,
-      formData,
-      documentsCount
-    ),
-    legalDocuments: validateBuyerField(
-      "legalDocuments",
-      "",
-      formData,
-      documentsCount
-    ),
+    name: validateBuyerField("name", formData.name, formData),
+    email: validateBuyerField("email", formData.email, formData),
+    phoneCountryCode: validateBuyerField("phoneCountryCode", formData.phoneCountryCode, formData),
+    phone: validateBuyerField("phone", formData.phone, formData),
+    buyerType: validateBuyerField("buyerType", formData.buyerType, formData),
+    investorRegion: validateBuyerField("investorRegion", formData.investorRegion, formData),
+    minBudget: validateBuyerField("minBudget", formData.minBudget, formData),
+    maxBudget: validateBuyerField("maxBudget", formData.maxBudget, formData),
+    preferredLocations: validateBuyerField("preferredLocations", formData.preferredLocations, formData),
+    propertyInterest: validateBuyerField("propertyInterest", formData.propertyInterest, formData),
+    minBedrooms: validateBuyerField("minBedrooms", formData.minBedrooms, formData),
+    maxBedrooms: validateBuyerField("maxBedrooms", formData.maxBedrooms, formData),
+    minBathrooms: validateBuyerField("minBathrooms", formData.minBathrooms, formData),
+    maxBathrooms: validateBuyerField("maxBathrooms", formData.maxBathrooms, formData),
+    minCarSpaces: validateBuyerField("minCarSpaces", formData.minCarSpaces, formData),
+    maxCarSpaces: validateBuyerField("maxCarSpaces", formData.maxCarSpaces, formData),
+    propertyType: validateBuyerField("propertyType", formData.propertyType, formData),
+    keywords: validateBuyerField("keywords", formData.keywords, formData),
+    message: validateBuyerField("message", formData.message, formData),
   };
 }
 
@@ -476,12 +361,6 @@ function buildPrefilledFormData(
   };
 }
 
-function formatFileSize(fileSize: number) {
-  if (fileSize < 1024) return `${fileSize} B`;
-  if (fileSize < 1024 * 1024) return `${(fileSize / 1024).toFixed(1)} KB`;
-  return `${(fileSize / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="mt-3 text-[14px] text-[#dc2626]">{message}</p>;
@@ -513,14 +392,10 @@ function getTextareaClass(hasError: boolean) {
 
 function BuyersInvestorsContactContent() {
   const searchParams = useSearchParams();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { countries, defaultDialCode } = useCountryCodes("+61");
   const { data: session } = useSession();
 
   const [formData, setFormData] = useState<BuyerFormData>(initialFormData);
-  const [selectedDocuments, setSelectedDocuments] = useState<
-    SelectedLegalDocument[]
-  >([]);
   const [fieldErrors, setFieldErrors] = useState<BuyerFieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<{
@@ -640,114 +515,14 @@ function BuyersInvestorsContactContent() {
 
       setFieldErrors((prevErrors) => ({
         ...prevErrors,
-        [fieldName]: validateBuyerField(
-          fieldName,
-          value,
-          next,
-          selectedDocuments.length
-        ),
-        maxBudget: validateBuyerField(
-          "maxBudget",
-          next.maxBudget,
-          next,
-          selectedDocuments.length
-        ),
-        maxBedrooms: validateBuyerField(
-          "maxBedrooms",
-          next.maxBedrooms,
-          next,
-          selectedDocuments.length
-        ),
-        maxBathrooms: validateBuyerField(
-          "maxBathrooms",
-          next.maxBathrooms,
-          next,
-          selectedDocuments.length
-        ),
-        maxCarSpaces: validateBuyerField(
-          "maxCarSpaces",
-          next.maxCarSpaces,
-          next,
-          selectedDocuments.length
-        ),
+        [fieldName]: validateBuyerField(fieldName, value, next),
+        maxBudget: validateBuyerField("maxBudget", next.maxBudget, next),
+        maxBedrooms: validateBuyerField("maxBedrooms", next.maxBedrooms, next),
+        maxBathrooms: validateBuyerField("maxBathrooms", next.maxBathrooms, next),
+        maxCarSpaces: validateBuyerField("maxCarSpaces", next.maxCarSpaces, next),
       }));
 
       return next;
-    });
-  }
-
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []);
-    if (files.length === 0) return;
-
-    if (selectedDocuments.length + files.length > MAX_DOCUMENTS) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        legalDocuments: `Upload up to ${MAX_DOCUMENTS} files only`,
-      }));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    const invalidTypeFile = files.find(
-      (file) => !ALLOWED_DOCUMENT_TYPES.includes(file.type)
-    );
-
-    if (invalidTypeFile) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        legalDocuments: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed",
-      }));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    const oversizedFile = files.find(
-      (file) => file.size > MAX_DOCUMENT_SIZE_BYTES
-    );
-
-    if (oversizedFile) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        legalDocuments: "Each file must be 5MB or smaller",
-      }));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    const nextDocuments = files.map((file) => ({
-      file,
-      previewId: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-    }));
-
-    const updatedDocuments = [...selectedDocuments, ...nextDocuments];
-    setSelectedDocuments(updatedDocuments);
-    setFieldErrors((prev) => ({
-      ...prev,
-      legalDocuments: validateBuyerField(
-        "legalDocuments",
-        "",
-        formData,
-        updatedDocuments.length
-      ),
-    }));
-
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
-
-  function handleRemoveDocument(previewId: string) {
-    setSelectedDocuments((prev) => {
-      const nextDocuments = prev.filter((doc) => doc.previewId !== previewId);
-      setFieldErrors((prevErrors) => ({
-        ...prevErrors,
-        legalDocuments: validateBuyerField(
-          "legalDocuments",
-          "",
-          formData,
-          nextDocuments.length
-        ),
-      }));
-      return nextDocuments;
     });
   }
 
@@ -764,7 +539,7 @@ function BuyersInvestorsContactContent() {
       return;
     }
 
-    const validationErrors = validateBuyerForm(formData, selectedDocuments.length);
+    const validationErrors = validateBuyerForm(formData);
     setFieldErrors(validationErrors);
 
     if (Object.values(validationErrors).some(Boolean)) {
@@ -780,17 +555,10 @@ function BuyersInvestorsContactContent() {
     setLoading(true);
 
     try {
-      const payload = formData;
-        
-
       const multipartData = new FormData();
 
-      Object.entries(payload).forEach(([key, value]) => {
+      Object.entries(formData).forEach(([key, value]) => {
         multipartData.append(key, value);
-      });
-
-      selectedDocuments.forEach((document) => {
-        multipartData.append("legalDocuments", document.file);
       });
 
       const response = await fetch("/api/contact", {
@@ -818,9 +586,7 @@ function BuyersInvestorsContactContent() {
         success: true,
       });
       setFormData(initialFormData);
-      setSelectedDocuments([]);
       setFieldErrors({});
-      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch {
       setFeedbackModal({
         open: true,
@@ -1300,71 +1066,6 @@ function BuyersInvestorsContactContent() {
                 </div>
               </section>
             )}
-
-            <section className="space-y-6 border-t border-[#e3d8ca] pt-10">
-              <div>
-                <h2 className="text-2xl font-light text-[#1f1a17]">
-                  Legal Documents
-                </h2>
-                <p className="mt-2 text-[14px] leading-7 text-[#6c6258]">
-                  Upload supporting legal documents. Maximum {MAX_DOCUMENTS} files, 5MB each.
-                </p>
-              </div>
-
-              <div
-                className={`rounded-sm border bg-[#fdfbf8] p-5 ${
-                  fieldErrors.legalDocuments ? "border-[#dc2626]" : "border-[#d9cec0]"
-                }`}
-              >
-                <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
-                  Upload Legal Documents
-                </label>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
-                  onChange={handleFileChange}
-                  className="block w-full text-[13px] text-[#5b5147] file:mr-4 file:rounded-sm file:border-0 file:bg-[#2f2a24] file:px-4 file:py-2.5 file:text-[11px] file:font-semibold file:uppercase file:tracking-[0.16em] file:text-white hover:file:bg-[#1f1a17]"
-                />
-
-                <p className="mt-3 text-[12px] text-[#8a7b6d]">
-                  Accepted: PDF, DOC, DOCX, JPG, PNG
-                </p>
-
-                <FieldError message={fieldErrors.legalDocuments} />
-
-                {selectedDocuments.length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    {selectedDocuments.map((document) => (
-                      <div
-                        key={document.previewId}
-                        className="flex items-center justify-between gap-4 rounded-sm border border-[#e3d8ca] bg-white px-4 py-3"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-[13px] font-medium text-[#1f1a17]">
-                            {document.file.name}
-                          </p>
-                          <p className="mt-1 text-[12px] text-[#8a7b6d]">
-                            {document.file.type || "Unknown type"} ·{" "}
-                            {formatFileSize(document.file.size)}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDocument(document.previewId)}
-                          className="shrink-0 rounded-sm border border-[#d7cabc] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
 
             <section className="space-y-6 border-t border-[#e3d8ca] pt-10">
               <div>
