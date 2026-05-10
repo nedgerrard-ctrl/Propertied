@@ -59,9 +59,13 @@ export async function POST(
   const b64 = Buffer.from(bytes).toString("base64");
   const dataUri = `data:${file.type};base64,${b64}`;
 
+  const isRaw =
+    file.type === "application/msword" ||
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: `ppm/client-documents/${id}`,
-    resource_type: "auto",
+    resource_type: isRaw ? "raw" : "image",
     use_filename: true,
     unique_filename: true,
   });
@@ -153,8 +157,10 @@ export async function DELETE(
   );
 
   if (doc) {
-    const resourceType = doc.fileType?.startsWith("image/") ? "image" : "raw";
-    await cloudinary.uploader.destroy(storedName, { resource_type: resourceType }).catch(() => {});
+    const isRaw =
+      doc.fileType === "application/msword" ||
+      doc.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    await cloudinary.uploader.destroy(storedName, { resource_type: isRaw ? "raw" : "image" }).catch(() => {});
   }
 
   client.assignedDocuments = (client.assignedDocuments ?? []).filter(
