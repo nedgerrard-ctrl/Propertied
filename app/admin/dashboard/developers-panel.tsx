@@ -53,7 +53,7 @@ const DEV_STATUS_LABEL: Record<string, string> = {
 };
 
 const DEV_STATUS_BADGE: Record<string, string> = {
-  active: "bg-neutral-100 text-neutral-600",
+  active: "bg-emerald-100 text-emerald-700",
   pending: "bg-amber-100 text-amber-800",
 };
 
