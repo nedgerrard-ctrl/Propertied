@@ -599,7 +599,7 @@ function BuyersInvestorsContactContent() {
 
   return (
     <main className="min-h-screen w-full bg-[#f6f2eb] text-[#1f1a17]">
-      <Navbar />
+      <Navbar blackBg />
       <ContactTabs />
 
       <section className="mx-auto max-w-7xl px-6 py-16">
