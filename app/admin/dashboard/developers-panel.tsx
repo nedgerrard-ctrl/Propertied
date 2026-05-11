@@ -64,8 +64,8 @@ const DEV_STATUS_BUTTON: Record<string, string> = {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-function getDeveloperStatus(developer: Pick<Developer, "pendingApproval">): string {
-  return developer.pendingApproval ? "pending" : "active";
+function getDeveloperStatus(_developer: Pick<Developer, "pendingApproval">): string {
+  return "active";
 }
 
 function formatDate(iso: string) {
@@ -174,22 +174,14 @@ function ConfirmDialog({
 function DeveloperDetailPanel({
   developer: initialDeveloper,
   onClose,
-  onStatusUpdate,
 }: {
   developer: Developer;
   onClose: () => void;
-  onStatusUpdate: (id: string, pendingApproval: boolean) => void;
 }) {
   const [developer, setDeveloper] = useState<Developer>(initialDeveloper);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(true);
   const [detailError, setDetailError] = useState("");
-
-  const [pendingStatus, setPendingStatus] = useState<string>(
-    getDeveloperStatus(initialDeveloper)
-  );
-  const [savingStatus, setSavingStatus] = useState(false);
-  const [savedStatus, setSavedStatus] = useState(false);
 
   const [notes, setNotes] = useState(initialDeveloper.adminNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -213,32 +205,10 @@ function DeveloperDetailPanel({
         if (data.developer) setDeveloper(data.developer);
         if (data.enquiries) setEnquiries(data.enquiries);
         setNotes(data.developer?.adminNotes ?? "");
-        setPendingStatus(
-          data.developer ? getDeveloperStatus(data.developer) : getDeveloperStatus(initialDeveloper)
-        );
       })
       .catch(() => setDetailError("Failed to load developer details."))
       .finally(() => setLoadingDetail(false));
   }, [initialDeveloper._id]);
-
-  async function handleSaveStatus() {
-    if (pendingStatus === getDeveloperStatus(developer)) return;
-    setSavingStatus(true);
-    const newPendingApproval = pendingStatus === "pending";
-    const res = await fetch(`/api/admin/developers/${developer._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pendingApproval: newPendingApproval }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setDeveloper(data.developer);
-      onStatusUpdate(developer._id, newPendingApproval);
-      setSavedStatus(true);
-      setTimeout(() => setSavedStatus(false), 2000);
-    }
-    setSavingStatus(false);
-  }
 
   async function handleSaveNotes() {
     setSavingNotes(true);
@@ -417,37 +387,6 @@ function DeveloperDetailPanel({
                     </dd>
                   </div>
                 </dl>
-              </section>
-
-              <hr className="border-neutral-100" />
-
-              {/* Status control */}
-              <section>
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Update Status
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {["active", "pending"].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setPendingStatus(s)}
-                      className={`rounded border px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] transition leading-tight ${
-                        pendingStatus === s
-                          ? DEV_STATUS_BUTTON[s]
-                          : "border-neutral-200 bg-white text-neutral-400"
-                      }`}
-                    >
-                      {DEV_STATUS_LABEL[s]}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={handleSaveStatus}
-                  disabled={savingStatus || pendingStatus === getDeveloperStatus(developer)}
-                  className="mt-3 w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {savingStatus ? "Saving…" : savedStatus ? "Saved" : "Save Status"}
-                </button>
               </section>
 
               <hr className="border-neutral-100" />
@@ -733,13 +672,6 @@ export default function DevelopersPanel() {
       .finally(() => setLoading(false));
   }, []);
 
-  function handleStatusUpdate(id: string, pendingApproval: boolean) {
-    setDevelopers((prev) =>
-      prev.map((d) => (d._id === id ? { ...d, pendingApproval } : d))
-    );
-    setSelected((prev) => (prev?._id === id ? { ...prev, pendingApproval } : prev));
-  }
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return developers.filter((d) => {
@@ -760,8 +692,7 @@ export default function DevelopersPanel() {
   const counts = useMemo(
     () => ({
       total: developers.length,
-      active: developers.filter((d) => !d.pendingApproval).length,
-      pending: developers.filter((d) => d.pendingApproval).length,
+      active: developers.length,
     }),
     [developers]
   );
@@ -789,7 +720,6 @@ export default function DevelopersPanel() {
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
           { label: "Active", value: counts.active, color: "text-neutral-700" },
-          { label: "Pending", value: counts.pending, color: "text-amber-700" },
         ].map((s) => (
           <div
             key={s.label}
@@ -827,9 +757,8 @@ export default function DevelopersPanel() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
           >
-            <option value="all">All statuses</option>
+            <option value="all">All</option>
             <option value="active">Active</option>
-            <option value="pending">Pending</option>
           </select>
         </div>
 
@@ -912,7 +841,6 @@ export default function DevelopersPanel() {
         <DeveloperDetailPanel
           developer={selected}
           onClose={() => setSelected(null)}
-          onStatusUpdate={handleStatusUpdate}
         />
       )}
     </div>
