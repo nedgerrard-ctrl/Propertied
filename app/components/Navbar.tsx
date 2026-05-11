@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { motion } from 'framer-motion'
 
 // ─── Link data ────────────────────────────────────────────────────────────────
@@ -28,15 +28,56 @@ function getInitials(name?: string | null) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-function ProfileIcon({ name, dashboardHref }: { name?: string | null; dashboardHref: string }) {
+function ProfileDropdown({ name, dashboardHref }: { name?: string | null; dashboardHref: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
   return (
-    <Link
-      href={dashboardHref}
-      title="My Portal"
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c8a96e] text-[10px] font-bold uppercase tracking-wide text-[#0f0c0a] transition hover:opacity-80"
-    >
-      {getInitials(name)}
-    </Link>
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="true"
+        aria-expanded={open}
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c8a96e] text-[10px] font-bold uppercase tracking-wide text-[#0f0c0a] transition hover:opacity-80"
+      >
+        {getInitials(name)}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-10 z-50 w-40 overflow-hidden rounded-lg border border-white/10 bg-[#1a1512] shadow-xl">
+          <Link
+            href={dashboardHref}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#c8a96e] transition hover:bg-white/5"
+          >
+            <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
+            </svg>
+            My Portal
+          </Link>
+          <div className="mx-4 h-px bg-white/10" />
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-[11px] font-medium uppercase tracking-[0.14em] text-red-400 transition hover:bg-white/5"
+          >
+            <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -214,7 +255,7 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
 
           {isLoggedIn ? (
             <>
-              <ProfileIcon name={session.user?.name} dashboardHref={dashboardHref} />
+              <ProfileDropdown name={session.user?.name} dashboardHref={dashboardHref} />
               <Link
                 href="/contact"
                 className="ml-3 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]"
@@ -325,16 +366,28 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
           </Link>
 
           {isLoggedIn ? (
-            <Link
-              href={dashboardHref}
-              className="flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] text-[#9e8d7a] transition hover:text-white"
-              onClick={closeMobile}
-            >
-              <span>My Portal</span>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#c8a96e] text-[9px] font-bold text-[#0f0c0a]">
-                {getInitials(session.user?.name)}
-              </span>
-            </Link>
+            <>
+              <Link
+                href={dashboardHref}
+                className="flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] border-b border-white/[0.06] text-[#9e8d7a] transition hover:text-white"
+                onClick={closeMobile}
+              >
+                <span>My Portal</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#c8a96e] text-[9px] font-bold text-[#0f0c0a]">
+                  {getInitials(session.user?.name)}
+                </span>
+              </Link>
+              <button
+                onClick={() => { closeMobile(); signOut({ callbackUrl: '/login' }) }}
+                className="flex w-full items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] text-red-400 transition hover:text-red-300"
+              >
+                <span>Logout</span>
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </button>
+            </>
           ) : (
             <Link
               href="/login"
