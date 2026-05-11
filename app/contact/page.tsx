@@ -33,7 +33,7 @@ const initialFormData: ContactFormData = {
 
 function ContactTabs() {
   return (
-    <div className="mt-24 flex flex-wrap justify-center gap-4 px-6">
+    <div className="bg-[#f6f2eb] pt-24 pb-6 flex flex-wrap justify-center gap-4 px-6">
       <Link
         href="/contact"
         className="min-w-[180px] border border-[#5f5245] bg-[#2f2a24] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
