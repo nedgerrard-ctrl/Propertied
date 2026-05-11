@@ -637,15 +637,9 @@ function DeveloperDetailPanel({
                       <option>Ownership</option>
                       <option>Financial</option>
                     </select>
-                    <label className="flex items-center gap-2 cursor-pointer select-none text-[13px] text-neutral-700">
-                      <input
-                        type="checkbox"
-                        checked={uploadRequiresSignature}
-                        onChange={(e) => setUploadRequiresSignature(e.target.checked)}
-                        className="h-4 w-4 rounded border-neutral-300 accent-neutral-800"
-                      />
-                      Requires signature
-                    </label>
+                    <p className="text-[12px] text-neutral-500">
+                      For documents requiring a signature, use <span className="font-medium text-neutral-700">Send via DocuSign (eSignature)</span>.
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <label className="flex-1 cursor-pointer rounded border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-500 truncate hover:border-neutral-400 transition">

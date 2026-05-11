@@ -414,15 +414,9 @@ export default function DocumentsPanel() {
                 </select>
               </div>
               <div className="pt-5">
-                <label className="flex cursor-pointer items-center gap-2 select-none text-[13px] text-neutral-700">
-                  <input
-                    type="checkbox"
-                    checked={uploadRequiresSignature}
-                    onChange={(e) => setUploadRequiresSignature(e.target.checked)}
-                    className="h-4 w-4 rounded border-neutral-300 accent-neutral-800"
-                  />
-                  Requires client signature
-                </label>
+                <p className="text-[12px] text-neutral-500">
+                  For documents requiring a signature, use <span className="font-medium text-neutral-700">Send via DocuSign (eSignature)</span>.
+                </p>
               </div>
             </div>
 
