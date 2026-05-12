@@ -1,8 +1,18 @@
+// -----------------------------------------------------------------------------
+// seed-admin.js
+// Creates the first admin account in the MongoDB database.
+// Run once during initial deployment: node scripts/seed-admin.js
+// Requires: .env.local with MONGODB_URI set
+// -----------------------------------------------------------------------------
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const readline = require("readline");
 require("dotenv").config({ path: ".env.local" });
 
+// --- Minimal User schema (mirrors models/User.ts) ---
+// Only the fields needed to create an admin account are defined here
+// so this script has no dependency on the compiled TypeScript models.
 const userSchema = new mongoose.Schema(
   {
     name: String,
@@ -26,6 +36,8 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
+// --- Validation ---
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateEmail(email) {
@@ -34,6 +46,7 @@ function validateEmail(email) {
   return null;
 }
 
+// Password must meet all five rules to match the app's auth requirements
 function validatePassword(password) {
   if (!password) return "Password is required.";
   if (password.length < 8) return "Password must be at least 8 characters.";
@@ -44,6 +57,9 @@ function validatePassword(password) {
   return null;
 }
 
+// --- Input helpers ---
+
+// Prompts the user for text input and returns the answer
 function ask(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => {
@@ -54,9 +70,9 @@ function ask(question) {
   });
 }
 
+// Prompts for a password without echoing typed characters to the terminal
 function askPassword(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  // Suppress echoing of typed characters while still showing the question
   rl._writeToOutput = function (str) {
     if (str === question) rl.output.write(str);
   };
@@ -69,6 +85,8 @@ function askPassword(question) {
   });
 }
 
+// --- Main ---
+
 async function seed() {
   console.log("\n--- Create Admin Account ---\n");
   console.log("Password rules:");
@@ -76,6 +94,7 @@ async function seed() {
   console.log("  - Include uppercase, lowercase, and a number");
   console.log("  - Include at least 1 special character\n");
 
+  // Keep prompting until a valid email is entered
   let email;
   while (true) {
     const input = await ask("Admin email: ");
@@ -88,6 +107,7 @@ async function seed() {
     }
   }
 
+  // Keep prompting until a valid password is entered
   let password;
   while (true) {
     const input = await askPassword("Admin password: ");
@@ -100,15 +120,18 @@ async function seed() {
     }
   }
 
+  // Connect to MongoDB using the URI from .env.local
   console.log("\nConnecting to database...");
   await mongoose.connect(process.env.MONGODB_URI, { dbName: "ppm" });
 
+  // Prevent duplicate admin accounts with the same email
   const existing = await User.findOne({ email });
   if (existing) {
     console.log("An admin with that email already exists.");
     process.exit(0);
   }
 
+  // Hash the password before storing — never store plain-text passwords
   const passwordHash = await bcrypt.hash(password, 10);
   await User.create({ name: "PPM Admin", email, passwordHash, role: "admin" });
 
