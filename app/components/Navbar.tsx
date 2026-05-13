@@ -7,10 +7,14 @@ import { motion } from 'framer-motion'
 
 // ─── Link data ────────────────────────────────────────────────────────────────
 
+const BUYERS_DROPDOWN = [
+  { href: '/buyers/investors',       label: 'Investors' },
+  { href: '/buyers/owner-occupiers', label: 'Owner-Occupiers' },
+]
+
 const ALL_PRIMARY_LINKS = [
   { href: '/',            label: 'Home',         slug: 'landing' },
   { href: '/about',       label: 'About',        slug: 'about' },
-  { href: '/buyers',      label: 'Buyers',       slug: 'buyer' },
   { href: '/developer',   label: 'Developers',   slug: 'developer' },
   { href: '/blog',        label: 'Blog',         slug: null },
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
@@ -92,8 +96,11 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
   const [scrolled,     setScrolled]     = useState(false)
   const [mobileOpen,   setMobileOpen]   = useState(false)
   const [visibleSlugs, setVisibleSlugs] = useState<string[] | null>(null)
+  const [buyersOpen,   setBuyersOpen]   = useState(false)
+  const [mobileBuyersOpen, setMobileBuyersOpen] = useState(false)
 
   const mobileOpenRef = useRef(false)
+  const buyersRef     = useRef<HTMLDivElement>(null)
 
   const isLoggedIn = !!session?.user
   const dashboardHref =
@@ -128,6 +135,19 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // ── Buyers dropdown close-on-outside-click ───────────────────────────────
+
+  useEffect(() => {
+    if (!buyersOpen) return
+    function onClickOutside(e: MouseEvent) {
+      if (buyersRef.current && !buyersRef.current.contains(e.target as Node)) {
+        setBuyersOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [buyersOpen])
+
   // ── CMS page visibility ───────────────────────────────────────────────────
 
   useEffect(() => {
@@ -153,6 +173,9 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
   const PRIMARY_LINKS = visibleSlugs === null
     ? ALL_PRIMARY_LINKS
     : ALL_PRIMARY_LINKS.filter((l) => l.slug === null || visibleSlugs.includes(l.slug))
+
+  const showBuyers = visibleSlugs === null || visibleSlugs.includes('buyer')
+  const buyersActive = pathname.startsWith('/buyers')
 
   // ─── Palette tokens ───────────────────────────────────────────────────────
 
@@ -228,7 +251,69 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
           scrolled ? 'flex-1 justify-center' : '',
         ].join(' ')}>
 
-          {PRIMARY_LINKS.map((link) => {
+          {/* Home, About */}
+          {PRIMARY_LINKS.slice(0, 2).map((link) => {
+            const active = isActive(link.href)
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={[
+                  'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
+                  active ? linkActive : linkBase,
+                ].join(' ')}
+              >
+                {link.label}
+                {active && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
+              </Link>
+            )
+          })}
+
+          {/* Buyers dropdown */}
+          {showBuyers && (
+            <div ref={buyersRef} className="relative">
+              <button
+                onClick={() => setBuyersOpen((v) => !v)}
+                className={[
+                  'relative flex items-center gap-1 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
+                  buyersActive ? linkActive : linkBase,
+                ].join(' ')}
+              >
+                Buyers
+                <svg
+                  className={`h-2.5 w-2.5 transition-transform duration-200 ${buyersOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 10 6" fill="currentColor"
+                >
+                  <path d="M0 0l5 6 5-6H0z" />
+                </svg>
+                {buyersActive && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
+              </button>
+
+              {buyersOpen && (
+                <div className={`absolute left-0 top-full z-50 mt-1 min-w-[180px] overflow-hidden border shadow-xl ${scrolled ? 'border-gray-200 bg-white' : 'border-white/10 bg-[#1a1512]'}`}>
+                  {BUYERS_DROPDOWN.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setBuyersOpen(false)}
+                      className={[
+                        'flex items-center px-4 py-3 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors',
+                        scrolled
+                          ? 'text-[#4a3d35] hover:bg-neutral-50 hover:text-[#0f0c0a]'
+                          : 'text-white/70 hover:bg-white/5 hover:text-white',
+                        pathname === item.href ? (scrolled ? 'text-[#0f0c0a] font-semibold' : 'text-white font-semibold') : '',
+                      ].join(' ')}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Developers, Blog, Testimonials */}
+          {PRIMARY_LINKS.slice(2).map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
             return (
@@ -244,9 +329,7 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
                 aria-disabled={placeholder}
               >
                 {link.label}
-                {active && (
-                  <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />
-                )}
+                {active && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
               </Link>
             )
           })}
@@ -328,7 +411,68 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
         <div className="h-px bg-gradient-to-r from-[#c8a96e] via-[#c8a96e]/40 to-transparent" />
 
         <nav className="flex flex-col px-8 pb-4 pt-2 bg-[#0f0c0a]">
-          {PRIMARY_LINKS.map((link) => {
+          {/* Home, About */}
+          {PRIMARY_LINKS.slice(0, 2).map((link) => {
+            const active = isActive(link.href)
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={[
+                  'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
+                  'border-b border-white/[0.06] transition',
+                  active ? 'text-white' : 'text-[#9e8d7a]',
+                ].join(' ')}
+                onClick={closeMobile}
+              >
+                <span>{link.label}</span>
+                {active && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+              </Link>
+            )
+          })}
+
+          {/* Buyers expandable */}
+          {showBuyers && (
+            <div className="border-b border-white/[0.06]">
+              <button
+                onClick={() => setMobileBuyersOpen((v) => !v)}
+                className={[
+                  'flex w-full items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em] transition',
+                  buyersActive ? 'text-white' : 'text-[#9e8d7a]',
+                ].join(' ')}
+              >
+                <span>Buyers</span>
+                <svg
+                  className={`h-3 w-3 transition-transform duration-200 ${mobileBuyersOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 10 6" fill="currentColor"
+                >
+                  <path d="M0 0l5 6 5-6H0z" />
+                </svg>
+              </button>
+              {mobileBuyersOpen && (
+                <div className="mb-2 ml-3 flex flex-col gap-0.5">
+                  {BUYERS_DROPDOWN.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => { setMobileBuyersOpen(false); closeMobile() }}
+                      className={[
+                        'flex items-center justify-between py-3 pl-3 text-[11px] font-medium uppercase tracking-[0.16em] transition',
+                        'border-l border-[#c8a96e]/30',
+                        pathname === item.href ? 'text-[#c8a96e]' : 'text-[#6b5e54] hover:text-white',
+                      ].join(' ')}
+                    >
+                      <span>{item.label}</span>
+                      {pathname === item.href && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Developers, Blog, Testimonials */}
+          {PRIMARY_LINKS.slice(2).map((link) => {
             const active      = isActive(link.href)
             const placeholder = link.href === '#'
             return (

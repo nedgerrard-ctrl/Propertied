@@ -38,7 +38,7 @@ const CMS_EDIT_LINKS: Record<string, string> = {
 const CMS_PREVIEW_LINKS: Record<string, string> = {
   landing:     "/",
   about:       "/about",
-  buyer:       "/buyers",
+  buyer:       "/buyers/investors",
   developer:   "/developer",
   testimonial: "/testimonial",
 };
@@ -249,15 +249,67 @@ export default function PagesList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
-                {cmsPages.map((page) => (
-                  <tr key={page.slug} className={`transition ${!page.published ? "bg-neutral-50/80" : ""}`}>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-neutral-900">{page.name}</p>
-                      <p className="mt-1 text-[11px] text-neutral-400">
-                        /{page.slug === "landing" ? "" : page.slug}
-                      </p>
-                    </td>
+                {cmsPages.flatMap((page) => {
+                  const rowClass = `transition ${!page.published ? "bg-neutral-50/80" : ""}`;
 
+                  const statusCell = (
+                    <td className="px-6 py-4">
+                      {page.published ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[11px] font-semibold text-green-700">
+                          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                          Live
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                          <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
+                          Hidden
+                        </span>
+                      )}
+                    </td>
+                  );
+
+                  const sharedActions = (previewHref: string, editHref?: string) => (
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <a
+                          href={previewHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded border border-neutral-200 px-3 py-1.5 text-[11px] font-medium text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          Preview ↗
+                        </a>
+                        {(editHref ?? CMS_EDIT_LINKS[page.slug]) && (
+                          <Link
+                            href={editHref ?? CMS_EDIT_LINKS[page.slug]}
+                            className="rounded border border-[#5f5245] bg-[#2f2a24] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#1f1a17]"
+                          >
+                            Edit
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => cmsTogglePublish(page)}
+                          disabled={cmsTogglingSlug === page.slug}
+                          className={`rounded px-3 py-1.5 text-[11px] font-medium transition disabled:opacity-50 ${
+                            page.published
+                              ? "border border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+                              : "border border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                          }`}
+                        >
+                          {cmsTogglingSlug === page.slug ? "…" : page.published ? "Unpublish" : "Publish"}
+                        </button>
+                        <button
+                          onClick={() => cmsArchivePage(page)}
+                          disabled={cmsArchivingSlug === page.slug}
+                          className="rounded border border-orange-200 bg-orange-50 px-3 py-1.5 text-[11px] font-medium text-orange-600 transition hover:bg-orange-100 disabled:opacity-50"
+                        >
+                          {cmsArchivingSlug === page.slug ? "…" : "Archive"}
+                        </button>
+                      </div>
+                    </td>
+                  );
+
+                  const descCell = (
                     <td className="max-w-[200px] px-6 py-4">
                       {editingDesc === page.slug ? (
                         <div className="space-y-2">
@@ -299,65 +351,56 @@ export default function PagesList() {
                         </button>
                       )}
                     </td>
+                  );
 
-                    <td className="whitespace-nowrap px-6 py-4 text-[12px] text-neutral-500">
-                      {formatDate(page.contentUpdatedAt)}
-                    </td>
+                  // Buyers slug → two rows for Investors and Owner-Occupiers
+                  if (page.slug === "buyer") {
+                    return [
+                      <tr key="buyer-investors" className={rowClass}>
+                        <td className="px-6 py-4">
+                          <p className="font-medium text-neutral-900">Investors</p>
+                          <p className="mt-1 text-[11px] text-neutral-400">/buyers/investors</p>
+                        </td>
+                        {descCell}
+                        <td className="whitespace-nowrap px-6 py-4 text-[12px] text-neutral-500">
+                          {formatDate(page.contentUpdatedAt)}
+                        </td>
+                        {statusCell}
+                        {sharedActions("/buyers/investors", "/admin/dashboard/content/buyer/investors")}
+                      </tr>,
+                      <tr key="buyer-owner-occupiers" className={rowClass}>
+                        <td className="px-6 py-4">
+                          <p className="font-medium text-neutral-900">Owner-Occupiers</p>
+                          <p className="mt-1 text-[11px] text-neutral-400">/buyers/owner-occupiers</p>
+                        </td>
+                        {descCell}
+                        <td className="whitespace-nowrap px-6 py-4 text-[12px] text-neutral-500">
+                          {formatDate(page.contentUpdatedAt)}
+                        </td>
+                        {statusCell}
+                        {sharedActions("/buyers/owner-occupiers", "/admin/dashboard/content/buyer/owner-occupiers")}
+                      </tr>,
+                    ];
+                  }
 
-                    <td className="px-6 py-4">
-                      {page.published ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[11px] font-semibold text-green-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                          Live
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-500">
-                          <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
-                          Hidden
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <a
-                          href={CMS_PREVIEW_LINKS[page.slug] ?? `/${page.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded border border-neutral-200 px-3 py-1.5 text-[11px] font-medium text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-900"
-                        >
-                          Preview ↗
-                        </a>
-                        {CMS_EDIT_LINKS[page.slug] && (
-                          <Link
-                            href={CMS_EDIT_LINKS[page.slug]}
-                            className="rounded border border-[#5f5245] bg-[#2f2a24] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#1f1a17]"
-                          >
-                            Edit
-                          </Link>
-                        )}
-                        <button
-                          onClick={() => cmsTogglePublish(page)}
-                          disabled={cmsTogglingSlug === page.slug}
-                          className={`rounded px-3 py-1.5 text-[11px] font-medium transition disabled:opacity-50 ${
-                            page.published
-                              ? "border border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
-                              : "border border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
-                          }`}
-                        >
-                          {cmsTogglingSlug === page.slug ? "…" : page.published ? "Unpublish" : "Publish"}
-                        </button>
-                        <button
-                          onClick={() => cmsArchivePage(page)}
-                          disabled={cmsArchivingSlug === page.slug}
-                          className="rounded border border-orange-200 bg-orange-50 px-3 py-1.5 text-[11px] font-medium text-orange-600 transition hover:bg-orange-100 disabled:opacity-50"
-                        >
-                          {cmsArchivingSlug === page.slug ? "…" : "Archive"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                  // Default: single row
+                  return [
+                    <tr key={page.slug} className={rowClass}>
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-neutral-900">{page.name}</p>
+                        <p className="mt-1 text-[11px] text-neutral-400">
+                          /{page.slug === "landing" ? "" : page.slug}
+                        </p>
+                      </td>
+                      {descCell}
+                      <td className="whitespace-nowrap px-6 py-4 text-[12px] text-neutral-500">
+                        {formatDate(page.contentUpdatedAt)}
+                      </td>
+                      {statusCell}
+                      {sharedActions(CMS_PREVIEW_LINKS[page.slug] ?? `/${page.slug}`)}
+                    </tr>,
+                  ];
+                })}
               </tbody>
             </table>
           )}

@@ -221,9 +221,10 @@ function ProjectDetailPanel({ project, onClose }: { project: DynamicProject; onC
 interface BuyersPageProps {
   content: BuyerContentData
   projects: DynamicProject[]
+  variant?: 'investors' | 'owner-occupiers'
 }
 
-export default function BuyersPage({ content, projects }: BuyersPageProps) {
+export default function BuyersPage({ content, projects, variant }: BuyersPageProps) {
   const [selectedProject, setSelectedProject] = useState<DynamicProject | null>(null)
 
   const stats = [
@@ -276,7 +277,7 @@ export default function BuyersPage({ content, projects }: BuyersPageProps) {
               transition={{ duration: 1 }}
             >
               <p className="mb-8 text-[10px] uppercase tracking-[0.36em] text-[#6b5e54]">
-                For Buyers
+                {variant === 'investors' ? 'For Investors' : variant === 'owner-occupiers' ? 'For Owner-Occupiers' : 'For Buyers'}
               </p>
               <h1 className="font-[family-name:var(--font-cormorant)] text-5xl font-light leading-[1.1] text-white md:text-7xl">
                 {content.heroLine1}
@@ -325,68 +326,72 @@ export default function BuyersPage({ content, projects }: BuyersPageProps) {
             {content.tailoredHeading}
           </motion.h2>
 
-          <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.85 }}
-            >
-              <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
-                  {content.investorsHeading}
-                </h3>
-                <span className="tabular-nums text-sm text-[#8a7b6d]">01</span>
-              </div>
-              <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
-                {content.investorsBody}
-              </p>
-              <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
-                {investorBullets.map((item) => (
-                  <li key={item} className="flex gap-4">
-                    <span className="shrink-0 text-[#c8a96e]">—</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/contact/buyers-investors"
-                className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+          <div className={`grid grid-cols-1 gap-20 ${!variant ? 'md:grid-cols-2' : 'max-w-2xl'}`}>
+            {(!variant || variant === 'investors') && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.85 }}
               >
-                Enquire as Investor
-              </Link>
-            </motion.div>
+                <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
+                  <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
+                    {content.investorsHeading}
+                  </h3>
+                  <span className="tabular-nums text-sm text-[#8a7b6d]">01</span>
+                </div>
+                <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
+                  {content.investorsBody}
+                </p>
+                <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                  {investorBullets.map((item) => (
+                    <li key={item} className="flex gap-4">
+                      <span className="shrink-0 text-[#c8a96e]">—</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/contact/buyers-investors"
+                  className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                >
+                  Enquire as Investor
+                </Link>
+              </motion.div>
+            )}
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.85, delay: 0.1 }}
-            >
-              <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
-                  {content.ownerHeading}
-                </h3>
-                <span className="tabular-nums text-sm text-[#8a7b6d]">02</span>
-              </div>
-              <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
-                {content.ownerBody}
-              </p>
-              <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
-                {ownerBullets.map((item) => (
-                  <li key={item} className="flex gap-4">
-                    <span className="shrink-0 text-[#c8a96e]">—</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/contact/buyers-investors"
-                className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+            {(!variant || variant === 'owner-occupiers') && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.85, delay: 0.1 }}
               >
-                Enquire as Owner-Occupier
-              </Link>
-            </motion.div>
+                <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
+                  <h3 className="font-[family-name:var(--font-cormorant)] text-3xl font-light text-[#1f1a17]">
+                    {content.ownerHeading}
+                  </h3>
+                  <span className="tabular-nums text-sm text-[#8a7b6d]">02</span>
+                </div>
+                <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
+                  {content.ownerBody}
+                </p>
+                <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                  {ownerBullets.map((item) => (
+                    <li key={item} className="flex gap-4">
+                      <span className="shrink-0 text-[#c8a96e]">—</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/contact/buyers-investors"
+                  className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                >
+                  Enquire as Owner-Occupier
+                </Link>
+              </motion.div>
+            )}
           </div>
         </div>
       </section>

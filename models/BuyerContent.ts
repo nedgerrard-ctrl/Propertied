@@ -2,6 +2,7 @@ import { Schema, model, models } from "mongoose";
 
 const BuyerContentSchema = new Schema(
   {
+    section:          { type: String, enum: ["investors", "owner-occupiers"], unique: true, sparse: true },
     heroLine1:        { type: String, default: "" },
     heroAccent:       { type: String, default: "" },
     heroLine3:        { type: String, default: "" },
@@ -36,4 +37,6 @@ const BuyerContentSchema = new Schema(
   { timestamps: true }
 );
 
-export default models.BuyerContent || model("BuyerContent", BuyerContentSchema);
+// Always recompile so schema changes (like adding `section`) are picked up without a full server restart
+delete (models as Record<string, unknown>)["BuyerContent"];
+export default model("BuyerContent", BuyerContentSchema);
