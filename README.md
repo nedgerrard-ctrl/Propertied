@@ -1,131 +1,497 @@
-# team219-app_fit3048
+# Property Project Marketing (PPM)
 
+A real estate marketing and client management platform. Agents use it to manage clients, documents, and enquiries. Clients use it to view their documents and browse properties.
 
+**Stack:** Next.js · TypeScript · MongoDB · Tailwind CSS · Netlify
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
+
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [How the App Works](#how-the-app-works)
+- [Environment Variables](#environment-variables)
+- [Git Conventions](#git-conventions)
+- [Common Tasks](#common-tasks)
+- [Troubleshooting](#troubleshooting)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### What you need installed first
+
+| Tool | Version | How to get it |
+|---|---|---|
+| Node.js | 20 or newer | https://nodejs.org |
+| pnpm | 10.32.1 | Run: `npm install -g pnpm@10.32.1` |
+| Git | Latest | https://git-scm.com |
+
+> **Why pnpm and not npm?** This project uses a patch file to fix a bug in one of its dependencies (`docusign-esign`). The patch only works with pnpm. Using `npm install` will break the DocuSign feature.
+
+### Step 1 — Get the code
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone <repository-url> ppm
+cd ppm
+```
+
+### Step 2 — Install dependencies
+
+```bash
+pnpm install
+```
+
+### Step 3 — Set up your environment file
+
+Create a file called `.env.local` in the root of the project. This file holds secret credentials and is **never committed to git**.
+
+```env
+# ── App ───────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL=http://localhost:3000/
+
+# ── Authentication ─────────────────────────────────────────
+# Generate a random secret with: openssl rand -base64 32
+AUTH_SECRET=your-random-secret-here
+AUTH_TRUST_HOST=true
+
+# ── Database ───────────────────────────────────────────────
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/
+
+# ── Email (Resend) ─────────────────────────────────────────
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+EMAIL_FROM=Property Project Marketing <noreply@yourdomain.com>
+
+# ── Image Hosting (Cloudinary) ─────────────────────────────
+CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+
+# ── DocuSign eSignature ────────────────────────────────────
+DOCUSIGN_INTEGRATION_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_USER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_ACCOUNT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DOCUSIGN_OAUTH_BASE_PATH=account-d.docusign.com
+DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
+DOCUSIGN_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nMIIE...\n-----END RSA PRIVATE KEY-----
+
+# ── Webflow CMS ────────────────────────────────────────────
+WEBFLOW_API_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+WEBFLOW_COLLECTION_ID=xxxxxxxxxxxxxxxxxxxxxxxx
+WEBFLOW_SITE_ID=xxxxxxxxxxxxxxxxxxxxxxxx
+
+# ── AgentBox CRM ───────────────────────────────────────────
+AGENTBOX_API_KEY=your_agentbox_api_key
+AGENTBOX_CLIENT_ID=your_agentbox_client_id
+```
+
+Where do these credentials come from? See the [External Services](#external-services) section below.
+
+### Step 4 — Start the app
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Step 5 — Create the first admin account
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The database starts completely empty. You need to create an admin user before you can use the admin dashboard.
 
-## Learn More
+**Option A — Use the signup page, then promote in the database:**
+1. Go to http://localhost:3000/signup and create an account
+2. Open MongoDB Atlas, find your user in the `users` collection
+3. Change `role` from `"client"` to `"admin"` and save
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://git.infotech.monash.edu/UGIE/ugie-2025/team219/team219-app_fit3048.git
-git branch -M main
-git push -uf origin main
+**Option B — Update directly in the MongoDB Atlas shell:**
+```js
+db.users.updateOne(
+  { email: "your@email.com" },
+  { $set: { role: "admin" } }
+)
 ```
 
-## Integrate with your tools
+The admin dashboard is at http://localhost:3000/admin/dashboard.
 
-- [ ] [Set up project integrations](https://git.infotech.monash.edu/UGIE/ugie-2025/team219/team219-app_fit3048/-/settings/integrations)
+---
 
-## Collaborate with your team
+## Project Structure
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Here is what every folder and important file does. Read this before diving into any specific file.
 
-## Test and Deploy
+```
+ppm/
+│
+├── app/                        # Everything Next.js renders or serves lives here
+│   │
+│   │   ── Public pages (no login needed) ──────────────────────────────────
+│   ├── page.tsx                # Home / landing page  →  /
+│   ├── about/                  # About the company  →  /about
+│   ├── blog/                   # Blog list  →  /blog
+│   │   └── [slug]/             # Individual blog post  →  /blog/some-post
+│   ├── buyers/                 # Buyers information  →  /buyers
+│   ├── developers/             # Developers landing  →  /developers
+│   ├── login/                  # Login page  →  /login
+│   ├── signup/                 # Register a new account  →  /signup
+│   ├── forgot-password/        # Request a password reset email  →  /forgot-password
+│   ├── reset-password/         # Set a new password (via emailed link)
+│   ├── access-denied/          # Shown when a user tries a page above their role
+│   ├── account-rejected/       # Shown when an account has been rejected by admin
+│   └── contact/                # Contact forms (general, buyer, developer)
+│
+│       ── Admin area (login required + role must be "admin") ──────────────
+├── admin/dashboard/
+│   ├── page.tsx                # Main dashboard with tabs  →  /admin/dashboard
+│   ├── blogs/                  # Write and publish blog posts
+│   ├── pages/                  # Manage CMS pages and sync them to Webflow
+│   ├── content/                # Edit the text on public pages (about, landing, etc.)
+│   ├── clients-panel/          # View and approve/reject buyer accounts
+│   ├── developers-panel/       # View and manage developer accounts
+│   ├── documents-panel/        # Upload files and assign them to users
+│   ├── enquiries-panel/        # See all incoming contact enquiries
+│   ├── esignature-panel/       # Send documents for digital signature via DocuSign
+│   └── stats-panel/            # Charts and usage numbers
+│
+│       ── Client area (login required) ──────────────────────────────────
+├── client/
+│   ├── dashboard/              # Client home screen
+│   ├── documents/              # Documents the admin has shared with the client
+│   ├── enquiries/              # Client's own enquiries
+│   ├── profile/                # Edit personal details
+│   ├── portfolio/              # Browse available properties
+│   └── vip/                    # Extra section for approved "existing clients" only
+│
+│       ── Developer area (login required + must be a developer-type client) ──
+├── developer/
+│   ├── page.tsx                # Public developer landing  →  /developer
+│   ├── dashboard/              # Developer dashboard (private)
+│   └── documents/              # Developer documents (private)
+│
+│       ── API endpoints ─────────────────────────────────────────────────
+├── api/
+│   ├── auth/                   # Login, signup, forgot/reset password, session handling
+│   ├── admin/                  # All admin actions (CRUD for blogs, clients, documents, etc.)
+│   ├── client/                 # Client's own data (documents, enquiries, profile)
+│   ├── developer/              # Developer's own data
+│   ├── blogs/                  # Public blog data (no auth needed)
+│   ├── projects/               # Public property listings (no auth needed)
+│   ├── contact/                # Handles contact form submissions
+│   └── public/                 # Public CMS page content
+│
+│       ── Shared components ───────────────────────────────────────────────
+├── components/
+│   ├── ui/                     # Ready-made UI pieces (Button, Input, Card…)
+│   │                           # Generated by shadcn — run: npx shadcn add <name>
+│   ├── globe/                  # The interactive 3D globe on the landing page
+│   ├── Navbar.tsx              # The navigation bar shown on every page
+│   ├── Footer.tsx              # The footer shown on every page
+│   ├── HeroCarousel.tsx        # Sliding image banner
+│   ├── TestimonialCard.tsx     # Displays one testimonial
+│   ├── SpotlightCard.tsx       # Card with a glowing hover effect
+│   ├── Waves.tsx               # Animated wave background
+│   └── Threads.tsx             # Animated strand/particle background
+│
+├── layout.tsx                  # The outer HTML shell — adds Navbar and Footer to every page
+├── globals.css                 # Global styles and Tailwind imports
+└── middleware.ts               # Controls which pages require login/admin
+│                               # ← Edit this file to add new protected routes
+│
+├── models/                     # Database table definitions (MongoDB uses "collections")
+│   ├── User.ts                 # Stores all user accounts (both admin and client)
+│   ├── Project.ts              # Real estate properties listed in the portfolio
+│   ├── Enquiry.ts              # Contact form submissions from buyers and developers
+│   ├── BlogPost.ts             # Blog articles
+│   ├── Page.ts                 # CMS pages that can be synced to Webflow
+│   ├── Testimonial.ts          # Client testimonials
+│   ├── AboutContent.ts         # Editable text for the About page
+│   ├── BuyerContent.ts         # Editable text for the Buyers page
+│   ├── DeveloperContent.ts     # Editable text for the Developers page
+│   ├── LandingContent.ts       # Editable text for the Landing page
+│   └── TestimonialContent.ts   # Testimonial section configuration
+│
+├── lib/                        # Helper files — logic that is shared across route handlers
+│   ├── mongodb.ts              # Connects to the database (call connectDB() first in every route)
+│   ├── email.ts                # Sends emails using the Resend service
+│   ├── email-templates.ts      # The actual HTML content of emails (e.g. password reset)
+│   ├── cloudinary.ts           # Connects to Cloudinary for image/file storage
+│   ├── docusign.ts             # Sends documents for digital signature via DocuSign
+│   ├── webflow-admin.ts        # Syncs CMS pages to the Webflow website
+│   ├── agentbox.ts             # Sends enquiries to the AgentBox CRM system
+│   ├── password-validation.ts  # Checks that a password is strong enough
+│   └── utils.ts                # Small helpers used everywhere (e.g. merging CSS class names)
+│
+├── public/                     # Images and icons served directly (e.g. /logo.png)
+├── patches/                    # Auto-applied fixes for third-party library bugs
+├── auth.ts                     # Configures login — JWT sessions, credentials provider
+├── next.config.ts              # Next.js settings (image domains, external packages)
+├── netlify.toml                # Deployment settings for Netlify
+├── package.json                # Lists all dependencies and available scripts
+├── pnpm-lock.yaml              # Exact versions of every package — always commit this file
+└── .env.local                  # Your secret credentials — NEVER commit this file
+```
 
-Use the built-in continuous integration in GitLab.
+---
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## How the App Works
 
-***
+### User roles and what they can access
 
-# Editing this README
+The app has two roles: `admin` and `client`. Within the `client` role there are different types (`buyer_investor`, `developer`, `existing_client`) that control which sections a client can see.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| Who | Can access |
+|---|---|
+| Anyone (not logged in) | Public pages, blog, contact forms, login/signup |
+| Any logged-in user | `/client/*` — their own dashboard, documents, enquiries |
+| Developer-type clients | `/developer/*` — developer dashboard and documents |
+| Existing clients (approved) | `/client/vip/*` — VIP section |
+| Admin | Everything above, plus `/admin/*` |
 
-## Suggestions for a good README
+### How login works
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+1. User submits email + password at `/login`
+2. The server checks the password against the stored bcrypt hash in MongoDB
+3. If correct, a signed JWT (a secure token) is saved in an HTTP-only cookie
+4. The cookie expires after 1 hour — the user must log in again after that
+5. Every protected page checks the cookie before loading (`app/middleware.ts`)
 
-## Name
-Choose a self-explaining name for your project.
+### How the database is accessed
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+The database is MongoDB, hosted on MongoDB Atlas (cloud). All the database table definitions ("schemas") are in the `models/` folder.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+To query the database in an API route:
+```ts
+import { connectDB } from "@/lib/mongodb";
+import User from "@/models/User";
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+export async function GET() {
+  await connectDB();              // always call this first
+  const users = await User.find();
+  return Response.json(users);
+}
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+**Never import `connectDB` in a component file** — it only works in server-side route handlers.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### How file uploads work
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+When an admin uploads a file, it goes to Cloudinary (a cloud file storage service), not to the server. The server just stores the file's URL in MongoDB. That URL is what gets displayed to users.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### How the Webflow sync works
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+The client's public marketing website runs on Webflow. When an admin creates or edits a CMS page in the admin dashboard, they can click "Sync to Webflow" to push that content to the Webflow site automatically. The code for this is in `lib/webflow-admin.ts`.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+---
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## External Services
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+The app connects to several external services. Each one needs its own account and API key (stored in `.env.local`).
 
-## License
-For open source projects, say how it is licensed.
+| Service | What it does | Sign up at |
+|---|---|---|
+| **MongoDB Atlas** | Hosts the database | https://cloud.mongodb.com |
+| **Resend** | Sends password reset emails | https://resend.com |
+| **Cloudinary** | Stores uploaded images and documents | https://cloudinary.com |
+| **DocuSign** | Sends documents for digital signature | https://developers.docusign.com |
+| **Webflow** | The public marketing website (CMS sync) | https://webflow.com |
+| **AgentBox** | Real estate CRM — receives enquiry leads | https://agentboxcrm.com.au |
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+> **Important:** Never paste real API keys into code files or commit them to git. Always keep them in `.env.local` only.
+
+---
+
+## Git Conventions
+
+These rules keep the commit history readable for everyone on the team, including future developers who weren't here when the code was written.
+
+### Branch names
+
+Use a short prefix that describes the type of work, followed by a hyphenated description.
+
+| Type of work | Pattern | Example |
+|---|---|---|
+| New feature | `feature/what-you-built` | `feature/developer-portal` |
+| Bug fix | `fix/what-was-broken` | `fix/pdf-route-404` |
+| Refactoring code | `refactor/what-changed` | `refactor/navbar-layout` |
+| Visual / styling | `ui/what-changed` | `ui/admin-tab-colours` |
+| Urgent production fix | `hotfix/what-was-broken` | `hotfix/login-loop` |
+| Documentation | `docs/what-you-wrote` | `docs/api-setup-guide` |
+
+**Rules:**
+- Lowercase letters and hyphens only
+- Keep it short — 2 to 4 words
+- Branch from `main` and merge back into `main` via a pull/merge request
+- Delete your branch after it has been merged
+
+---
+
+### Commit messages
+
+Every commit needs a **type prefix**, followed by a colon, followed by a short description.
+
+```
+<type>: <what you did, written as a command>
+```
+
+**Types:**
+
+| Prefix | Use when… |
+|---|---|
+| `feat:` | You added something new |
+| `fix:` | You fixed a bug |
+| `refactor:` | You reorganised code without changing how it works |
+| `style:` | You changed colours, spacing, or CSS only |
+| `docs:` | You updated documentation or comments |
+| `chore:` | You updated a config file or dependency |
+
+**The description:**
+- Write it as a command — "add login page", not "added login page" or "adding login page"
+- Keep it under 50 characters
+- No capital letter at the start, no full stop at the end
+
+**Good commit messages:**
+```
+feat: add DocuSign eSignature panel to admin dashboard
+fix: resolve pdf route 404 on Netlify deploy
+refactor: extract agentbox enquiry logic into lib/agentbox.ts
+style: update admin tab strip background colour
+chore: update pnpm lockfile after dependency change
+docs: add environment variable reference to README
+```
+
+**Bad commit messages:**
+```
+fix things           ← too vague
+update               ← no description
+Added login page     ← wrong tense, capital letter
+WIP                  ← never commit "work in progress" to main
+more changes for netlify   ← still too vague
+```
+
+**When you need to explain more**, add a blank line after the summary and write a longer explanation below:
+```
+fix: prevent duplicate MongoDB connections in development
+
+Next.js hot-reload creates a new module instance on every file
+save. Without caching the connection, each save opened a new
+connection to Atlas and eventually hit the connection limit.
+```
+
+---
+
+### Naming things in code
+
+| What | Style | Example |
+|---|---|---|
+| React component files | PascalCase | `HeroCarousel.tsx` |
+| Pages and API routes | lowercase (Next.js requires this) | `page.tsx`, `route.ts` |
+| Helper / utility files | camelCase or kebab-case | `agentbox.ts`, `email-templates.ts` |
+| Database model files | PascalCase matching the collection | `User.ts`, `BlogPost.ts` |
+| Environment variables | UPPER_SNAKE_CASE | `MONGODB_URI` |
+| TypeScript interfaces | PascalCase with `I` prefix | `IUser`, `IAssignedDocument` |
+| CSS files | kebab-case | `globals.css` |
+
+---
+
+## Common Tasks
+
+### Add a new page
+
+1. Create a folder under `app/` matching the URL you want (e.g. `app/pricing/`)
+2. Add a `page.tsx` file inside it
+3. If the page should require login, add the path to the matcher in `app/middleware.ts`
+
+### Add a new database field
+
+1. Open the relevant model in `models/` (e.g. `models/User.ts`)
+2. Add the field to the Mongoose schema
+3. Add it to the TypeScript interface at the top of the file
+4. MongoDB will start storing the new field automatically — no migration needed
+
+### Add a new API endpoint
+
+1. Create a folder under `app/api/` matching the URL (e.g. `app/api/admin/reports/`)
+2. Add a `route.ts` file with exported functions for each HTTP method:
+```ts
+import { connectDB } from "@/lib/mongodb";
+import { auth } from "@/auth";
+
+export async function GET() {
+  const session = await auth();
+  if (session?.user?.role !== "admin") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+  await connectDB();
+  // ... your logic here
+}
+```
+
+### Add a new UI component
+
+Run the shadcn CLI to generate an accessible, pre-styled component:
+```bash
+npx shadcn add <component-name>
+# Examples:
+npx shadcn add dialog
+npx shadcn add table
+npx shadcn add select
+```
+The file will appear in `app/components/ui/`.
+
+### Reset an admin password
+
+**Via the forgot password flow (easiest):**
+1. Go to `/forgot-password`
+2. Enter the admin email address
+3. Check the inbox for a reset link (sent via Resend)
+4. Follow the link and set a new password
+
+**Via the database (if email is not working):**
+You need to generate a bcrypt hash of the new password, then update it in MongoDB Atlas:
+```js
+// In MongoDB Atlas → Data Explorer → users collection → find the user
+// Replace the passwordHash field with a bcrypt hash of the new password
+// (use bcrypt.hashSync("NewPassword1!", 10) in a Node.js script)
+db.users.updateOne(
+  { email: "admin@example.com" },
+  { $set: { passwordHash: "<new-bcrypt-hash>" } }
+)
+```
+
+Password requirements: at least 8 characters, with at least one uppercase letter, one lowercase letter, one number, and one special character.
+
+---
+
+## Available Scripts
+
+```bash
+pnpm dev        # Start the development server (http://localhost:3000)
+pnpm build      # Build the app for production
+pnpm start      # Run the production build locally
+pnpm lint       # Check the code for errors and style issues
+```
+
+---
+
+## Troubleshooting
+
+### "Please define the MONGODB_URI environment variable"
+Your `.env.local` file is missing or the variable is not set. Make sure the file exists in the project root (not inside any subfolder).
+
+### Login always fails even with the right password
+- Check that your MongoDB Atlas cluster allows connections from your IP address (Atlas → Network Access)
+- Check that the user's `accountStatus` in the database is not `"rejected"`
+
+### The app works locally but not on Netlify
+- Check that all environment variables from `.env.local` have been added in the Netlify dashboard (Site Settings → Environment Variables)
+- Make sure `NEXT_PUBLIC_APP_URL` is set to the Netlify URL, not `http://localhost:3000`
+
+### DocuSign says "consent_required"
+Open the URL printed in the terminal error message in your browser and click Accept. This only needs to be done once.
+
+### Webflow sync fails
+- Check that `WEBFLOW_API_TOKEN` is still valid (tokens can expire)
+- Make sure the field names in Webflow's collection exactly match what `lib/webflow-admin.ts` sends
+
+### Images are not loading
+- Check that `CLOUDINARY_URL` is set correctly in your environment
+- Images must be hosted on `res.cloudinary.com` — the app blocks images from other domains for security
