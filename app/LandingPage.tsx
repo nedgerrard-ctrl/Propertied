@@ -8,6 +8,15 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { LandingContentData } from '@/lib/landing-defaults'
 
+export type ShowcaseProjectData = {
+  _id: string
+  name: string
+  address: string
+  image: string
+  order: number
+  published: boolean
+}
+
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
@@ -280,6 +289,80 @@ function ServicesGrid({ content }: { content: LandingContentData }) {
   )
 }
 
+function ShowcaseSection({ projects }: { projects: ShowcaseProjectData[] }) {
+  return (
+    <section className="bg-[#0d0b08] py-28 px-8 border-t border-white/[0.06]">
+      <div className="mx-auto max-w-7xl">
+
+        {/* Section header */}
+        <div className="mb-16 flex items-start gap-16">
+          <div className="shrink-0 md:pt-1">
+            <div className="h-px w-12 bg-[#c8a96e] mb-6" />
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54]">
+              Our Portfolio
+            </p>
+          </div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-8%' }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className={`${cormorant.className} text-4xl md:text-5xl lg:text-[3.4rem] font-light leading-[1.15] text-white max-w-xl`}
+          >
+            Completed <em className="italic text-[#c8a96e]">Projects</em>
+          </motion.h2>
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.05]">
+          {projects.map((project, i) => (
+            <motion.div
+              key={project._id}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-5%' }}
+              transition={{ duration: 0.75, delay: i * 0.07 }}
+              className="group relative flex flex-col overflow-hidden bg-[#0d0b08]"
+            >
+              {/* Image */}
+              <div className="relative overflow-hidden aspect-[4/3]">
+                {project.image ? (
+                  <img
+                    src={project.image}
+                    alt={project.name}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[#1c1814] flex items-center justify-center">
+                    <span className="text-[10px] uppercase tracking-[0.24em] text-[#3d3530]">
+                      Image Coming Soon
+                    </span>
+                  </div>
+                )}
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08] via-[#0d0b08]/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+              </div>
+
+              {/* Info */}
+              <div className="flex flex-col p-7 border-t border-white/[0.06]">
+                <p className="text-[9px] uppercase tracking-[0.28em] text-[#c8a96e]/50 mb-3">
+                  Completed
+                </p>
+                <h3 className={`${cormorant.className} text-[1.85rem] font-light leading-none text-white mb-3 transition group-hover:text-[#e8d4b0]`}>
+                  {project.name}
+                </h3>
+                <p className="text-[11px] uppercase tracking-[0.16em] text-[#5a4f47] leading-[1.6]">
+                  {project.address}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function CtaBanner({ content }: { content: LandingContentData }) {
   return (
     <section className="bg-[#1c1814] border-t border-white/[0.06] py-28 px-8">
@@ -318,13 +401,20 @@ function CtaBanner({ content }: { content: LandingContentData }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function LandingPage({ content }: { content: LandingContentData }) {
+export default function LandingPage({
+  content,
+  showcaseProjects = [],
+}: {
+  content: LandingContentData
+  showcaseProjects?: ShowcaseProjectData[]
+}) {
   return (
     <main className="w-full bg-[#0a0806]">
       <Navbar />
       <VideoHero content={content} />
       <StatsStrip content={content} />
       <EthosSection content={content} />
+      <ShowcaseSection projects={showcaseProjects} />
       <ServicesGrid content={content} />
       <CtaBanner content={content} />
       <Footer />
