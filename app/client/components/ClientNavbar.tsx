@@ -80,8 +80,9 @@ export default function ClientNavbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
+  const isAdmin = session?.user?.role === "admin";
   const isApprovedExistingClient = session?.user?.userType === "existing_client" && !session?.user?.pendingApproval;
-  const links = isApprovedExistingClient ? [...BASE_LINKS, VIP_LINK] : BASE_LINKS;
+  const links = (isAdmin || isApprovedExistingClient) ? [...BASE_LINKS, VIP_LINK] : BASE_LINKS;
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
   const isActive = (href: string) =>
