@@ -78,6 +78,7 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [locationKind, setLocationKind] = useState<"local" | "overseas" | "">("");
   const [city, setCity] = useState("");
+  const [clientType, setClientType] = useState<"investor" | "owner-occupier" | "">("");
   const [companyName, setCompanyName] = useState("");
   const [abn, setAbn] = useState("");
 
@@ -92,6 +93,7 @@ export default function SignupPage() {
 
   function handleRoleSelect(role: UserType) {
     setUserType(role);
+    setClientType("");
     setFieldErrors({});
   }
 
@@ -120,6 +122,7 @@ export default function SignupPage() {
           password,
           confirmPassword,
           userType,
+          clientType,
           phone,
           locationKind,
           city,
@@ -396,6 +399,32 @@ export default function SignupPage() {
                 />
                 <FieldError msg={fieldErrors.phone} />
               </div>
+
+              {userType === "buyer_investor" && (
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-medium text-[#4d453d]">
+                    I am purchasing as <span className="text-[#dc2626]">*</span>
+                  </label>
+                  <div className="flex gap-3">
+                    {(["investor", "owner-occupier"] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => { setClientType(type); clearFieldError("clientType"); }}
+                        className={[
+                          "flex-1 rounded-xl border px-4 py-2.5 text-[14px] font-medium transition",
+                          clientType === type
+                            ? "border-[#2f2923] bg-[#2f2923] text-[#f4f1ea]"
+                            : "border-[#c8bfb4] bg-[#fbfaf7] text-[#2f2923] hover:border-[#2f2923]",
+                        ].join(" ")}
+                      >
+                        {type === "investor" ? "Investor" : "Owner-Occupier"}
+                      </button>
+                    ))}
+                  </div>
+                  <FieldError msg={fieldErrors.clientType} />
+                </div>
+              )}
 
               {userType === "developer" && (
                 <>

@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       password,
       confirmPassword,
       userType,
+      clientType,
       phone,
       locationKind,
       city,
@@ -66,6 +67,12 @@ export async function POST(req: NextRequest) {
 
     if (!userType || !["buyer_investor", "developer", "existing_client"].includes(userType)) {
       fieldErrors.userType = "Please select a role.";
+    }
+
+    if (userType === "buyer_investor") {
+      if (!clientType || !["investor", "owner-occupier"].includes(clientType)) {
+        fieldErrors.clientType = "Please select whether you are an investor or owner-occupier.";
+      }
     }
 
     if (!locationKind || !["local", "overseas"].includes(locationKind)) {
@@ -133,6 +140,10 @@ export async function POST(req: NextRequest) {
       },
       pendingApproval: isExistingClient,
     };
+
+    if (userType === "buyer_investor") {
+      userData.clientType = clientType;
+    }
 
     if (userType === "developer") {
       if (companyName?.trim()) userData.companyName = companyName.trim();
