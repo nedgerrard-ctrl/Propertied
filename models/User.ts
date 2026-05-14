@@ -1,7 +1,7 @@
 import { Schema, models, model } from "mongoose";
 
 export type UserRole = "admin" | "client";
-export type ClientType = "buyer" | "investor" | "developer" | "";
+export type ClientType = "investor" | "owner-occupier" | "";
 export type AccountStatus =
   | "active"
   | "pending-existing-client"
@@ -110,7 +110,7 @@ const userSchema = new Schema<IUser>(
     },
     clientType: {
       type: String,
-      enum: ["buyer", "investor", "developer", ""],
+      enum: ["investor", "owner-occupier", ""],
       default: "",
     },
     companyName: {

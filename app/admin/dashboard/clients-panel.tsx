@@ -20,7 +20,7 @@ type AssignedDocument = {
   requiresSignature?: boolean;
 };
 
-type ClientType = "buyer" | "investor" | "developer" | "";
+type ClientType = "investor" | "owner-occupier" | "";
 
 type Client = {
   _id: string;
@@ -102,11 +102,12 @@ const ACCOUNT_STATUS_BADGE: Record<AccountStatus, string> = {
 };
 
 const CLIENT_TYPE_LABEL: Record<ClientType, string> = {
-  buyer: "Buyer",
   investor: "Investor",
-  developer: "Developer",
+  "owner-occupier": "Owner-Occupier",
   "": "—",
 };
+
+const CLIENT_TYPE_OPTIONS: ClientType[] = ["investor", "owner-occupier", ""];
 
 const ACCOUNT_STATUS_BUTTON: Record<AccountStatus, string> = {
   active: "border-emerald-400 bg-emerald-50 text-emerald-800",
@@ -249,6 +250,10 @@ function ClientDetailPanel({
   const [savedStatus, setSavedStatus] = useState(false);
   const [actionLoading, setActionLoading] = useState<"approve" | "reject" | null>(null);
 
+  const [pendingClientType, setPendingClientType] = useState<ClientType>(initialClient.clientType ?? "");
+  const [savingClientType, setSavingClientType] = useState(false);
+  const [savedClientType, setSavedClientType] = useState(false);
+
   const [notes, setNotes] = useState(initialClient.adminNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
   const [savedNotes, setSavedNotes] = useState(false);
@@ -332,6 +337,23 @@ function ClientDetailPanel({
       setTimeout(() => setSavedNotes(false), 2000);
     }
     setSavingNotes(false);
+  }
+
+  async function handleSaveClientType() {
+    if (pendingClientType === (client.clientType ?? "")) return;
+    setSavingClientType(true);
+    const res = await fetch(`/api/admin/clients/${client._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientType: pendingClientType }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setClient(data.client);
+      setSavedClientType(true);
+      setTimeout(() => setSavedClientType(false), 2000);
+    }
+    setSavingClientType(false);
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -476,10 +498,27 @@ function ClientDetailPanel({
                       )}
                     </dd>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 items-center">
                     <dt className="w-32 shrink-0 text-neutral-400">Type</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {CLIENT_TYPE_LABEL[client.clientType] ?? "—"}
+                    <dd className="flex items-center gap-2">
+                      <select
+                        value={pendingClientType}
+                        onChange={(e) => setPendingClientType(e.target.value as ClientType)}
+                        className="rounded border border-neutral-200 bg-white px-2 py-1 text-[13px] text-neutral-800 outline-none focus:border-neutral-400"
+                      >
+                        {CLIENT_TYPE_OPTIONS.map((t) => (
+                          <option key={t} value={t}>
+                            {CLIENT_TYPE_LABEL[t]}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={handleSaveClientType}
+                        disabled={savingClientType || pendingClientType === (client.clientType ?? "")}
+                        className="rounded border border-neutral-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-500 disabled:opacity-50"
+                      >
+                        {savingClientType ? "Saving…" : savedClientType ? "Saved" : "Save"}
+                      </button>
                     </dd>
                   </div>
                   <div className="flex gap-3">

@@ -70,6 +70,14 @@ export async function PATCH(
     update.accountStatus = body.accountStatus;
   }
 
+  if ("clientType" in body) {
+    const validClientTypes = ["investor", "owner-occupier", ""];
+    if (!validClientTypes.includes(body.clientType as string)) {
+      return NextResponse.json({ message: "Invalid client type" }, { status: 400 });
+    }
+    update.clientType = body.clientType;
+  }
+
   if ("adminNotes" in body) {
     const notes = String(body.adminNotes ?? "").trim();
     if (notes.length > 2000) {
