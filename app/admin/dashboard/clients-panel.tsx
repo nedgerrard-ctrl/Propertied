@@ -980,6 +980,19 @@ export default function ClientsPanel() {
           </select>
         </div>
 
+        <a
+          href="/client/dashboard"
+          target="_blank"
+          rel="noreferrer"
+          className="self-end flex items-center gap-1.5 rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+        >
+          <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-current">
+            <path fillRule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z" clipRule="evenodd" />
+          </svg>
+          Client Portal
+        </a>
+
         {hasFilters && (
           <button
             onClick={() => {
