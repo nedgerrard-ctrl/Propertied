@@ -93,6 +93,11 @@ export default function AdminTabs() {
           href: "/admin/dashboard/blogs",
           ariaLabel: "Manage blog posts",
         },
+        {
+          label: "Manage VIP Contents",
+          href: "/admin/dashboard/vip",
+          ariaLabel: "Manage VIP content posts",
+        },
       ],
     },
   ], []);
