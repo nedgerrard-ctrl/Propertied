@@ -6,7 +6,7 @@ import { touchCmsPage } from "@/lib/touch-cms-page";
 
 export async function GET(req: NextRequest) {
   await connectDB();
-  const section = req.nextUrl.searchParams.get("section");
+  const section = req.nextUrl.searchParams.get("section") as "investors" | "owner-occupiers" | null;
   const filter = section ? { section } : {};
   const doc = await BuyerContent.findOne(filter).lean();
   const content = mergeBuyerContent(doc as Record<string, unknown> | null);
