@@ -20,10 +20,6 @@ const ALL_PRIMARY_LINKS = [
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
 ]
 
-const UTIL_LINKS = [
-  { href: '/login',   label: 'Login',   cta: false },
-  { href: '/contact', label: 'Contact', cta: true  },
-]
 
 function getInitials(name?: string | null) {
   if (!name) return '?'
@@ -179,12 +175,13 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
 
   // ─── Palette tokens ───────────────────────────────────────────────────────
 
-  const isLoginPage = pathname === '/login'
-  const bg          = scrolled
+  const isLoginPage  = pathname === '/login'
+  const isSignupPage = pathname === '/signup'
+  const bg           = scrolled
     ? 'bg-white border-b border-gray-200 shadow-sm'
     : blackBg
     ? 'bg-[#0f0c0a]'
-    : isLoginPage
+    : isLoginPage || isSignupPage
     ? 'bg-[#0f0c0a]/50 backdrop-blur-md'
     : 'bg-transparent'
   const logoColor  = scrolled ? 'text-[#0f0c0a]'                      : 'text-white'
@@ -347,33 +344,30 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
               </Link>
             </>
           ) : (
-            UTIL_LINKS.map((link) => {
-              const active = isActive(link.href)
-              if (link.cta) {
-                return (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]"
-                  >
-                    {link.label}
-                  </Link>
-                )
-              }
-              return (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={[
-                    'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
-                    active ? linkActive : linkBase,
-                  ].join(' ')}
-                >
-                  {link.label}
-                  {active && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
-                </Link>
-              )
-            })
+            <>
+              <Link
+                href="/login"
+                className={[
+                  'relative px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] transition-colors duration-500',
+                  isActive('/login') ? linkActive : linkBase,
+                ].join(' ')}
+              >
+                Login
+                {isActive('/login') && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
+              </Link>
+              <Link
+                href="/signup"
+                className="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] bg-[#c8a96e] text-[#0f0c0a] transition hover:bg-[#b89464]"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/contact"
+                className="ml-1 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] border transition border-[#c8a96e] text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0f0c0a]"
+              >
+                Contact
+              </Link>
+            </>
           )}
         </nav>
 
@@ -533,18 +527,32 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className={[
-                'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
-                'border-b border-white/[0.06] transition',
-                isActive('/login') ? 'text-white' : 'text-[#9e8d7a]',
-              ].join(' ')}
-              onClick={closeMobile}
-            >
-              <span>Login</span>
-              {isActive('/login') && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
-            </Link>
+            <>
+              <Link
+                href="/login"
+                className={[
+                  'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
+                  'border-b border-white/[0.06] transition',
+                  isActive('/login') ? 'text-white' : 'text-[#9e8d7a]',
+                ].join(' ')}
+                onClick={closeMobile}
+              >
+                <span>Login</span>
+                {isActive('/login') && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+              </Link>
+              <Link
+                href="/signup"
+                className={[
+                  'flex items-center justify-between py-4 text-[11px] font-medium uppercase tracking-[0.16em]',
+                  'border-b border-white/[0.06] transition',
+                  isActive('/signup') ? 'text-[#c8a96e]' : 'text-[#c8a96e]/70 hover:text-[#c8a96e]',
+                ].join(' ')}
+                onClick={closeMobile}
+              >
+                <span>Sign Up</span>
+                {isActive('/signup') && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+              </Link>
+            </>
           )}
         </nav>
       </div>
