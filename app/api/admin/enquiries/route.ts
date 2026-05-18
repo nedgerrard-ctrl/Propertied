@@ -10,7 +10,7 @@ export async function GET() {
   }
 
   await connectDB();
-  const enquiries = await Enquiry.find({}).sort({ createdAt: -1 }).lean();
+  const enquiries = await Enquiry.find({ isDeleted: { $ne: true } }).sort({ createdAt: -1 }).lean();
 
   return NextResponse.json({ enquiries });
 }
@@ -33,12 +33,13 @@ export async function DELETE(req: NextRequest) {
 
   await connectDB();
 
-  const result = await Enquiry.deleteMany({
-    _id: { $in: ids },
-  });
+  const result = await Enquiry.updateMany(
+    { _id: { $in: ids } },
+    { $set: { isDeleted: true } }
+  );
 
   return NextResponse.json({
-    message: "Enquiries deleted successfully",
-    deletedCount: result.deletedCount ?? 0,
+    message: "Enquiries removed successfully",
+    deletedCount: result.modifiedCount ?? 0,
   });
 }

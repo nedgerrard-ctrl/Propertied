@@ -55,6 +55,7 @@ export interface IUser {
   assignedDocuments?: IAssignedDocument[];
   resetPasswordTokenHash?: string | null;
   resetPasswordExpiresAt?: Date | null;
+  isDeleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -174,6 +175,10 @@ const userSchema = new Schema<IUser>(
     resetPasswordExpiresAt: {
       type: Date,
       default: null,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

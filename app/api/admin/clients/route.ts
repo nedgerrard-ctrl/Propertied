@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
@@ -14,10 +14,37 @@ export async function GET() {
   const clients = await User.find({
     role: "client",
     userType: { $in: ["buyer_investor", "existing_client"] },
+    isDeleted: { $ne: true },
   })
     .select("_id name email phone userType clientType accountStatus pendingApproval createdAt")
     .sort({ createdAt: -1 })
     .lean();
 
   return NextResponse.json({ clients });
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (!session || session.user?.role !== "admin") {
+    return NextResponse.json({ message: "Unauthorised" }, { status: 401 });
+  }
+
+  const body = await req.json().catch(() => null);
+  const ids = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
+
+  if (ids.length === 0) {
+    return NextResponse.json({ message: "No client IDs provided" }, { status: 400 });
+  }
+
+  await connectDB();
+
+  const result = await User.updateMany(
+    { _id: { $in: ids }, role: "client", userType: { $in: ["buyer_investor", "existing_client"] } },
+    { $set: { isDeleted: true } }
+  );
+
+  return NextResponse.json({
+    message: "Clients removed successfully",
+    deletedCount: result.modifiedCount ?? 0,
+  });
 }

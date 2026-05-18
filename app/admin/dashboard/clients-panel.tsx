@@ -874,6 +874,22 @@ function ClientDetailPanel({
   );
 }
 
+async function bulkRemoveClients(ids: string[]) {
+  const res = await fetch("/api/admin/clients", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+  if (!res.ok) throw new Error("Failed to remove selected clients");
+  return true;
+}
+
+async function removeClient(id: string) {
+  const res = await fetch(`/api/admin/clients/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to remove client");
+  return true;
+}
+
 // ─── Main panel ────────────────────────────────────────────────────────────────
 
 export default function ClientsPanel() {
@@ -884,6 +900,10 @@ export default function ClientsPanel() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkRemoving, setBulkRemoving] = useState(false);
+  const [showBulkRemoveConfirm, setShowBulkRemoveConfirm] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/clients")
@@ -908,6 +928,12 @@ export default function ClientsPanel() {
     setSelected((prev) =>
       prev?._id === id ? ({ ...prev, ...updates } as Client) : prev
     );
+  }
+
+  function handleRemove(id: string) {
+    setClients((prev) => prev.filter((c) => c._id !== id));
+    setSelectedIds((prev) => prev.filter((sid) => sid !== id));
+    setSelected((prev) => (prev?._id === id ? null : prev));
   }
 
   const filtered = useMemo(() => {
@@ -943,6 +969,54 @@ export default function ClientsPanel() {
   );
 
   const hasFilters = search.trim() !== "" || statusFilter !== "all";
+
+  const allFilteredIds = filtered.map((c) => c._id);
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((c) => selectedIds.includes(c._id));
+  const selectedCount = selectedIds.length;
+
+  function toggleSelectOne(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  function toggleSelectAllFiltered() {
+    if (allFilteredSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !allFilteredIds.includes(id)));
+      return;
+    }
+    setSelectedIds((prev) => Array.from(new Set([...prev, ...allFilteredIds])));
+  }
+
+  async function handleBulkRemove() {
+    setBulkRemoving(true);
+    try {
+      await bulkRemoveClients(selectedIds);
+      setClients((prev) => prev.filter((c) => !selectedIds.includes(c._id)));
+      setSelected((prev) => (prev && selectedIds.includes(prev._id) ? null : prev));
+      setSelectedIds([]);
+      setShowBulkRemoveConfirm(false);
+    } catch {
+      alert("Failed to remove selected clients.");
+    } finally {
+      setBulkRemoving(false);
+    }
+  }
+
+  async function handleRowRemove(e: React.MouseEvent, clientId: string, clientName: string) {
+    e.stopPropagation();
+    const confirmed = window.confirm(
+      `Remove client "${clientName}" from the dashboard? This cannot be undone.`
+    );
+    if (!confirmed) return;
+    try {
+      await removeClient(clientId);
+      handleRemove(clientId);
+    } catch {
+      alert("Failed to remove client.");
+    }
+  }
 
   if (loading) {
     return (
@@ -1049,6 +1123,32 @@ export default function ClientsPanel() {
         </span>
       </div>
 
+      {/* Selection toolbar */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-5 py-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleSelectAllFiltered}
+            disabled={filtered.length === 0}
+            className="rounded border border-neutral-200 px-3 py-2 text-[12px] text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {allFilteredSelected ? "Deselect visible" : "Select visible"}
+          </button>
+          <span className="text-[12px] text-neutral-500">
+            {selectedCount} selected
+          </span>
+        </div>
+
+        <button
+          onClick={() => setShowBulkRemoveConfirm(true)}
+          disabled={selectedCount === 0 || bulkRemoving}
+          className="rounded border border-red-200 bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {bulkRemoving
+            ? "Removing…"
+            : `Remove Selected${selectedCount ? ` (${selectedCount})` : ""}`}
+        </button>
+      </div>
+
       {/* Table */}
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         {filtered.length === 0 ? (
@@ -1061,6 +1161,15 @@ export default function ClientsPanel() {
           <table className="w-full text-left text-[13px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                <th className="px-5 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleSelectAllFiltered}
+                    aria-label="Select all visible clients"
+                    className="h-4 w-4 rounded border-neutral-300"
+                  />
+                </th>
                 <th className="px-5 py-3">Name</th>
                 <th className="px-5 py-3">Email</th>
                 <th className="px-5 py-3">Phone</th>
@@ -1071,43 +1180,66 @@ export default function ClientsPanel() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c, i) => (
-                <tr
-                  key={c._id}
-                  onClick={() => setSelected(c)}
-                  className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
-                    i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
-                  }`}
-                >
-                  <td className="px-5 py-3.5 font-medium text-neutral-900">
-                    {c.name || "—"}
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
-                    {c.phone || "—"}
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-600">
-                    {CLIENT_TYPE_LABEL[c.clientType] ?? "—"}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <AccountStatusBadge status={getAccountStatus(c)} />
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
-                    {formatDate(c.createdAt)}
-                  </td>
-                  <td
-                    className="px-5 py-3.5"
-                    onClick={(e) => e.stopPropagation()}
+              {filtered.map((c, i) => {
+                const isChecked = selectedIds.includes(c._id);
+                return (
+                  <tr
+                    key={c._id}
+                    onClick={() => setSelected(c)}
+                    className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
+                      i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
+                    }`}
                   >
-                    <button
-                      onClick={() => setSelected(c)}
-                      className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+                    <td
+                      className="px-5 py-3.5"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleSelectOne(c._id)}
+                        aria-label={`Select client ${c.name}`}
+                        className="h-4 w-4 rounded border-neutral-300"
+                      />
+                    </td>
+                    <td className="px-5 py-3.5 font-medium text-neutral-900">
+                      {c.name || "—"}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
+                    <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
+                      {c.phone || "—"}
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600">
+                      {CLIENT_TYPE_LABEL[c.clientType] ?? "—"}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <AccountStatusBadge status={getAccountStatus(c)} />
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
+                      {formatDate(c.createdAt)}
+                    </td>
+                    <td
+                      className="px-5 py-3.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelected(c)}
+                          className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={(e) => handleRowRemove(e, c._id, c.name)}
+                          className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -1120,6 +1252,18 @@ export default function ClientsPanel() {
           onStatusUpdate={handleStatusUpdate}
         />
       )}
+
+      <ConfirmDialog
+        open={showBulkRemoveConfirm}
+        title="Remove selected clients?"
+        message={`Are you sure you want to remove ${selectedCount} selected ${
+          selectedCount === 1 ? "client" : "clients"
+        } from the dashboard? They will not be deleted from the database.`}
+        confirmLabel="Remove"
+        loading={bulkRemoving}
+        onCancel={() => { if (!bulkRemoving) setShowBulkRemoveConfirm(false); }}
+        onConfirm={handleBulkRemove}
+      />
     </div>
   );
 }

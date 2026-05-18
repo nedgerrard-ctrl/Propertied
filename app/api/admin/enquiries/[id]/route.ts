@@ -47,11 +47,15 @@ export async function DELETE(
 
   await connectDB();
 
-  const enquiry = await Enquiry.findByIdAndDelete(id).lean();
+  const enquiry = await Enquiry.findOneAndUpdate(
+    { _id: id, isDeleted: { $ne: true } },
+    { $set: { isDeleted: true } },
+    { new: true }
+  ).lean();
 
   if (!enquiry) {
     return NextResponse.json({ message: "Enquiry not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ message: "Enquiry deleted successfully" });
+  return NextResponse.json({ message: "Enquiry removed successfully" });
 }

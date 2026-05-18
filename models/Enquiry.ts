@@ -208,6 +208,11 @@ const enquirySchema = new Schema(
       trim: true,
       default: "",
     },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
