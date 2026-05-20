@@ -52,4 +52,9 @@ const DeveloperContentSchema = new Schema(
   { timestamps: true }
 );
 
+// In development, delete the cached model so schema changes take effect without a full server restart.
+if (process.env.NODE_ENV === "development") {
+  delete (models as Record<string, unknown>).DeveloperContent;
+}
+
 export default models.DeveloperContent || model("DeveloperContent", DeveloperContentSchema);
