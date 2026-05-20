@@ -453,28 +453,88 @@ export default function LandingInlineEditor() {
           </div>
         </section>
 
-        {/* S3: Ethos */}
-        <section className="relative bg-[#f6f2eb] py-36 px-8">
+        {/* S3: What We Do */}
+        <section className="relative bg-[#f6f2eb] py-24 lg:py-32 px-8">
           <EditBadge />
-          <div className="mx-auto max-w-7xl">
-            <div className="grid md:grid-cols-[1fr_2fr] gap-16 md:items-start">
-              <div className="md:pt-3">
-                <div className="h-px w-12 bg-[#c8a96e] mb-6" />
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">Our Ethos</p>
-              </div>
-              <div>
-                <h2 ref={r("ethosHeading")} contentEditable suppressContentEditableWarning className={`text-4xl md:text-5xl lg:text-[3.4rem] font-light leading-[1.2] text-[#1f1a17] ${EDIT_LIGHT}`}>
-                  {c.ethosHeading}
-                </h2>
-                <p ref={r("ethosBody")} contentEditable suppressContentEditableWarning className={`mt-8 max-w-[55ch] text-[13.5px] leading-[2] text-[#5a4a3f] ${EDIT_LIGHT}`}>
-                  {c.ethosBody}
-                </p>
-              </div>
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d] mb-5">What We Do</p>
+            <h2 ref={r("ethosHeading")} contentEditable suppressContentEditableWarning className={`text-4xl md:text-5xl lg:text-[3.2rem] font-light leading-[1.15] text-[#1f1a17] mb-10 ${EDIT_LIGHT}`}>
+              {c.ethosHeading}
+            </h2>
+            <div className="space-y-5 text-[14px] leading-[1.95] text-[#3d3530] max-w-[68ch] mb-10">
+              <p ref={r("ethosBody")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.ethosBody}</p>
+              <p ref={r("whatWeDoBody2")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.whatWeDoBody2}</p>
+            </div>
+            <p ref={r("whatWeDoBody3")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.9] text-[#3d3530] max-w-[68ch] ${EDIT_LIGHT}`}>
+              {c.whatWeDoBody3}
+            </p>
+          </div>
+        </section>
+
+        {/* S4: Our Transition */}
+        <section className="relative bg-[#2f2a24] py-24 lg:py-32 px-8">
+          <EditBadge />
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d] mb-5">Our Transition</p>
+            <h2 ref={r("transitionHeading")} contentEditable suppressContentEditableWarning className={`text-3xl md:text-4xl lg:text-[2.8rem] font-light leading-[1.2] text-white mb-10 ${EDIT_DARK}`}>
+              {c.transitionHeading}
+            </h2>
+            <div className="space-y-5 text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch]">
+              <p ref={r("transitionP1")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP1}</p>
+              <p ref={r("transitionP2")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP2}</p>
+              <p ref={r("transitionP3")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP3}</p>
+              <p ref={r("transitionP4")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP4}</p>
             </div>
           </div>
         </section>
 
-        {/* S4: Completed Projects Showcase ─ fully interactive, not editable-text */}
+        {/* S5: Federal Budget */}
+        <section className="relative bg-white py-24 lg:py-32 px-8">
+          <EditBadge />
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d] mb-5">The 2026 Federal Budget</p>
+            <h2 ref={r("budgetHeading")} contentEditable suppressContentEditableWarning className={`text-3xl md:text-4xl lg:text-[2.8rem] font-light leading-[1.2] text-[#1f1a17] mb-10 ${EDIT_LIGHT}`}>
+              {c.budgetHeading}
+            </h2>
+            <ul className="space-y-4 mb-8">
+              {(["budgetBullet1", "budgetBullet2"] as const).map((field) => (
+                <li key={field} className="flex items-start gap-4 text-[13.5px] leading-[1.85] text-[#1f1a17]">
+                  <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
+                  <span ref={r(field)} contentEditable suppressContentEditableWarning className={`font-medium ${EDIT_LIGHT}`}>{c[field]}</span>
+                </li>
+              ))}
+            </ul>
+            <p ref={r("budgetBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#3d3530] max-w-[68ch] mb-8 ${EDIT_LIGHT}`}>
+              {c.budgetBody}
+            </p>
+            <p ref={r("budgetDisclaimer")} contentEditable suppressContentEditableWarning className={`text-[12px] italic text-[#8a7b6d] max-w-[64ch] ${EDIT_LIGHT}`}>
+              {c.budgetDisclaimer}
+            </p>
+          </div>
+        </section>
+
+        {/* S6: Why Choose PPM */}
+        <section className="relative bg-[#1c1814] py-24 lg:py-32 px-8">
+          <EditBadge />
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d] mb-5">Why Choose PPM</p>
+            <h2 ref={r("whyHeading")} contentEditable suppressContentEditableWarning className={`text-3xl md:text-4xl lg:text-[2.8rem] font-light leading-[1.2] text-white mb-14 ${EDIT_DARK}`}>
+              {c.whyHeading}
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-px bg-white/[0.04]">
+              {(["why1","why2","why3","why4","why5","why6"] as const).map((field, i) => (
+                <div key={field} className="bg-[#1c1814] px-8 py-8 border-t border-white/[0.06]">
+                  <span className="block text-[9px] uppercase tracking-[0.28em] text-[#4a3f37] mb-3">{String(i + 1).padStart(2, "0")}</span>
+                  <p ref={r(field)} contentEditable suppressContentEditableWarning className={`text-[13.5px] leading-[1.85] text-[#9e8d7a] ${EDIT_DARK}`}>
+                    {c[field]}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* S7: Completed Projects Showcase ─ fully interactive, not editable-text */}
         <section className="bg-[#0d0b08] py-16 px-8 border-t border-white/[0.06] pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_label]:pointer-events-auto">
           <div className="mx-auto max-w-7xl">
 
@@ -577,36 +637,7 @@ export default function LandingInlineEditor() {
           </div>
         </section>
 
-        {/* S5: Services Grid */}
-        <section className="relative bg-[#2f2a24] py-20 px-8">
-          <EditBadge />
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-10 flex items-center gap-8">
-              <p className="text-[10px] uppercase tracking-[0.32em] text-[#6b5e54] shrink-0">Explore</p>
-              <div className="h-px flex-1 bg-white/[0.06]" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {svcGroups.map(({ index, lf, sf, df, hasDesc }) => (
-                <div key={index} className="border border-white/[0.07] bg-[#1c1814] flex flex-col p-7">
-                  <span className="text-[9px] uppercase tracking-[0.28em] mb-5 text-[#3d3530]">{index}</span>
-                  <p ref={r(lf)} contentEditable suppressContentEditableWarning className={`text-[1.9rem] font-light leading-none mb-2 text-neutral-200 ${EDIT_DARK}`}>
-                    {c[lf]}
-                  </p>
-                  <p ref={r(sf)} contentEditable suppressContentEditableWarning className={`text-[10px] uppercase tracking-[0.18em] mb-4 text-[#6b5e54] ${EDIT_DARK}`}>
-                    {c[sf]}
-                  </p>
-                  {hasDesc && df && (
-                    <p ref={r(df)} contentEditable suppressContentEditableWarning className={`text-[12.5px] leading-[1.85] text-[#5a4f47] ${EDIT_DARK}`}>
-                      {c[df]}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* S6: CTA */}
+        {/* S9: CTA */}
         <section className="relative bg-[#1c1814] border-t border-white/[0.06] py-28 px-8">
           <EditBadge />
           <div className="mx-auto max-w-7xl text-center">

@@ -6,6 +6,21 @@ const AboutContentSchema = new Schema(
     heroHeadingMain: { type: String, default: "" },
     heroHeadingAccent: { type: String, default: "" },
 
+    // Intro
+    introText: { type: String, default: "" },
+
+    // Timeline
+    era1Year:    { type: String, default: "" },
+    era1Heading: { type: String, default: "" },
+    era1Body:    { type: String, default: "" },
+    era2Year:    { type: String, default: "" },
+    era2Heading: { type: String, default: "" },
+    era2Body:    { type: String, default: "" },
+    era3Year:    { type: String, default: "" },
+    era3Heading: { type: String, default: "" },
+    era3Body1:   { type: String, default: "" },
+    era3Body2:   { type: String, default: "" },
+
     // Brand Story
     pullQuote: { type: String, default: "" },
     storyP1: { type: String, default: "" },

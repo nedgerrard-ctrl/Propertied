@@ -45,7 +45,7 @@ function ContactTabs() {
         href="/contact/buyers-investors"
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
       >
-        Buyers / Investors
+        Investors / Owner-Occupiers
       </Link>
 
       <Link
@@ -385,7 +385,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {feedbackModal.open ? (
+{feedbackModal.open ? (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/30 px-6">
           <div className="w-full max-w-md rounded-sm bg-white p-6 shadow-xl">
             <h3 className="text-lg font-medium text-[#1f1a17]">

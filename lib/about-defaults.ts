@@ -1,88 +1,109 @@
 export const aboutDefaults = {
   heroHeadingMain:
-    "The trusted name behind Melbourne’s most significant",
-  heroHeadingAccent: "residential developments.",
+    "Our track record was built inside",
+  heroHeadingAccent: "Melbourne’s development industry.",
 
-  pullQuote: "For over a decade, we were the silent engine.",
+  introText:
+    "PPM’s track record was not built in the consumer property market. It was built inside Melbourne’s development industry, competing against the largest agencies in the country. That history is the buyers’ advantage.",
+
+  era1Year: "2013",
+  era1Heading: "Founded to sell boutique off-the-plan projects",
+  era1Body:
+    "PPM commenced operations marketing and selling boutique townhouse and apartment projects off-the-plan across Melbourne — building deep coalface knowledge of the city’s new property market from day one.",
+
+  era2Year: "2018",
+  era2Heading: "Retained by major developers as management consultants",
+  era2Body:
+    "Local and multinational developers engaged PPM to rescue underperforming projects and to develop and implement full operational frameworks from concept through to completion. We delivered results under their names, not ours.",
+
+  era3Year: "2026",
+  era3Heading: "The insider knowledge is now yours",
+  era3Body1:
+    "In partnership with Monash University, PPM has transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers seeking a trusted third-party partner.",
+  era3Body2:
+    "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
+
+  pullQuote: "After 13 years working under our clients’ brands, PPM now works directly for buyers.",
   storyP1:
-    "Property Project Marketing Pty Ltd (PPM) was founded in April 2013 and for over a decade operated invisibly behind Melbourne’s major residential developers — delivering more than $1.5 billion in off-the-plan property sales with zero public presence.",
-  storyP2: "We are now changing that.",
+    "Founded in 2013 to sell boutique off-the-plan projects, PPM built deep coalface knowledge of Melbourne’s new property market — marketing and selling boutique townhouse and apartment projects across the city from day one.",
+  storyP2:
+    "From 2018, local and multinational developers engaged PPM as management consultants to rescue underperforming projects and to develop and implement full operational frameworks from concept through completion. We delivered results under their names, not ours.",
   storyP3:
-    "After years of working exclusively under developers’ names, we are bringing that same expertise directly to buyers, investors, and developers who want a trusted, end-to-end partner for the full investment lifecycle.",
+    "In 2026, in partnership with Monash University, PPM transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers.",
   storyP4:
-    "Our approach goes far beyond a transaction. We source, sell, manage, and resell — a closed-loop service that keeps working for you long after settlement.",
+    "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
 
-  stat1Value: "$1.5B+",
-  stat1Label: "In Delivered Sales",
-  stat2Value: "$50M+",
-  stat2Label: "Assets Under Management",
-  stat3Value: "10+",
-  stat3Label: "Years of Industry Experience",
+  stat1Value: "$1.5B",
+  stat1Label: "In Delivered Projects",
+  stat2Value: "1,000+",
+  stat2Label: "Settled Sales",
+  stat3Value: "$100M",
+  stat3Label: "Managed Portfolio",
 
   step1Title: "Source",
   step1Desc:
-    "We identify and curate the finest off-the-plan developments across Melbourne — from boutique townhouses to high-rise apartments.",
+    "We identify only the best Melbourne projects across boutique to mega scale. The rest, you never see.",
   step2Title: "Buy",
   step2Desc:
-    "We match you to the right property, organise display suite visits, and guide you through purchase. Our fee is paid by the developer — not by you.",
-  step3Title: "Manage",
+    "The developer pays our fee. You pay nothing. We guide you from contract to settlement with independent advice at every stage.",
+  step3Title: "Steward",
   step3Desc:
-    "Through our sister division Online Property Services, we steward your residential asset as a premium portfolio — maximising returns, not just collecting rent.",
-  step4Title: "Maximise",
+    "Principal-level attention, always. Never a junior property manager. Our portfolio is strictly capped at $100M to ensure this.",
+  step4Title: "Sell Again",
   step4Desc:
-    "We actively protect and grow the value of your investment, keeping you informed and consistently ahead of the market.",
-  step5Title: "Resell",
+    "When the time is right, we sell at a discounted commission for returning clients — leveraging our real-time market intelligence.",
+  step5Title: "Replace",
   step5Desc:
-    "When the time is right, we leverage deep market knowledge to appraise and resell your property — achieving the best possible outcome.",
-  step6Title: "Reinvest",
+    "Your capital moves straight into the next vetted property. The cycle continues working for you.",
+  step6Title: "Repeat",
   step6Desc:
-    "We identify your next opportunity, keeping your capital working and your portfolio growing for the long term.",
+    "One relationship — buy, manage, sell, repeat. The same trusted team across the full lifecycle of every investment.",
 
-  member1Name: "Ned Gerrard",
-  member1Role: "Co-Founder & Director",
-  member1Image: "/images/Ned Gerrard_ai_placeholder.png",
+  member1Name: "Joan Alcock",
+  member1Role: "Officer in Effective Control · Director",
+  member1Image: "/images/Joan Alcock_ai_placeholder.png",
   member1Bio:
-    "With a background in management consulting, accounting, and marketing, Ned brings strategic discipline to every engagement — from developer feasibility to long-term client strategy. He built PPM into Melbourne’s silent engine for over a decade before bringing the brand to market.",
-  member2Name: "Joan Alcock",
-  member2Role: "Director & Officer in Effective Control",
-  member2Image: "/images/Joan Alcock_ai_placeholder.png",
+    "After a career in finance, Joan has spent the last thirteen years at the operational centre of Melbourne’s new property market — leading sales campaigns for boutique developments and major projects alike. Her personal sales record runs to hundreds of millions of dollars. She has won local and international industry elite performance awards and was selected as the public face for two of Melbourne’s most significant residential landmarks in televised campaigns. She works daily at the market coalface — with industry stakeholders and buyers alike. Her real-time market intelligence is a primary asset of the PPM client relationship.",
+  member2Name: "Ned Gerrard",
+  member2Role: "Director",
+  member2Image: "/images/Ned Gerrard_ai_placeholder.png",
   member2Bio:
-    "Ranked nationally in the Top 2% of sales professionals, Joan holds the agency licence and leads all client relationships. Multi-award winning, her approach is direct, experienced, and entirely client-first.",
+    "An MBA graduate of Monash University with a career spanning senior executive roles in listed public companies and specialist management consulting engagements. Major developers retained Ned not as an external adviser but as an embedded marketing director — responsible for building entire project brands and implementing sales frameworks that delivered hundreds of millions in settlements. At PPM, Ned applies his consulting discipline to the supply side of every investment opportunity — assessing developer feasibility, pricing strategy, construction risk, and long-term capital positioning, while at the same time being able to use his marketing skill and experience to achieve sales in his own right.",
 
-  devHeading: "The team behind Melbourne’s most successful launches.",
+  devHeading: "Full lifecycle services. From boutique to mega projects.",
   devP1:
-    "For over a decade, PPM was the silent force behind some of Melbourne’s most significant residential projects — managing campaigns from launch strategy to final settlement, with no public credit taken.",
+    "Our services cover the full development lifecycle. At concept stage we provide feasibility input, finish selection guidance, pricing strategy and marketing positioning — the decisions that determine the outcome at completion.",
   devP2:
-    "We now offer that same capability directly. An independent agency with a qualified buyer network spanning local owner-occupiers, local investors, and overseas investors across Asia-Pacific — with transparent reporting from day one.",
-  service1: "Project Marketing & Sales Management",
-  service2: "Independent Sales Agency & Qualified Buyer Network",
-  service3: "Feasibility & Pricing Strategy Advisory",
-  service4: "Campaign Reporting & Settlement Support",
+    "For projects already in market, we offer targeted sales execution and, where required, full project rescue and restructure. PPM has turned around developments that other agencies could not move, applying management consulting discipline to the diagnosis and proven sales capability to the solution.",
+  service1: "Feasibility Input & Pricing Strategy Advisory",
+  service2: "Project Marketing & Sales Execution",
+  service3: "Full Project Rescue & Restructure",
+  service4: "Selective Third-Party Agency with Qualified Buyer Database",
 
   overseasHeadingMain: "Your gateway to Melbourne property,",
   overseasHeadingAccent: "from anywhere",
   overseasP1:
-    "The majority of PPM's clients are based overseas — predominantly across the Asia-Pacific region. We understand the unique complexities of investing in Australian residential property from abroad: foreign investment approvals, remote due diligence, and ongoing asset management at a distance.",
+    "PPM maintains developer relationships as a selective third-party agent and provides access to an established buyer database of qualified local and overseas investors. This network has been built across thirteen years of active market participation.",
   overseasP2:
-    "From first enquiry through to settled contract and long-term portfolio management, you deal with one trusted team — no handoffs, no information gaps.",
-  overseasStat1Value: "$50M+",
-  overseasStat1Label: "Assets Under Management",
-  overseasStat2Value: "10+ Years",
-  overseasStat2Label: "Serving Overseas Clients",
-  overseasStat3Value: "Asia-Pacific",
-  overseasStat3Label: "Primary Client Base",
+    "Because we are not exclusively contracted to any single developer, our recommendation of a project carries genuine weight with buyers — something an in-house sales team cannot replicate.",
+  overseasStat1Value: "$1.5B",
+  overseasStat1Label: "Delivered Projects",
+  overseasStat2Value: "1,000+",
+  overseasStat2Label: "Settled Sales",
+  overseasStat3Value: "13 Years",
+  overseasStat3Label: "Market Participation",
 
   trackHeading:
-    "$1.5 billion delivered across Southbank · Docklands · Richmond and beyond.",
-  project1Location: "Southbank, Melbourne",
-  project1Type: "High-Rise Apartments",
-  project1Status: "Sold Out",
-  project2Location: "Richmond, Melbourne",
-  project2Type: "Boutique Townhouses",
-  project2Status: "Sold Out",
-  project3Location: "Docklands, Melbourne",
-  project3Type: "Mixed-Use Residential",
-  project3Status: "Sold Out",
+    "$1.5 billion delivered across Melbourne’s new property market.",
+  project1Location: "Hawthorn Park",
+  project1Type: "Off-the-Plan Apartments",
+  project1Status: "Completed",
+  project2Location: "Yarra 1",
+  project2Type: "Off-the-Plan Apartments",
+  project2Status: "Completed",
+  project3Location: "The Barkly",
+  project3Type: "Residential Development",
+  project3Status: "Completed",
 };
 
 export type AboutContentData = typeof aboutDefaults;

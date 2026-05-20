@@ -24,6 +24,33 @@ const LandingContentSchema = new Schema(
     ethosHeading: { type: String, default: "" },
     ethosBody: { type: String, default: "" },
 
+    // What We Do
+    whatWeDoBody2: { type: String, default: "" },
+    whatWeDoBody3: { type: String, default: "" },
+
+    // Our Transition
+    transitionHeading: { type: String, default: "" },
+    transitionP1: { type: String, default: "" },
+    transitionP2: { type: String, default: "" },
+    transitionP3: { type: String, default: "" },
+    transitionP4: { type: String, default: "" },
+
+    // Federal Budget
+    budgetHeading:    { type: String, default: "" },
+    budgetBullet1:    { type: String, default: "" },
+    budgetBullet2:    { type: String, default: "" },
+    budgetBody:       { type: String, default: "" },
+    budgetDisclaimer: { type: String, default: "" },
+
+    // Why Choose PPM
+    whyHeading: { type: String, default: "" },
+    why1: { type: String, default: "" },
+    why2: { type: String, default: "" },
+    why3: { type: String, default: "" },
+    why4: { type: String, default: "" },
+    why5: { type: String, default: "" },
+    why6: { type: String, default: "" },
+
     // CTA
     ctaHeading: { type: String, default: "" },
 

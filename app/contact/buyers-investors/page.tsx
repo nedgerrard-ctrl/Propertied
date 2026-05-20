@@ -251,7 +251,7 @@ function ContactTabs() {
         href="/contact/buyers-investors"
         className="min-w-[180px] border border-[#5f5245] bg-[#2f2a24] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
       >
-        Buyers / Investors
+        Investors / Owner-Occupiers
       </Link>
 
       <Link
@@ -605,7 +605,7 @@ function BuyersInvestorsContactContent() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8a7b6d]">
-            Buyers / Investors
+            Investors / Owner-Occupiers
           </p>
           <h1 className="mt-3 text-4xl font-light text-[#1f1a17] md:text-5xl">
             Register Your Property Interest

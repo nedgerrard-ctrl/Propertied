@@ -317,15 +317,6 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
 
       <section className="border-y border-[#e3d8ca] bg-[#f6f2eb] py-32">
         <div className="mx-auto max-w-7xl px-6 md:px-12">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="mb-20 font-[family-name:var(--font-cormorant)] text-4xl font-light text-[#1f1a17] md:text-5xl"
-          >
-            {content.tailoredHeading}
-          </motion.h2>
-
           <div className={`grid grid-cols-1 gap-20 ${!variant ? 'md:grid-cols-2' : 'max-w-2xl'}`}>
             {(!variant || variant === 'investors') && (
               <motion.div
@@ -340,22 +331,31 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                   </h3>
                   <span className="tabular-nums text-sm text-[#8a7b6d]">01</span>
                 </div>
-                <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
-                  {content.investorsBody}
+                <div className="mb-8 space-y-4 text-[13px] font-light leading-[2] text-[#5a4a3f]">
+                  <p>{content.investorsBody}</p>
+                  {content.investorsBody2 && <p>{content.investorsBody2}</p>}
+                </div>
+                <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e]">
+                  {content.investorsStepsLabel}
                 </p>
-                <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
-                  {investorBullets.map((item) => (
-                    <li key={item} className="flex gap-4">
-                      <span className="shrink-0 text-[#c8a96e]">—</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <ol className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                  {investorBullets.map((item, i) => {
+                    const sep = item.indexOf(' — ')
+                    const bold = sep !== -1 ? item.slice(0, sep) : item
+                    const rest = sep !== -1 ? item.slice(sep) : ''
+                    return (
+                      <li key={item} className="flex gap-3">
+                        <span className="shrink-0 font-semibold text-[#c8a96e]">{i + 1}.</span>
+                        <span><strong>{bold}</strong>{rest}</span>
+                      </li>
+                    )
+                  })}
+                </ol>
                 <Link
                   href="/contact/buyers-investors"
                   className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
                 >
-                  Enquire as Investor
+                  → Speak with a PPM principal
                 </Link>
               </motion.div>
             )}
@@ -376,20 +376,36 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                 <p className="mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f]">
                   {content.ownerBody}
                 </p>
-                <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
-                  {ownerBullets.map((item) => (
-                    <li key={item} className="flex gap-4">
-                      <span className="shrink-0 text-[#c8a96e]">—</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/contact/buyers-investors"
-                  className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
-                >
-                  Enquire as Owner-Occupier
-                </Link>
+                <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e]">
+                  {content.ownerStepsLabel}
+                </p>
+                <ol className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                  {[content.ownerBullet1, content.ownerBullet2, content.ownerBullet3].map((item, i) => {
+                    const sep = item.indexOf(' — ')
+                    const bold = sep !== -1 ? item.slice(0, sep) : item
+                    const rest = sep !== -1 ? item.slice(sep) : ''
+                    return (
+                      <li key={item} className="flex gap-3">
+                        <span className="shrink-0 font-semibold text-[#c8a96e]">{i + 1}.</span>
+                        <span><strong>{bold}</strong>{rest}</span>
+                      </li>
+                    )
+                  })}
+                </ol>
+                <div className="flex flex-wrap gap-6">
+                  <Link
+                    href="/contact/buyers-investors"
+                    className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                  >
+                    → Request a strategic asset review
+                  </Link>
+                  <Link
+                    href="/buyers/investors"
+                    className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                  >
+                    → What is off-the-plan?
+                  </Link>
+                </div>
               </motion.div>
             )}
           </div>

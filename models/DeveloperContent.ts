@@ -12,6 +12,7 @@ const DeveloperContentSchema = new Schema(
     networkHeadingAccent: { type: String, default: "" },
     networkP1: { type: String, default: "" },
     networkP2: { type: String, default: "" },
+    networkP3: { type: String, default: "" },
     networkBullet1: { type: String, default: "" },
     networkBullet2: { type: String, default: "" },
     networkBullet3: { type: String, default: "" },

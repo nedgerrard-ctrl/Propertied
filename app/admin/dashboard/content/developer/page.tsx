@@ -85,32 +85,6 @@ export default function DeveloperInlineEditor() {
 
   const c = content;
 
-  const partnershipBenefits = [
-    { titleField: "benefit1Title" as Field, descField: "benefit1Desc" as Field },
-    { titleField: "benefit2Title" as Field, descField: "benefit2Desc" as Field },
-    { titleField: "benefit3Title" as Field, descField: "benefit3Desc" as Field },
-  ];
-
-  const processSteps = [
-    { step: "01", titleField: "process1Title" as Field, descField: "process1Desc" as Field },
-    { step: "02", titleField: "process2Title" as Field, descField: "process2Desc" as Field },
-    { step: "03", titleField: "process3Title" as Field, descField: "process3Desc" as Field },
-  ];
-
-  const networkBulletFields = [
-    "networkBullet1" as Field,
-    "networkBullet2" as Field,
-    "networkBullet3" as Field,
-    "networkBullet4" as Field,
-  ];
-
-  const lifecycleFields = [
-    "lifecycle1" as Field,
-    "lifecycle2" as Field,
-    "lifecycle3" as Field,
-    "lifecycle4" as Field,
-  ];
-
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-neutral-400">Loading…</div>;
   }
@@ -208,142 +182,22 @@ export default function DeveloperInlineEditor() {
           </div>
         </section>
 
-        {/* S2: Network section */}
-        <section className="relative bg-[#1e1a15] overflow-hidden">
+        {/* S2: Content */}
+        <section className="relative bg-white py-20 lg:py-28">
           <EditBadge />
-          <div className="mx-auto max-w-7xl">
-            <div className="grid min-h-[540px] lg:grid-cols-2">
-              <div className="flex flex-col justify-center px-8 py-16 lg:px-14 xl:px-16">
-                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#9e8d7a]">
-                  The PPM Difference
-                </p>
-                <h2 className="mt-4 text-[26px] font-light leading-[1.35] text-white sm:text-[30px]">
-                  <span ref={r("networkHeadingMain")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.networkHeadingMain}</span>{" "}
-                  <span ref={r("networkHeadingAccent")} contentEditable suppressContentEditableWarning className={`text-[#c8a96e] ${EDIT_DARK}`}>{c.networkHeadingAccent}</span>
-                </h2>
-                <p ref={r("networkP1")} contentEditable suppressContentEditableWarning className={`mt-5 max-w-[42ch] text-[13px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}>
-                  {c.networkP1}
-                </p>
-                <p ref={r("networkP2")} contentEditable suppressContentEditableWarning className={`mt-4 max-w-[42ch] text-[13px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}>
-                  {c.networkP2}
-                </p>
-                <div className="mt-10 grid grid-cols-1 gap-px border border-[#2d2218] bg-[#2d2218]">
-                  {networkBulletFields.map((field) => (
-                    <div key={field} className="flex items-start gap-3 bg-[#1a1410] px-4 py-4">
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
-                      <p ref={r(field)} contentEditable suppressContentEditableWarning className={`text-[12px] leading-[1.75] text-[#8a7b6d] ${EDIT_DARK}`}>
-                        {c[field]}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="relative min-h-[380px] bg-[#1e1a15] lg:min-h-0 flex items-center justify-center">
-                <p className="text-[11px] text-[#3d3028] uppercase tracking-[0.2em] select-none">
-                  [Three.js Network Canvas — preview only]
-                </p>
-              </div>
+          <div className="mx-auto max-w-3xl px-8">
+            <div className="space-y-5 text-[14px] leading-[1.85] text-[#3d3530]">
+              <p ref={r("networkP1")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.networkP1}</p>
+              <p ref={r("networkP2")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.networkP2}</p>
+              <p ref={r("networkP3")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.networkP3}</p>
             </div>
-          </div>
-        </section>
-
-        {/* S3: Why Partner */}
-        <section className="relative bg-white py-24 lg:py-32">
-          <EditBadge />
-          <div className="mx-auto max-w-7xl px-8">
-            <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2 mb-16">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">Why Partner With PPM</p>
-              <h2 ref={r("partnerHeading")} contentEditable suppressContentEditableWarning className={`text-2xl lg:text-3xl font-light text-[#1f1a17] ${EDIT_LIGHT}`}>
-                {c.partnerHeading}
-              </h2>
-            </div>
-            <div className="grid gap-px bg-[#f0ebe4] sm:grid-cols-3">
-              {partnershipBenefits.map(({ titleField, descField }) => (
-                <div key={titleField} className="bg-white p-10">
-                  <h3 ref={r(titleField)} contentEditable suppressContentEditableWarning className={`text-[16px] font-semibold text-[#1f1a17] leading-snug ${EDIT_LIGHT}`}>
-                    {c[titleField]}
-                  </h3>
-                  <div className="mt-4 w-6 border-t border-[#ddd3c6]" />
-                  <p ref={r(descField)} contentEditable suppressContentEditableWarning className={`mt-5 text-[13px] leading-[1.85] text-[#5b5147] ${EDIT_LIGHT}`}>
-                    {c[descField]}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* S4: Process */}
-        <section className="relative bg-[#f6f2eb] py-24 lg:py-32">
-          <EditBadge />
-          <div className="mx-auto max-w-7xl px-8">
-            <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2 mb-16">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d]">Process</p>
-              <h2 ref={r("processHeading")} contentEditable suppressContentEditableWarning className={`text-2xl lg:text-3xl font-light text-[#1f1a17] ${EDIT_LIGHT}`}>
-                {c.processHeading}
-              </h2>
-            </div>
-            <div className="border-l-2 border-[#ddd3c6] pl-8 lg:pl-14">
-              {processSteps.map(({ step, titleField, descField }) => (
-                <div key={step} className="grid grid-cols-[2.5rem_1fr] lg:grid-cols-[2.5rem_10rem_1fr] gap-x-6 lg:gap-x-10 gap-y-1 py-9 border-b border-[#e8e2da] last:border-b-0">
-                  <p className="text-[2.6rem] font-thin text-[#e0d8d0] tabular-nums leading-none select-none row-span-2 lg:row-span-1 self-center">{step}</p>
-                  <p ref={r(titleField)} contentEditable suppressContentEditableWarning className={`text-[15px] font-semibold text-[#1f1a17] self-center ${EDIT_LIGHT}`}>
-                    {c[titleField]}
-                  </p>
-                  <p ref={r(descField)} contentEditable suppressContentEditableWarning className={`col-start-2 lg:col-start-3 text-[13px] leading-[1.85] text-[#5b5147] max-w-[52ch] ${EDIT_LIGHT}`}>
-                    {c[descField]}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* S5: End-to-End Model */}
-        <section className="relative bg-white py-24 lg:py-32">
-          <EditBadge />
-          <div className="mx-auto max-w-7xl px-8">
-            <div className="grid lg:grid-cols-[5fr_7fr] gap-16 lg:gap-24 lg:items-start">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-[#8a7b6d] mb-6">End-to-End Model</p>
-                <h2 ref={r("endToEndHeading")} contentEditable suppressContentEditableWarning className={`text-3xl lg:text-[2.75rem] font-light leading-[1.2] text-[#1f1a17] ${EDIT_LIGHT}`}>
-                  {c.endToEndHeading}
-                </h2>
-                <div className="mt-8 space-y-5 text-[13px] leading-[1.9] text-[#5b5147]">
-                  <p ref={r("endToEndP1")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.endToEndP1}</p>
-                  <p ref={r("endToEndP2")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.endToEndP2}</p>
-                </div>
-              </div>
-              <div className="border border-[#e3d8ca] bg-[#fbf8f3] p-10">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8a7b6d]">The Lifecycle</p>
-                <div className="mt-8 space-y-6">
-                  {lifecycleFields.map((field, i) => (
-                    <div key={field} className="flex items-start gap-5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#ddd3c6] text-[11px] font-semibold text-[#2f2a24]">
-                        {i + 1}
-                      </div>
-                      <p ref={r(field)} contentEditable suppressContentEditableWarning className={`pt-1 text-[13px] leading-6 text-[#5b5147] ${EDIT_LIGHT}`}>
-                        {c[field]}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* S6: CTA */}
-        <section className="relative bg-[#1c1814] py-32 lg:py-44">
-          <EditBadge />
-          <div className="mx-auto max-w-7xl px-8 text-center">
-            <p className="text-[10px] uppercase tracking-[0.32em] text-[#4a3f37]">Work With PPM</p>
-            <h2 ref={r("ctaHeading")} contentEditable suppressContentEditableWarning className={`mt-6 text-4xl md:text-6xl lg:text-7xl font-light text-white leading-[1.06] whitespace-pre-line ${EDIT_DARK}`}>
-              {c.ctaHeading}
-            </h2>
-            <p ref={r("ctaSubtext")} contentEditable suppressContentEditableWarning className={`mt-6 text-[14px] text-[#8a7b6d] max-w-[40ch] mx-auto leading-[1.9] ${EDIT_DARK}`}>
-              {c.ctaSubtext}
+            <p className="mt-8 text-[14px] leading-[1.85] text-[#3d3530]">
+              To discuss your project in confidence, contact us at{" "}
+              <span className="text-[#c8a96e]">admin@onlinepropertyservices.com.au</span>
+              {" "}or{" "}
+              <span className="text-[#c8a96e]">register your interest below</span>.
             </p>
+            <div className="mt-10 border-b border-[#ddd3c6]" />
           </div>
         </section>
 

@@ -424,7 +424,7 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
   const c = content;
   const bulletFields: Field[] = isInvestors
     ? ["investorsBullet1", "investorsBullet2", "investorsBullet3", "investorsBullet4", "investorsBullet5"]
-    : ["ownerBullet1", "ownerBullet2", "ownerBullet3", "ownerBullet4", "ownerBullet5"];
+    : ["ownerBullet1", "ownerBullet2", "ownerBullet3"];
 
   if (loading) return <div className="flex min-h-screen items-center justify-center text-sm text-neutral-400">Loading…</div>;
 
@@ -497,9 +497,6 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
         <section className="relative border-y border-[#e3d8ca] bg-[#f6f2eb] py-32">
           <EditBadge />
           <div className="mx-auto max-w-7xl px-6 md:px-12">
-            <h2 className="mb-20 text-4xl font-light text-[#1f1a17] md:text-5xl">
-              <span ref={r("tailoredHeading")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.tailoredHeading}</span>
-            </h2>
             <div className="max-w-2xl">
               <div className="mb-8 flex items-start justify-between border-t border-[#c8a96e]/40 pt-8">
                 <h3 className="text-3xl font-light text-[#1f1a17]">
@@ -513,21 +510,39 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
                 </h3>
                 <span className="tabular-nums text-sm text-[#8a7b6d]">{isInvestors ? "01" : "02"}</span>
               </div>
+              <div className="mb-8 space-y-4 text-[13px] font-light leading-[2] text-[#5a4a3f]">
+                <p
+                  ref={r(isInvestors ? "investorsBody" : "ownerBody")}
+                  contentEditable suppressContentEditableWarning
+                  className={EDIT_LIGHT}
+                >
+                  {isInvestors ? c.investorsBody : c.ownerBody}
+                </p>
+                {isInvestors && (
+                  <p
+                    ref={r("investorsBody2")}
+                    contentEditable suppressContentEditableWarning
+                    className={EDIT_LIGHT}
+                  >
+                    {c.investorsBody2}
+                  </p>
+                )}
+              </div>
               <p
-                ref={r(isInvestors ? "investorsBody" : "ownerBody")}
+                ref={r(isInvestors ? "investorsStepsLabel" : "ownerStepsLabel")}
                 contentEditable suppressContentEditableWarning
-                className={`mb-8 text-[13px] font-light leading-[2] text-[#5a4a3f] ${EDIT_LIGHT}`}
+                className={`mb-4 text-[10px] uppercase tracking-[0.22em] text-[#c8a96e] ${EDIT_LIGHT}`}
               >
-                {isInvestors ? c.investorsBody : c.ownerBody}
+                {isInvestors ? c.investorsStepsLabel : c.ownerStepsLabel}
               </p>
-              <ul className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
-                {bulletFields.map((field) => (
-                  <li key={field} className="flex gap-4">
-                    <span className="shrink-0 text-[#c8a96e]">—</span>
+              <ol className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                {bulletFields.map((field, i) => (
+                  <li key={field} className="flex gap-3">
+                    <span className="shrink-0 font-semibold text-[#c8a96e]">{i + 1}.</span>
                     <span ref={r(field)} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c[field]}</span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
           </div>
         </section>

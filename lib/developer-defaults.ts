@@ -1,55 +1,57 @@
 export const developerDefaults = {
-  heroHeadingMain: "Sell your development through Melbourne's",
-  heroHeadingAccent: "most trusted channel.",
+  heroHeadingMain: "Advisory, Sales & Project Rescue",
+  heroHeadingAccent: "for Melbourne Developers.",
   heroSubtext:
-    "PPM works with developers as an independent third-party partner — connecting quality off-the-plan projects with qualified buyers and investors across local and overseas markets.",
+    "PPM covers the full development lifecycle — from concept feasibility and pricing strategy through to targeted sales execution and full project rescue. As a selective third-party agent, we bring a qualified buyer network built across thirteen years.",
 
-  networkHeadingMain: "More than a project marketer —",
-  networkHeadingAccent: "a full ecosystem partner.",
+  networkHeadingMain: "Full lifecycle developer services —",
+  networkHeadingAccent: "built on thirteen years of insider knowledge.",
   networkP1:
-    "PPM sits at the centre of a connected network: developers, qualified local and overseas buyers, portfolio management, and eventual resale. Every project we represent benefits from the full depth of that ecosystem.",
+    "Our services cover the full development lifecycle. At concept stage we provide feasibility input, finish selection guidance, pricing strategy and marketing positioning — the decisions that determine the outcome at completion. For projects already in market, we offer targeted sales execution and, where required, full project rescue and restructure. PPM has turned around developments that other agencies could not move, applying management consulting discipline to the diagnosis and proven sales capability to the solution.",
   networkP2:
-    "Our model means deeper investor relationships, stronger market understanding, and a service connected to the full life cycle of property ownership.",
-  networkBullet1: "Independent channel partner, not tied to one developer",
-  networkBullet2: "Commission-based representation for suitable developments",
-  networkBullet3: "Local & overseas qualified buyer network",
-  networkBullet4: "Experience across sourcing, selling, managing & resale",
+    "As a selective third-party agent, PPM also provides developers with direct access to our established database of qualified local and overseas investors who are actively seeking Melbourne off-the-plan property. This network has been built across thirteen years of active market participation. Because we are not exclusively contracted to any single developer, our recommendation of a project carries genuine weight with buyers — something an in-house sales team cannot replicate.",
+  networkP3:
+    "PPM's transition to a B2C model has not closed the door on developer relationships. It has simply changed their nature. We now engage selectively as a trusted independent partner — which ultimately creates a more credible and more effective position for both parties. We take on the projects we believe in, and when we bring our network to a development, our clients trust the recommendation.",
+  networkBullet1: "Feasibility input & pricing strategy at concept",
+  networkBullet2: "Targeted sales execution for in-market projects",
+  networkBullet3: "Full project rescue and restructure capability",
+  networkBullet4: "Access to a qualified buyer database of local and overseas investors",
 
-  partnerHeading: "Built on experience, trust, and long-term investor relationships",
-  benefit1Title: "Independent third-party representation",
+  partnerHeading: "Independent representation that carries genuine weight.",
+  benefit1Title: "Not tied to any single developer",
   benefit1Desc:
-    "PPM is not tied to any single project or developer. We act as an independent channel partner — aligning the right developments with the right buyers.",
-  benefit2Title: "End-to-end investor journey",
+    "As a selective third-party agent, PPM provides developers with direct access to our established database of qualified local and overseas investors who are actively seeking Melbourne off-the-plan property.",
+  benefit2Title: "Thirteen years of market participation",
   benefit2Desc:
-    "Our model extends beyond the initial sale. We support buyers through acquisition, ongoing portfolio management, and eventual resale.",
-  benefit3Title: "Experienced off-the-plan specialists",
+    "Our buyer network has been built across thirteen years of active market participation. We take on the projects we believe in — and when we bring our network to a development, our clients trust the recommendation.",
+  benefit3Title: "A trusted independent partner",
   benefit3Desc:
-    "Rooted in off-the-plan apartments and townhouses, PPM brings practical depth in project marketing, buyer qualification, and sales progression.",
+    "PPM's transition to a B2C model has not closed the door on developer relationships. We now engage selectively as a trusted independent partner — which creates a more credible and more effective position for both parties.",
 
-  processHeading: "A straightforward partnership approach",
-  process1Title: "Project alignment",
+  processHeading: "A selective and structured partnership",
+  process1Title: "Concept stage assessment",
   process1Desc:
-    "We assess the development, target buyer profile, and market positioning before committing to representation.",
-  process2Title: "Project representation",
+    "Feasibility input, finish selection guidance, pricing strategy and marketing positioning — the decisions that determine the outcome at completion.",
+  process2Title: "Sales execution & project rescue",
   process2Desc:
-    "PPM markets your development to qualified buyers and investors on a commission basis, maintaining a premium presentation throughout.",
-  process3Title: "Buyer matching & progression",
+    "For projects in market, targeted sales execution and, where required, full project rescue and restructure using management consulting discipline.",
+  process3Title: "Qualified buyer network access",
   process3Desc:
-    "We guide interested buyers through project discussions, display suite visits, and through to sale progression.",
+    "Direct access to our established database of qualified local and overseas investors actively seeking Melbourne off-the-plan property.",
 
-  endToEndHeading: "Beyond a single transaction.",
+  endToEndHeading: "Beyond the initial sale.",
   endToEndP1:
     "PPM's broader model extends beyond simply introducing a buyer to a project. We are built around a wider investment journey that continues through portfolio management and eventual resale.",
   endToEndP2:
-    "That matters to developers because it reflects deeper investor relationships, stronger market understanding, and a service connected to the full life cycle of property ownership.",
-  lifecycle1: "Source the right opportunity",
-  lifecycle2: "Support the buyer journey",
-  lifecycle3: "Manage long-term investor relationships",
-  lifecycle4: "Assist with future resale & reinvestment",
+    "That matters to developers because it reflects deeper investor relationships — clients who stay in the portfolio, who return for reinvestment, and who trust PPM's recommendation next time.",
+  lifecycle1: "Concept feasibility & pricing strategy",
+  lifecycle2: "Project marketing & sales execution",
+  lifecycle3: "Buyer management & long-term relationships",
+  lifecycle4: "Resale & reinvestment into future projects",
 
-  ctaHeading: "Ready to discuss\nyour development?",
+  ctaHeading: "Discuss your development\nin confidence.",
   ctaSubtext:
-    "Contact our team to explore how PPM can support your project through commission-based representation and premium market positioning.",
+    "To discuss your project in confidence, contact us at admin@onlinepropertyservices.com.au or register your interest below.",
 };
 
 export type DeveloperContentData = typeof developerDefaults;
