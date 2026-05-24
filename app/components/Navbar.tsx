@@ -18,6 +18,7 @@ const ALL_PRIMARY_LINKS = [
   { href: '/our-people',  label: 'Our People',   slug: 'our-people' },
   { href: '/developer',   label: 'Developers',   slug: 'developer' },
   { href: '/blog',        label: 'Blog',         slug: null },
+  { href: '/insights',    label: 'Insights',     slug: 'insights' },
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
 ]
 

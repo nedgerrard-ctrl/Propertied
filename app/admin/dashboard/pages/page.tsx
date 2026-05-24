@@ -34,6 +34,7 @@ const CMS_EDIT_LINKS: Record<string, string> = {
   buyer:       "/admin/dashboard/content/buyer",
   developer:   "/admin/dashboard/content/developer",
   testimonial: "/admin/dashboard/content/testimonial",
+  insights:    "/admin/dashboard/content/insights",
 };
 
 const CMS_PREVIEW_LINKS: Record<string, string> = {
@@ -43,6 +44,7 @@ const CMS_PREVIEW_LINKS: Record<string, string> = {
   buyer:       "/buyers/investors",
   developer:   "/developer",
   testimonial: "/testimonial",
+  insights:    "/insights",
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────

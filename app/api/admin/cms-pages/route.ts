@@ -9,6 +9,7 @@ const SEED_PAGES = [
   { slug: "buyer",       name: "Buyers",        description: "Buyer-focused page with project listings and buyer guides.", published: true },
   { slug: "developer",   name: "Developer",     description: "Developer partnership and off-plan project information.", published: true },
   { slug: "testimonial", name: "Testimonials",  description: "Client testimonials and reviews.", published: true },
+  { slug: "insights",    name: "Insights",      description: "Market intelligence and budget insights for property investors.", published: true },
 ];
 
 export async function GET() {
