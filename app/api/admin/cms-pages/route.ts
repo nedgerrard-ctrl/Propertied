@@ -13,6 +13,7 @@ const SEED_PAGES = [
   { slug: "off-the-plan-explainer", name: "Off-the-Plan Explainer", description: "Buyer education guide — what off-the-plan means, the six advantages, and 2026 Budget tax reforms.", published: true },
   { slug: "full-disclaimer",        name: "Full Disclaimer",        description: "Legal and regulatory disclosures — licence, acquisition fees, tax notices, and stamp duty caveats.", published: true },
   { slug: "past-projects",          name: "Past Projects",          description: "Card grid of past Melbourne developments. Add, remove, and reorder project cards.", published: true },
+  { slug: "blog",                   name: "Blog",                   description: "Blog listing page — hero heading and subtext. Individual posts managed in Blogs section.", published: true },
 ];
 
 export async function GET() {
