@@ -14,6 +14,7 @@ const SEED_PAGES = [
   { slug: "full-disclaimer",        name: "Full Disclaimer",        description: "Legal and regulatory disclosures — licence, acquisition fees, tax notices, and stamp duty caveats.", published: true },
   { slug: "past-projects",          name: "Past Projects",          description: "Card grid of past Melbourne developments. Add, remove, and reorder project cards.", published: true },
   { slug: "blog",                   name: "Blog",                   description: "Blog listing page — hero heading and subtext. Individual posts managed in Blogs section.", published: true },
+  { slug: "resources",              name: "Resources",              description: "Downloadable forms and documents for tenants, owners, investors, and partners.", published: true },
 ];
 
 export async function GET() {

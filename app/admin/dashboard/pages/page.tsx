@@ -39,6 +39,7 @@ const CMS_EDIT_LINKS: Record<string, string> = {
   "full-disclaimer":        "/admin/dashboard/content/full-disclaimer",
   "past-projects":          "/admin/dashboard/content/past-projects",
   blog:                     "/admin/dashboard/content/blog",
+  resources:                "/admin/dashboard/content/resources",
 };
 
 const CMS_PREVIEW_LINKS: Record<string, string> = {
@@ -53,6 +54,7 @@ const CMS_PREVIEW_LINKS: Record<string, string> = {
   "full-disclaimer":        "/full-disclaimer",
   "past-projects":          "/past-projects",
   blog:                     "/blog",
+  resources:                "/resources",
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────

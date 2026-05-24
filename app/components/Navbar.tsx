@@ -17,9 +17,10 @@ const ALL_PRIMARY_LINKS = [
   { href: '/about',       label: 'About',        slug: 'about' },
   { href: '/our-people',  label: 'Our People',   slug: 'our-people' },
   { href: '/developer',   label: 'Developers',   slug: 'developer' },
-  { href: '/blog',        label: 'Blog',         slug: null },
+  { href: '/blog',        label: 'Blog',         slug: 'blog' },
   { href: '/insights',    label: 'Insights',     slug: 'insights' },
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
+  { href: '/resources',   label: 'Resources',    slug: 'resources' },
 ]
 
 
