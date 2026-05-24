@@ -30,6 +30,7 @@ type CustomPage = {
 const CMS_EDIT_LINKS: Record<string, string> = {
   landing:     "/admin/dashboard/content/landing",
   about:       "/admin/dashboard/content/about",
+  "our-people": "/admin/dashboard/content/our-people",
   buyer:       "/admin/dashboard/content/buyer",
   developer:   "/admin/dashboard/content/developer",
   testimonial: "/admin/dashboard/content/testimonial",
@@ -38,6 +39,7 @@ const CMS_EDIT_LINKS: Record<string, string> = {
 const CMS_PREVIEW_LINKS: Record<string, string> = {
   landing:     "/",
   about:       "/about",
+  "our-people": "/our-people",
   buyer:       "/buyers/investors",
   developer:   "/developer",
   testimonial: "/testimonial",

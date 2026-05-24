@@ -78,7 +78,7 @@ export default async function AboutPage() {
           {/* Links */}
           <div className="mt-14 flex flex-wrap gap-x-8 gap-y-3">
             <Link
-              href="/about/people"
+              href="/our-people"
               className="text-[13px] text-[#1f1a17] hover:text-[#c8a96e] transition-colors"
             >
               → Meet our people

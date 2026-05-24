@@ -15,6 +15,7 @@ const BUYERS_DROPDOWN = [
 const ALL_PRIMARY_LINKS = [
   { href: '/',            label: 'Home',         slug: 'landing' },
   { href: '/about',       label: 'About',        slug: 'about' },
+  { href: '/our-people',  label: 'Our People',   slug: 'our-people' },
   { href: '/developer',   label: 'Developers',   slug: 'developer' },
   { href: '/blog',        label: 'Blog',         slug: null },
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
