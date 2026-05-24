@@ -48,8 +48,9 @@ export default function Footer() {
             </p>
             <ul className="space-y-3 text-[12px] text-[#4a3f37]">
               <li><Link href="/about" className="hover:text-[#c8a96e] transition-colors">About PPM</Link></li>
-              <li><Link href="/about" className="hover:text-[#c8a96e] transition-colors">Our People</Link></li>
-              <li><Link href="/blog" className="hover:text-[#c8a96e] transition-colors">Insights</Link></li>
+              <li><Link href="/our-people" className="hover:text-[#c8a96e] transition-colors">Our People</Link></li>
+              <li><Link href="/insights" className="hover:text-[#c8a96e] transition-colors">Insights</Link></li>
+              <li><Link href="/past-projects" className="hover:text-[#c8a96e] transition-colors">Past Projects</Link></li>
               <li><Link href="/contact" className="hover:text-[#c8a96e] transition-colors">Contact</Link></li>
             </ul>
           </div>
