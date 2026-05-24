@@ -215,7 +215,7 @@ function WhatWeDoSection({ content }: { content: LandingContentData }) {
           </p>
 
           <Link
-            href="/buyers"
+            href="/off-the-plan-explainer"
             className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
           >
             → What is off-the-plan?

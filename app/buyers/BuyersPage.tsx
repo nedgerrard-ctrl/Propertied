@@ -400,7 +400,7 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                     → Request a strategic asset review
                   </Link>
                   <Link
-                    href="/buyers/investors"
+                    href="/off-the-plan-explainer"
                     className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
                   >
                     → What is off-the-plan?

@@ -93,37 +93,25 @@ export default function InsightsPage({ content }: { content: InsightsContentData
 
           {/* Links */}
           <div className="mt-8 flex flex-wrap items-center gap-6">
-            {c.link1Url && c.link1Url !== '#' ? (
-              <Link
-                href={c.link1Url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35] transition hover:text-[#c8a96e]"
-              >
-                <span className="text-[#c8a96e]">→</span>
-                {c.link1Label}
-              </Link>
-            ) : (
-              <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35]">
-                <span className="text-[#c8a96e]">→</span>
-                {c.link1Label}
-              </span>
-            )}
-            {c.link2Url && c.link2Url !== '#' ? (
-              <Link
-                href={c.link2Url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35] transition hover:text-[#c8a96e]"
-              >
-                <span className="text-[#c8a96e]">→</span>
-                {c.link2Label}
-              </Link>
-            ) : (
-              <span className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35]">
-                <span className="text-[#c8a96e]">→</span>
-                {c.link2Label}
-              </span>
+            {[{ label: c.link1Label, url: c.link1Url }, { label: c.link2Label, url: c.link2Url }].map(
+              ({ label, url }) =>
+                url && url !== '#' ? (
+                  <Link
+                    key={label}
+                    href={url}
+                    target={url.startsWith('/') ? undefined : '_blank'}
+                    rel={url.startsWith('/') ? undefined : 'noopener noreferrer'}
+                    className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35] transition hover:text-[#c8a96e]"
+                  >
+                    <span className="text-[#c8a96e]">→</span>
+                    {label}
+                  </Link>
+                ) : (
+                  <span key={label} className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-[#4a3d35]">
+                    <span className="text-[#c8a96e]">→</span>
+                    {label}
+                  </span>
+                )
             )}
           </div>
 

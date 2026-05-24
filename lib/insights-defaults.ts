@@ -34,7 +34,7 @@ export const insightsDefaults = {
   link1Label: "Read the official Budget tax reform page",
   link1Url:   "#",
   link2Label: "See off-the-plan in detail",
-  link2Url:   "#",
+  link2Url:   "/off-the-plan-explainer",
 };
 
 export type InsightsContentData = typeof insightsDefaults;
