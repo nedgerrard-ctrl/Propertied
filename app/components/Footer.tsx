@@ -95,7 +95,7 @@ export default function Footer() {
             PPM is a licensed real estate agency. Licence No. 074846L · ABN 99 162 429 558. PPM does not provide financial, legal or taxation advice. Tax information on this site relates to proposed 2026-27 Budget changes and is general information only. Seek independent professional advice before making any investment decision.
           </p>
           <div className="mt-4 flex flex-wrap gap-6 text-[10px] uppercase tracking-[0.16em] text-[#4a3f37]">
-            <Link href="/contact" className="hover:text-[#c8a96e] transition-colors">Full Disclaimer</Link>
+            <Link href="/full-disclaimer" className="hover:text-[#c8a96e] transition-colors">Full Disclaimer</Link>
             <Link href="/contact" className="hover:text-[#c8a96e] transition-colors">Privacy Policy</Link>
             <span>© 2026 Property Project Marketing Pty Ltd</span>
           </div>

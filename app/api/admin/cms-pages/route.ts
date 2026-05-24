@@ -11,6 +11,7 @@ const SEED_PAGES = [
   { slug: "testimonial", name: "Testimonials",  description: "Client testimonials and reviews.", published: true },
   { slug: "insights",               name: "Insights",             description: "Market intelligence and budget insights for property investors.", published: true },
   { slug: "off-the-plan-explainer", name: "Off-the-Plan Explainer", description: "Buyer education guide — what off-the-plan means, the six advantages, and 2026 Budget tax reforms.", published: true },
+  { slug: "full-disclaimer",        name: "Full Disclaimer",        description: "Legal and regulatory disclosures — licence, acquisition fees, tax notices, and stamp duty caveats.", published: true },
 ];
 
 export async function GET() {

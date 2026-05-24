@@ -36,6 +36,7 @@ const CMS_EDIT_LINKS: Record<string, string> = {
   testimonial: "/admin/dashboard/content/testimonial",
   insights:               "/admin/dashboard/content/insights",
   "off-the-plan-explainer": "/admin/dashboard/content/off-the-plan-explainer",
+  "full-disclaimer":        "/admin/dashboard/content/full-disclaimer",
 };
 
 const CMS_PREVIEW_LINKS: Record<string, string> = {
@@ -47,6 +48,7 @@ const CMS_PREVIEW_LINKS: Record<string, string> = {
   testimonial: "/testimonial",
   insights:               "/insights",
   "off-the-plan-explainer": "/off-the-plan-explainer",
+  "full-disclaimer":        "/full-disclaimer",
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────
