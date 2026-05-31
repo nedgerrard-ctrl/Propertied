@@ -134,7 +134,7 @@ function getEnquiryLabel(enquiry: Enquiry) {
   if (enquiry.enquiryType === "buyer") {
     if (enquiry.propertyInterest === "off-plan") return "Off-the-Plan";
     if (enquiry.propertyInterest === "established") return "Established";
-    return "Buyer / Investor";
+    return "Buyer";
   }
   if (enquiry.enquiryType === "developer") return "Developer";
   return "General";
@@ -249,6 +249,7 @@ function ClientDetailPanel({
   const [savingStatus, setSavingStatus] = useState(false);
   const [savedStatus, setSavedStatus] = useState(false);
   const [actionLoading, setActionLoading] = useState<"approve" | "reject" | null>(null);
+  const [actionError, setActionError] = useState("");
 
   const [pendingClientType, setPendingClientType] = useState<ClientType>(initialClient.clientType ?? "");
   const [savingClientType, setSavingClientType] = useState(false);
@@ -292,19 +293,28 @@ function ClientDetailPanel({
         ? { accountStatus: "approved-existing-client", userType: "existing_client", pendingApproval: false }
         : { accountStatus: "rejected", userType: "buyer_investor", pendingApproval: false };
     setActionLoading(action);
-    const res = await fetch(`/api/admin/clients/${client._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setClient(data.client);
-      const newStatus = getAccountStatus(data.client);
-      setPendingStatus(newStatus);
-      onStatusUpdate(client._id, newStatus);
+    setActionError("");
+    try {
+      const res = await fetch(`/api/admin/clients/${client._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setClient(data.client);
+        const newStatus = getAccountStatus(data.client);
+        setPendingStatus(newStatus);
+        onStatusUpdate(client._id, newStatus);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.message ?? "Action failed. Please try again.");
+      }
+    } catch {
+      setActionError("Network error. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
-    setActionLoading(null);
   }
 
   async function handleSaveStatus() {
@@ -569,6 +579,9 @@ function ClientDetailPanel({
                         {actionLoading === "reject" ? "Rejecting…" : "Reject Existing Client"}
                       </button>
                     </div>
+                    {actionError && (
+                      <p className="mt-2 text-[12px] text-red-600">{actionError}</p>
+                    )}
                   </div>
                 </section>
               )}

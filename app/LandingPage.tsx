@@ -105,16 +105,16 @@ function VideoHero({ content }: { content: LandingContentData }) {
           className="mt-10 flex flex-wrap gap-4"
         >
           <Link
-            href="/buyers"
+            href="/contact"
             className="border border-[#c8a96e] px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c8a96e] transition hover:bg-[#c8a96e] hover:text-[#0a0806]"
           >
-            View Properties
+            Get in Touch
           </Link>
           <Link
-            href="/contact"
+            href="/about"
             className="border border-white/20 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#9e8d7a] transition hover:border-white/40 hover:text-white"
           >
-            Get in Touch
+            Learn More
           </Link>
         </motion.div>
       </motion.div>
@@ -399,10 +399,10 @@ function CtaBanner({ content }: { content: LandingContentData }) {
               Get in Touch
             </Link>
             <Link
-              href="/buyers"
+              href="/about"
               className="border border-neutral-800 px-10 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8a7b6d] transition hover:border-neutral-600 hover:text-neutral-200"
             >
-              View Properties
+              Learn More
             </Link>
           </div>
         </motion.div>

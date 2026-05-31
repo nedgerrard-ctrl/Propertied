@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import LogoutButton from "@/app/client/dashboard/logout-button";
 
 const BASE_LINKS = [
   { href: "/client/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -119,6 +120,10 @@ export default function ClientNavbar() {
           );
         })}
       </nav>
+
+      <div className="mt-4 border-t border-neutral-200 pt-4">
+        <LogoutButton />
+      </div>
 
     </aside>
   );

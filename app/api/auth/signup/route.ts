@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import { isValidPassword, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/password-validation";
+import { sendEmail } from "@/lib/email";
+import { buildWelcomeVerificationEmail } from "@/lib/email-templates";
 
 type FieldErrors = Record<string, string>;
 
@@ -150,7 +153,26 @@ export async function POST(req: NextRequest) {
       if (abn?.trim()) userData.abn = abn.replace(/\s/g, "");
     }
 
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    userData.emailVerified = false;
+    userData.emailVerificationToken = rawToken;
+    userData.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     await User.create(userData);
+
+    const baseUrl = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const verifyLink = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
+
+    try {
+      const { subject, html, text } = buildWelcomeVerificationEmail({
+        firstName: firstName.trim(),
+        email: normalizedEmail,
+        verifyLink,
+      });
+      await sendEmail({ to: normalizedEmail, subject, html, text });
+    } catch (emailErr) {
+      console.error("Failed to send verification email:", emailErr);
+    }
 
     return NextResponse.json(
       { message: "Account created successfully." },

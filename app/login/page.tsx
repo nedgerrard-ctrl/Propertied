@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import SpotlightCard from "../components/ui/SpotlightCard";
 import Waves from "../components/ui/Waves";
@@ -24,6 +24,8 @@ function getFieldClass(hasError: boolean) {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
@@ -86,7 +88,7 @@ export default function LoginPage() {
       const role = session?.user?.role;
 
       if (role === "admin") {
-        window.location.href = "/admin/dashboard";
+        window.location.href = callbackUrl ?? "/admin/dashboard";
         return;
       }
 
@@ -97,11 +99,8 @@ export default function LoginPage() {
           window.location.href = "/account-rejected";
           return;
         }
-        if (userType === "developer") {
-          window.location.href = "/developer/dashboard";
-        } else {
-          window.location.href = "/client/dashboard";
-        }
+        const defaultDash = userType === "developer" ? "/developer/dashboard" : "/client/dashboard";
+        window.location.href = callbackUrl ?? defaultDash;
         return;
       }
 
@@ -137,7 +136,7 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[#b89464]">
-            Admin Portal
+            Client Portal
           </p>
           <h1 className="mt-4 text-[2.6rem] font-medium leading-[1.1] tracking-tight text-[#f4f1ea]">
             Property
@@ -200,7 +199,7 @@ export default function LoginPage() {
               <input
                 id="email"
                 type="email"
-                placeholder="admin@ppm.com.au"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -277,7 +276,7 @@ export default function LoginPage() {
           <div className="space-y-2.5 text-[13px] text-[#7a7166]">
             <p className="flex items-start gap-2">
               <span className="mt-0.5 text-[#b89464]">—</span>
-              Use your registered admin email and password.
+              Use your registered email and password.
             </p>
             <p className="flex items-start gap-2">
               <span className="mt-0.5 text-[#b89464]">—</span>

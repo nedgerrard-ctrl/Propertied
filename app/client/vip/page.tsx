@@ -36,7 +36,7 @@ export default async function VipPage() {
 
   const [featured, ...rest] = articles;
 
-  const fallbackGradient = "linear-gradient(140deg, #2f2a24 0%, #1a1613 100%)";
+  const fallbackGradient = "linear-gradient(140deg, #e8ddd0 0%, #d4c9bb 100%)";
 
   return (
     <main className="flex-1 min-h-screen bg-[#f9f6f1]">

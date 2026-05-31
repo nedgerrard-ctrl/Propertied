@@ -20,7 +20,7 @@ type Enquiry = {
 const TYPE_LABEL: Record<string, string> = {
   general: "General",
   developer: "Developer",
-  buyer: "Buyer / Investor",
+  buyer: "Buyer",
 };
 
 const STATUS_STYLE: Record<string, string> = {

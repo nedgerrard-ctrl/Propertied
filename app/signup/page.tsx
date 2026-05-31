@@ -49,7 +49,7 @@ function FieldError({ msg }: { msg?: string }) {
 const ROLE_OPTIONS: { value: UserType; label: string; description: string }[] = [
   {
     value: "buyer_investor",
-    label: "Buyer / Investor",
+    label: "Buyer",
     description: "Looking to purchase or invest in property",
   },
   {

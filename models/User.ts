@@ -53,6 +53,9 @@ export interface IUser {
   abn?: string;
   adminNotes?: string;
   assignedDocuments?: IAssignedDocument[];
+  emailVerified?: boolean;
+  emailVerificationToken?: string | null;
+  emailVerificationExpires?: Date | null;
   resetPasswordTokenHash?: string | null;
   resetPasswordExpiresAt?: Date | null;
   isDeleted?: boolean;
@@ -167,6 +170,18 @@ const userSchema = new Schema<IUser>(
     abn: {
       type: String,
       trim: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
     },
     resetPasswordTokenHash: {
       type: String,

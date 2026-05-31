@@ -13,7 +13,7 @@ type ProfileData = {
 type FieldErrors = Partial<Record<keyof ProfileData, string>>;
 
 const USER_TYPE_LABEL: Record<string, string> = {
-  buyer_investor: "Buyer / Investor",
+  buyer_investor: "Buyer",
   existing_client: "Existing Client",
   developer: "Developer",
 };

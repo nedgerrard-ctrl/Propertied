@@ -37,7 +37,7 @@ const STATUS_LABEL: Record<string, string> = {
 const TYPE_LABEL: Record<string, string> = {
   general: "General",
   developer: "Developer",
-  buyer: "Buyer / Investor",
+  buyer: "Buyer",
 };
 
 function formatDate(iso: string) {

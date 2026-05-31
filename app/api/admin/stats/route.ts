@@ -82,7 +82,7 @@ export async function GET() {
     { $group: { _id: "$enquiryType", count: { $sum: 1 } } },
   ]);
   const byType = [
-    { name: "Buyer / Investor", key: "buyer", count: 0 },
+    { name: "Buyer", key: "buyer", count: 0 },
     { name: "Developer", key: "developer", count: 0 },
     { name: "General", key: "general", count: 0 },
   ];

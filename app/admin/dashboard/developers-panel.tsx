@@ -14,12 +14,15 @@ type AssignedDocument = {
   requiresSignature?: boolean;
 };
 
+type DeveloperAccountStatus = "active" | "rejected";
+
 type Developer = {
   _id: string;
   name: string;
   email: string;
   phone: string;
   companyName: string;
+  accountStatus?: DeveloperAccountStatus;
   pendingApproval: boolean;
   adminNotes: string;
   assignedDocuments: AssignedDocument[];
@@ -47,25 +50,27 @@ type Enquiry = {
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const DEV_STATUS_LABEL: Record<string, string> = {
+const DEV_STATUS_OPTIONS: DeveloperAccountStatus[] = ["active", "rejected"];
+
+const DEV_STATUS_LABEL: Record<DeveloperAccountStatus, string> = {
   active: "Active",
-  pending: "Pending",
+  rejected: "Rejected",
 };
 
-const DEV_STATUS_BADGE: Record<string, string> = {
+const DEV_STATUS_BADGE: Record<DeveloperAccountStatus, string> = {
   active: "bg-emerald-100 text-emerald-700",
-  pending: "bg-amber-100 text-amber-800",
+  rejected: "bg-red-100 text-red-700",
 };
 
-const DEV_STATUS_BUTTON: Record<string, string> = {
-  active: "border-neutral-400 bg-neutral-50 text-neutral-800",
-  pending: "border-amber-400 bg-amber-50 text-amber-800",
+const DEV_STATUS_BUTTON: Record<DeveloperAccountStatus, string> = {
+  active: "border-emerald-400 bg-emerald-50 text-emerald-800",
+  rejected: "border-red-400 bg-red-50 text-red-700",
 };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-function getDeveloperStatus(_developer: Pick<Developer, "pendingApproval">): string {
-  return "active";
+function getDeveloperStatus(developer: Pick<Developer, "accountStatus">): DeveloperAccountStatus {
+  return developer.accountStatus === "rejected" ? "rejected" : "active";
 }
 
 function formatDate(iso: string) {
@@ -183,6 +188,12 @@ function DeveloperDetailPanel({
   const [loadingDetail, setLoadingDetail] = useState(true);
   const [detailError, setDetailError] = useState("");
 
+  const [pendingStatus, setPendingStatus] = useState<DeveloperAccountStatus>(
+    getDeveloperStatus(initialDeveloper)
+  );
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [savedStatus, setSavedStatus] = useState(false);
+
   const [notes, setNotes] = useState(initialDeveloper.adminNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
   const [savedNotes, setSavedNotes] = useState(false);
@@ -209,6 +220,23 @@ function DeveloperDetailPanel({
       .catch(() => setDetailError("Failed to load developer details."))
       .finally(() => setLoadingDetail(false));
   }, [initialDeveloper._id]);
+
+  async function handleSaveStatus() {
+    if (pendingStatus === getDeveloperStatus(developer)) return;
+    setSavingStatus(true);
+    const res = await fetch(`/api/admin/developers/${developer._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accountStatus: pendingStatus }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDeveloper(data.developer);
+      setSavedStatus(true);
+      setTimeout(() => setSavedStatus(false), 2000);
+    }
+    setSavingStatus(false);
+  }
 
   async function handleSaveNotes() {
     setSavingNotes(true);
@@ -387,6 +415,37 @@ function DeveloperDetailPanel({
                     </dd>
                   </div>
                 </dl>
+              </section>
+
+              <hr className="border-neutral-100" />
+
+              {/* Account status control */}
+              <section>
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  Update Account Status
+                </p>
+                <div className="flex gap-2">
+                  {DEV_STATUS_OPTIONS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setPendingStatus(s)}
+                      className={`rounded border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] transition ${
+                        pendingStatus === s
+                          ? DEV_STATUS_BUTTON[s]
+                          : "border-neutral-200 bg-white text-neutral-400"
+                      }`}
+                    >
+                      {DEV_STATUS_LABEL[s]}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleSaveStatus}
+                  disabled={savingStatus || pendingStatus === getDeveloperStatus(developer)}
+                  className="mt-3 w-full rounded border border-blue-600 bg-blue-600 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingStatus ? "Saving…" : savedStatus ? "Saved" : "Save Status"}
+                </button>
               </section>
 
               <hr className="border-neutral-100" />
@@ -718,7 +777,8 @@ export default function DevelopersPanel() {
   const counts = useMemo(
     () => ({
       total: developers.length,
-      active: developers.length,
+      active: developers.filter((d) => getDeveloperStatus(d) === "active").length,
+      rejected: developers.filter((d) => getDeveloperStatus(d) === "rejected").length,
     }),
     [developers]
   );
@@ -793,7 +853,8 @@ export default function DevelopersPanel() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
-          { label: "Active", value: counts.active, color: "text-neutral-700" },
+          { label: "Active", value: counts.active, color: "text-emerald-700" },
+          { label: "Rejected", value: counts.rejected, color: "text-red-600" },
         ].map((s) => (
           <div
             key={s.label}
@@ -833,6 +894,7 @@ export default function DevelopersPanel() {
           >
             <option value="all">All</option>
             <option value="active">Active</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
 

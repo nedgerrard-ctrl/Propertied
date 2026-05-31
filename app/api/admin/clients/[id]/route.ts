@@ -67,6 +67,16 @@ export async function PATCH(
     if (!validStatuses.includes(body.accountStatus as string)) {
       return NextResponse.json({ message: "Invalid account status" }, { status: 400 });
     }
+    if (body.accountStatus === "approved-existing-client") {
+      await connectDB();
+      const target = await User.findOne({ _id: id, role: "client" }).select("emailVerified").lean();
+      if (target && !target.emailVerified) {
+        return NextResponse.json(
+          { message: "Cannot approve: the client has not verified their email address." },
+          { status: 422 }
+        );
+      }
+    }
     update.accountStatus = body.accountStatus;
   }
 

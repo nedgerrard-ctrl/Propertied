@@ -1,3 +1,85 @@
+type WelcomeVerificationTemplateParams = {
+  firstName: string;
+  email: string;
+  verifyLink: string;
+};
+
+export function buildWelcomeVerificationEmail({
+  firstName,
+  email,
+  verifyLink,
+}: WelcomeVerificationTemplateParams) {
+  const subject = "Welcome to PPM — please verify your email";
+
+  const text = [
+    `Welcome to Property Project Marketing, ${firstName}!`,
+    "",
+    `Your account has been created using: ${email}`,
+    "",
+    "Please verify your email address by visiting the link below:",
+    verifyLink,
+    "",
+    "This link will expire in 24 hours.",
+    "",
+    "If you did not create this account, you can safely ignore this email.",
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2f2923; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <p style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #9a8f83; margin-bottom: 8px;">
+        Property Project Marketing
+      </p>
+
+      <h1 style="font-size: 28px; margin: 0 0 16px;">Welcome, ${firstName}</h1>
+
+      <p style="margin: 0 0 16px;">
+        Your PPM account has been created using <strong>${email}</strong>.
+      </p>
+
+      <p style="margin: 0 0 24px;">
+        Please verify your email address to activate your account.
+      </p>
+
+      <p style="margin: 0 0 24px;">
+        <a
+          href="${verifyLink}"
+          style="
+            display: inline-block;
+            background: #2f2923;
+            color: #fbfaf7;
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 600;
+          "
+        >
+          Verify email address
+        </a>
+      </p>
+
+      <p style="margin: 0 0 12px; color: #6e655c;">
+        Or copy and paste this link into your browser:
+      </p>
+
+      <p style="margin: 0 0 24px; word-break: break-all;">
+        <a href="${verifyLink}" style="color: #2f2923;">
+          ${verifyLink}
+        </a>
+      </p>
+
+      <p style="margin: 0 0 12px; color: #6e655c;">
+        This link will expire in 24 hours.
+      </p>
+
+      <p style="margin: 0; color: #6e655c;">
+        If you did not create this account, you can safely ignore this email.
+      </p>
+    </div>
+  `;
+
+  return { subject, text, html };
+}
+
 type ResetPasswordTemplateParams = {
   resetLink: string;
   expiryMinutes: number;

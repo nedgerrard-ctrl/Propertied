@@ -16,7 +16,7 @@ export async function GET() {
     userType: "developer",
     isDeleted: { $ne: true },
   })
-    .select("_id name email phone companyName pendingApproval createdAt")
+    .select("_id name email phone companyName accountStatus pendingApproval createdAt")
     .sort({ createdAt: -1 })
     .lean();
 

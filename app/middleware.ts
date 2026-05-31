@@ -10,13 +10,17 @@ export default auth((req) => {
 
   // Admin routes: must be admin
   if (pathname.startsWith("/admin") && (!isLoggedIn || role !== "admin")) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Client portal: must be logged in (layout handles role check)
   if (pathname.startsWith("/client")) {
     if (!isLoggedIn) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
     }
   }
 

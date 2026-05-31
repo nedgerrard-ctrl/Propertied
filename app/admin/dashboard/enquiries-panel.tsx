@@ -113,7 +113,7 @@ function formatFileSize(fileSize: number) {
 function getEnquiryTypeLabel(type: EnquiryType) {
   switch (type) {
     case "buyer":
-      return "Buyer / Investor";
+      return "Buyer";
     case "developer":
       return "Developer";
     case "general":
@@ -126,7 +126,7 @@ function getTypeLabel(enquiry: Enquiry) {
   if (enquiry.enquiryType === "buyer") {
     if (enquiry.propertyInterest === "off-plan") return "Off-the-Plan";
     if (enquiry.propertyInterest === "established") return "Established";
-    return "Buyer / Investor";
+    return "Buyer";
   }
 
   if (enquiry.enquiryType === "developer") return "Developer Enquiry";
@@ -136,7 +136,7 @@ function getTypeLabel(enquiry: Enquiry) {
 function getSummaryLabel(enquiry: Enquiry) {
   if (enquiry.enquiryType === "buyer") {
     const parts = [enquiry.buyerType, enquiry.investorRegion].filter(Boolean);
-    return parts.length > 0 ? parts.join(" • ") : "Buyer / Investor";
+    return parts.length > 0 ? parts.join(" • ") : "Buyer";
   }
 
   if (enquiry.enquiryType === "developer") {
@@ -447,7 +447,7 @@ function DetailPanel({
 
               <section>
                 <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  Buyer / Investor Details
+                  Buyer Details
                 </p>
 
                 <dl className="space-y-2 text-[13px]">
@@ -956,7 +956,7 @@ export default function EnquiriesPanel() {
           >
             <option value="all">All enquiries</option>
             <option value="general">General</option>
-            <option value="buyer">Buyer / Investor</option>
+            <option value="buyer">Buyer</option>
             <option value="developer">Developer</option>
           </select>
         </div>

@@ -17,7 +17,6 @@ const ALL_PRIMARY_LINKS = [
   { href: '/about',       label: 'About',        slug: 'about' },
   { href: '/our-people',  label: 'Our People',   slug: 'our-people' },
   { href: '/developer',   label: 'Developers',   slug: 'developer' },
-  { href: '/blog',        label: 'Blog',         slug: 'blog' },
   { href: '/insights',    label: 'Insights',     slug: 'insights' },
   { href: '/testimonial', label: 'Testimonials', slug: 'testimonial' },
   { href: '/resources',   label: 'Resources',    slug: 'resources' },
@@ -355,7 +354,7 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
                   isActive('/login') ? linkActive : linkBase,
                 ].join(' ')}
               >
-                Login
+                Sign in
                 {isActive('/login') && <span className="absolute bottom-0 left-3 right-3 h-px bg-[#c8a96e]" />}
               </Link>
               <Link

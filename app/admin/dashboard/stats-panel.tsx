@@ -56,7 +56,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  buyer: "Buyer / Investor",
+  buyer: "Buyer",
   developer: "Developer",
   general: "General",
 };
@@ -305,7 +305,7 @@ function MonthlyDataTable({ monthly }: { monthly: MonthSlot[] }) {
             <th className="pb-3 pr-6">Month</th>
             <th className="pb-3 pr-6 text-right">Total</th>
             <th className="pb-3 pr-6 text-right" style={{ color: GOLD }}>
-              Buyer / Investor
+              Buyer
             </th>
             <th className="pb-3 pr-6 text-right text-neutral-400">Developer</th>
             <th className="pb-3 text-right text-neutral-400">General</th>
@@ -569,7 +569,7 @@ export default function StatsPanel() {
                 <Tooltip content={<ChartTooltip />} />
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
                 <Line type="monotone" dataKey="total" name="Total" stroke="#2f2923" strokeWidth={2.5} dot={{ r: 3, fill: "#2f2923", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5, fill: "#2f2923", stroke: "white", strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="buyer" name="Buyer / Investor" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: GOLD, stroke: "white", strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="buyer" name="Buyer" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: GOLD, stroke: "white", strokeWidth: 2 }} />
                 <Line type="monotone" dataKey="developer" name="Developer" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "#6b7280", stroke: "white", strokeWidth: 2 }} />
                 <Line type="monotone" dataKey="general" name="General" stroke={MID} strokeWidth={1.5} strokeDasharray="4 3" dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: MID, stroke: "white", strokeWidth: 2 }} />
               </LineChart>
@@ -610,7 +610,7 @@ export default function StatsPanel() {
                 />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f9f7f4" }} />
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: "#7a7166" }} />
-                <Bar dataKey="buyer" name="Buyer / Investor" stackId="a" fill={GOLD} />
+                <Bar dataKey="buyer" name="Buyer" stackId="a" fill={GOLD} />
                 <Bar dataKey="developer" name="Developer" stackId="a" fill="#6b7280" />
                 <Bar dataKey="general" name="General" stackId="a" fill={MID} radius={[3, 3, 0, 0]} />
               </BarChart>
@@ -752,7 +752,7 @@ export default function StatsPanel() {
               <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
               <Line type="monotone" dataKey="total" name="Total" stroke={DARK} strokeWidth={2.5} dot={{ r: 3, fill: DARK, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
-              <Line type="monotone" dataKey="buyer" name="Buyer / Investor" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
+              <Line type="monotone" dataKey="buyer" name="Buyer" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
               <Line type="monotone" dataKey="developer" name="Developer" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
               <Line type="monotone" dataKey="general" name="General" stroke={MID} strokeWidth={1.5} strokeDasharray="4 3" dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
             </LineChart>
@@ -783,7 +783,7 @@ export default function StatsPanel() {
               <YAxis allowDecimals={false} domain={[0, (dataMax: number) => dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3)]} tick={{ fontSize: 11, fill: "#a49a8d" }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f9f7f4" }} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: "#7a7166" }} />
-              <Bar dataKey="buyer" name="Buyer / Investor" stackId="a" fill={GOLD} />
+              <Bar dataKey="buyer" name="Buyer" stackId="a" fill={GOLD} />
               <Bar dataKey="developer" name="Developer" stackId="a" fill="#6b7280" />
               <Bar dataKey="general" name="General" stackId="a" fill={MID} radius={[3, 3, 0, 0]} />
             </BarChart>
