@@ -60,6 +60,13 @@ function ContactTabs() {
       >
         Developers
       </Link>
+
+      <Link
+        href="/contact/document-request"
+        className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
+      >
+        Document Request
+      </Link>
     </div>
   );
 }
