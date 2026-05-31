@@ -97,7 +97,7 @@ export default function Footer() {
           </p>
           <div className="mt-4 flex flex-wrap gap-6 text-[10px] uppercase tracking-[0.16em] text-[#4a3f37]">
             <Link href="/full-disclaimer" className="hover:text-[#c8a96e] transition-colors">Full Disclaimer</Link>
-            <Link href="/contact" className="hover:text-[#c8a96e] transition-colors">Privacy Policy</Link>
+            <Link href="/privacy-policy" className="hover:text-[#c8a96e] transition-colors">Privacy Policy</Link>
             <span>© 2026 Property Project Marketing Pty Ltd</span>
           </div>
         </div>
