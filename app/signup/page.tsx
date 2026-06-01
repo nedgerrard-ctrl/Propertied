@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
@@ -29,7 +29,6 @@ const AUSTRALIAN_CITIES = [
 ];
 
 type UserType = "buyer_investor" | "developer" | "existing_client";
-
 type FieldErrors = Record<string, string>;
 
 function getFieldClass(hasError: boolean) {
@@ -64,10 +63,92 @@ const ROLE_OPTIONS: { value: UserType; label: string; description: string }[] = 
   },
 ];
 
+// ─── OTP Input ────────────────────────────────────────────────────────────────
+
+function OtpInput({
+  value,
+  onChange,
+  hasError,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  hasError: boolean;
+}) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  function focus(i: number) {
+    inputRefs.current[i]?.focus();
+  }
+
+  function handleChange(index: number, char: string) {
+    const digit = char.replace(/\D/g, "").slice(-1);
+    const next = value.split("");
+    next[index] = digit;
+    const newVal = next.join("").slice(0, 6);
+    onChange(newVal);
+    if (digit && index < 5) focus(index + 1);
+  }
+
+  function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace") {
+      if (value[index]) {
+        const next = value.split("");
+        next[index] = "";
+        onChange(next.join(""));
+      } else if (index > 0) {
+        const next = value.split("");
+        next[index - 1] = "";
+        onChange(next.join(""));
+        focus(index - 1);
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      focus(index - 1);
+    } else if (e.key === "ArrowRight" && index < 5) {
+      focus(index + 1);
+    }
+  }
+
+  function handlePaste(e: React.ClipboardEvent) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    onChange(pasted.slice(0, 6));
+    focus(Math.min(pasted.length, 5));
+  }
+
+  const boxBase =
+    "h-14 w-11 rounded-xl border text-center text-[22px] font-semibold text-[#2f2923] outline-none transition bg-[#fbfaf7]";
+  const boxIdle = "border-[#c8bfb4] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10";
+  const boxError = "border-[#dc2626] focus:border-[#dc2626] focus:ring-2 focus:ring-[#dc2626]/10";
+
+  return (
+    <div className="flex gap-2.5 justify-center">
+      {Array.from({ length: 6 }, (_, i) => (
+        <input
+          key={i}
+          ref={(el) => { inputRefs.current[i] = el; }}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={1}
+          value={value[i] ?? ""}
+          onChange={(e) => handleChange(i, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+          onPaste={handlePaste}
+          className={[boxBase, hasError ? boxError : boxIdle].join(" ")}
+          aria-label={`Digit ${i + 1}`}
+          autoComplete="one-time-code"
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function SignupPage() {
   const router = useRouter();
 
-  const [step, setStep] = useState<"role" | "details">("role");
+  const [step, setStep] = useState<"role" | "details" | "verify">("role");
   const [userType, setUserType] = useState<UserType | "">("");
 
   const [firstName, setFirstName] = useState("");
@@ -87,6 +168,12 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // OTP step state
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [submittingOtp, setSubmittingOtp] = useState(false);
+
   function clearFieldError(field: string) {
     setFieldErrors((prev) => ({ ...prev, [field]: "" }));
   }
@@ -105,11 +192,74 @@ export default function SignupPage() {
     setStep("details");
   }
 
+  // Called when user clicks "Create account" on the details form
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setGeneralError("");
     setFieldErrors({});
     setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, firstName }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFieldErrors(data.fieldErrors ?? {});
+        setGeneralError(data.message || "Please correct the highlighted fields.");
+        setLoading(false);
+        return;
+      }
+
+      // Code sent — move to verify step
+      setOtp("");
+      setOtpError("");
+      setResendCooldown(60);
+      setStep("verify");
+      setLoading(false);
+    } catch {
+      setGeneralError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  async function handleResend() {
+    if (resendCooldown > 0) return;
+    setOtpError("");
+    setResendCooldown(60);
+    try {
+      await fetch("/api/auth/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, firstName }),
+      });
+    } catch {
+      // silently fail — user can try again
+    }
+  }
+
+  // Called when user submits OTP on the verify step
+  async function handleVerifySubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setOtpError("");
+
+    if (otp.replace(/\D/g, "").length < 6) {
+      setOtpError("Please enter all 6 digits.");
+      return;
+    }
+
+    setSubmittingOtp(true);
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -128,23 +278,32 @@ export default function SignupPage() {
           city,
           companyName,
           abn,
+          verificationCode: otp,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setFieldErrors(data.fieldErrors ?? {});
-        setGeneralError(data.message || "Please correct the highlighted fields.");
-        setLoading(false);
+        if (data.fieldErrors?.verificationCode) {
+          setOtpError(data.fieldErrors.verificationCode);
+        } else if (data.fieldErrors) {
+          // Form-level error (e.g. email taken race condition) — go back to details
+          setFieldErrors(data.fieldErrors);
+          setGeneralError(data.message || "Please correct the highlighted fields.");
+          setStep("details");
+        } else {
+          setOtpError(data.message || "Verification failed. Please try again.");
+        }
+        setSubmittingOtp(false);
         return;
       }
 
       setSuccess(true);
-      setLoading(false);
+      setSubmittingOtp(false);
     } catch {
-      setGeneralError("Something went wrong. Please try again.");
-      setLoading(false);
+      setOtpError("Something went wrong. Please try again.");
+      setSubmittingOtp(false);
     }
   }
 
@@ -168,14 +327,14 @@ export default function SignupPage() {
               </p>
             ) : (
               <p className="mb-8 text-[14px] leading-6 text-[#6e655c]">
-                Your account has been created successfully. You can now sign in to access your portal.
+                Your email has been verified and your account is ready. You can now sign in.
               </p>
             )}
             <button
               onClick={() => router.push("/login")}
               className="w-full rounded-xl bg-[#2f2923] px-4 py-3.5 text-[15px] font-medium text-[#f4f1ea] transition hover:bg-[#3d342c]"
             >
-              Click here to login
+              Sign in
             </button>
           </div>
         </div>
@@ -204,6 +363,7 @@ export default function SignupPage() {
             </p>
           </div>
 
+          {/* ── Step: Role selection ─────────────────────────────────────── */}
           {step === "role" && (
             <div>
               <p className="mb-4 text-[13px] font-medium text-[#4d453d]">
@@ -248,6 +408,7 @@ export default function SignupPage() {
             </div>
           )}
 
+          {/* ── Step: Details form ───────────────────────────────────────── */}
           {step === "details" && (
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div className="mb-2 flex items-center gap-3">
@@ -462,7 +623,7 @@ export default function SignupPage() {
                 </>
               )}
 
-              {generalError && Object.keys(fieldErrors).length === 0 && (
+              {generalError && Object.keys(fieldErrors).filter((k) => fieldErrors[k]).length === 0 && (
                 <div className="rounded-xl border border-[#d4b7b0] bg-[#f7e9e6] px-4 py-3 text-[13px] text-[#8a3d31]">
                   {generalError}
                 </div>
@@ -479,11 +640,78 @@ export default function SignupPage() {
                 disabled={loading}
                 className="mt-1 w-full rounded-xl bg-[#2f2923] px-4 py-3.5 text-[15px] font-medium text-[#f4f1ea] transition hover:bg-[#3d342c] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Creating account…" : "Create account"}
+                {loading ? "Sending code…" : "Create account"}
               </button>
 
               <p className="text-[12px] text-[#a49a8d]">
                 By creating an account, you agree to our Terms of Use and Privacy Policy.
+              </p>
+            </form>
+          )}
+
+          {/* ── Step: Email verification ─────────────────────────────────── */}
+          {step === "verify" && (
+            <form onSubmit={handleVerifySubmit} noValidate className="space-y-6">
+              <div className="mb-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setStep("details"); setOtp(""); setOtpError(""); }}
+                  className="flex items-center gap-1.5 text-[13px] text-[#7a7166] transition hover:text-[#2f2923]"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-[#ddd5c8] bg-white px-6 py-6 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#f0f7ee]">
+                  <svg className="h-6 w-6 text-[#4a9b5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-[15px] font-medium text-[#2f2923]">Check your email</p>
+                <p className="mt-1.5 text-[13px] text-[#6e655c]">
+                  We sent a 6-digit code to
+                </p>
+                <p className="mt-0.5 text-[13px] font-semibold text-[#2f2923] break-all">
+                  {email}
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-3 block text-center text-[13px] font-medium text-[#4d453d]">
+                  Enter verification code
+                </label>
+                <OtpInput value={otp} onChange={(v) => { setOtp(v); setOtpError(""); }} hasError={Boolean(otpError)} />
+                {otpError && (
+                  <p className="mt-3 text-center text-[13px] text-[#dc2626]">{otpError}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingOtp || otp.replace(/\D/g, "").length < 6}
+                className="w-full rounded-xl bg-[#2f2923] px-4 py-3.5 text-[15px] font-medium text-[#f4f1ea] transition hover:bg-[#3d342c] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submittingOtp ? "Creating account…" : "Verify & Create Account"}
+              </button>
+
+              <p className="text-center text-[13px] text-[#7a7166]">
+                Didn&apos;t receive a code?{" "}
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendCooldown > 0}
+                  className="font-medium text-[#2f2923] underline underline-offset-4 transition hover:text-[#b89464] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                </button>
+              </p>
+
+              <p className="text-center text-[12px] text-[#a49a8d]">
+                Code expires in 10 minutes.
               </p>
             </form>
           )}

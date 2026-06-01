@@ -50,6 +50,10 @@ export async function PATCH(
 
   const update: Record<string, unknown> = {};
 
+  if (body.restore === true) {
+    update.isDeleted = false;
+  }
+
   if ("userType" in body) {
     const validUserTypes = ["buyer_investor", "existing_client"];
     if (!validUserTypes.includes(body.userType as string)) {
@@ -107,7 +111,7 @@ export async function PATCH(
 
   const client = await User.findOneAndUpdate(
     { _id: id, role: "client" },
-    update,
+    { $set: update },
     { new: true }
   )
     .select("-passwordHash -resetPasswordTokenHash -resetPasswordExpiresAt")
@@ -121,7 +125,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
@@ -130,8 +134,17 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const permanent = req.nextUrl.searchParams.get("permanent") === "true";
 
   await connectDB();
+
+  if (permanent) {
+    const result = await User.deleteOne({ _id: id, role: "client" });
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "Client not found" }, { status: 404 });
+    }
+    return NextResponse.json({ message: "Client permanently deleted." });
+  }
 
   const client = await User.findOneAndUpdate(
     { _id: id, role: "client", isDeleted: { $ne: true } },

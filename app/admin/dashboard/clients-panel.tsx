@@ -910,6 +910,7 @@ export default function ClientsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Client | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -918,12 +919,31 @@ export default function ClientsPanel() {
   const [bulkRemoving, setBulkRemoving] = useState(false);
   const [showBulkRemoveConfirm, setShowBulkRemoveConfirm] = useState(false);
 
+  // Archived state
+  const [archivedClients, setArchivedClients] = useState<Client[]>([]);
+  const [archivedLoading, setArchivedLoading] = useState(true);
+  const [archivedError, setArchivedError] = useState("");
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [confirmPermanentDelete, setConfirmPermanentDelete] = useState<Client | null>(null);
+  const [deletingPermanent, setDeletingPermanent] = useState(false);
+  const [showBulkPermanentDeleteConfirm, setShowBulkPermanentDeleteConfirm] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkRestoring, setBulkRestoring] = useState(false);
+
   useEffect(() => {
     fetch("/api/admin/clients")
       .then((r) => r.json())
       .then((data) => setClients(data.clients ?? []))
       .catch(() => setError("Failed to load clients."))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/clients?archived=true")
+      .then((r) => r.json())
+      .then((data) => setArchivedClients(data.clients ?? []))
+      .catch(() => setArchivedError("Failed to load archived accounts."))
+      .finally(() => setArchivedLoading(false));
   }, []);
 
   function handleStatusUpdate(id: string, status: AccountStatus) {
@@ -949,10 +969,84 @@ export default function ClientsPanel() {
     setSelected((prev) => (prev?._id === id ? null : prev));
   }
 
+  async function handleRestore(id: string) {
+    setRestoringId(id);
+    try {
+      const res = await fetch(`/api/admin/clients/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restore: true }),
+      });
+      if (res.ok) {
+        setArchivedClients((prev) => prev.filter((c) => c._id !== id));
+        setSelectedIds((prev) => prev.filter((sid) => sid !== id));
+      }
+    } finally {
+      setRestoringId(null);
+    }
+  }
+
+  async function handlePermanentDelete() {
+    if (!confirmPermanentDelete) return;
+    setDeletingPermanent(true);
+    try {
+      const res = await fetch(`/api/admin/clients/${confirmPermanentDelete._id}?permanent=true`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setArchivedClients((prev) => prev.filter((c) => c._id !== confirmPermanentDelete._id));
+        setSelectedIds((prev) => prev.filter((sid) => sid !== confirmPermanentDelete._id));
+      }
+    } finally {
+      setDeletingPermanent(false);
+      setConfirmPermanentDelete(null);
+    }
+  }
+
+  async function handleBulkRestore() {
+    setBulkRestoring(true);
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/admin/clients/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ restore: true }),
+          })
+        )
+      );
+      setArchivedClients((prev) => prev.filter((c) => !selectedIds.includes(c._id)));
+      setSelectedIds([]);
+    } catch {
+      alert("Failed to restore some accounts.");
+    } finally {
+      setBulkRestoring(false);
+    }
+  }
+
+  async function handleBulkPermanentDelete() {
+    setBulkDeleting(true);
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/admin/clients/${id}?permanent=true`, { method: "DELETE" })
+        )
+      );
+      setArchivedClients((prev) => prev.filter((c) => !selectedIds.includes(c._id)));
+      setSelectedIds([]);
+      setShowBulkPermanentDeleteConfirm(false);
+    } catch {
+      alert("Failed to permanently delete some accounts.");
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return clients.filter((c) => {
-      if (statusFilter !== "all" && getAccountStatus(c) !== statusFilter)
+    const source = showArchived ? archivedClients : clients;
+    return source.filter((c) => {
+      if (!showArchived && statusFilter !== "all" && getAccountStatus(c) !== statusFilter)
         return false;
       if (q) {
         if (
@@ -964,7 +1058,7 @@ export default function ClientsPanel() {
       }
       return true;
     });
-  }, [clients, statusFilter, search]);
+  }, [clients, archivedClients, showArchived, statusFilter, search]);
 
   const counts = useMemo(
     () => ({
@@ -977,8 +1071,9 @@ export default function ClientsPanel() {
         (c) => getAccountStatus(c) === "approved-existing-client"
       ).length,
       rejected: clients.filter((c) => getAccountStatus(c) === "rejected").length,
+      archived: archivedClients.length,
     }),
-    [clients]
+    [clients, archivedClients]
   );
 
   const hasFilters = search.trim() !== "" || statusFilter !== "all";
@@ -1050,7 +1145,7 @@ export default function ClientsPanel() {
   return (
     <div className="mt-10">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-6">
         {[
           { label: "Total", value: counts.total, color: "text-neutral-900" },
           { label: "Buyer", value: counts.active, color: "text-emerald-700" },
@@ -1058,18 +1153,27 @@ export default function ClientsPanel() {
           { label: "Approved Existing", value: counts.approved, color: "text-blue-700" },
           { label: "Rejected", value: counts.rejected, color: "text-red-600" },
         ].map((s) => (
-          <div
-            key={s.label}
-            className="rounded-lg border border-neutral-200 bg-white px-5 py-4"
-          >
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-              {s.label}
-            </p>
-            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>
-              {s.value}
-            </p>
+          <div key={s.label} className="rounded-lg border border-neutral-200 bg-white px-5 py-4">
+            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">{s.label}</p>
+            <p className={`mt-1 text-3xl font-semibold ${s.color}`}>{s.value}</p>
           </div>
         ))}
+        <button
+          onClick={() => { setShowArchived((v) => !v); setSearch(""); setSelectedIds([]); }}
+          className={[
+            "rounded-lg border px-5 py-4 text-left transition",
+            showArchived
+              ? "border-neutral-800 bg-neutral-900 ring-2 ring-neutral-800"
+              : "border-neutral-200 bg-white hover:border-neutral-400",
+          ].join(" ")}
+        >
+          <p className={`text-[10px] font-medium uppercase tracking-[0.18em] ${showArchived ? "text-neutral-400" : "text-neutral-400"}`}>
+            Archived
+          </p>
+          <p className={`mt-1 text-3xl font-semibold ${showArchived ? "text-white" : "text-neutral-500"}`}>
+            {archivedLoading ? "—" : counts.archived}
+          </p>
+        </button>
       </div>
 
       {/* Filters */}
@@ -1088,23 +1192,25 @@ export default function ClientsPanel() {
           />
         </div>
 
-        {/* Status filter */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-            Status
-          </label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
-          >
-            <option value="all">All statuses</option>
-            <option value="active">Buyer</option>
-            <option value="pending-existing-client">Pending Approval</option>
-            <option value="approved-existing-client">Approved Existing</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
+        {/* Status filter — hidden in archived mode */}
+        {!showArchived && (
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">
+              Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400"
+            >
+              <option value="all">All statuses</option>
+              <option value="active">Buyer</option>
+              <option value="pending-existing-client">Pending Approval</option>
+              <option value="approved-existing-client">Approved Existing</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        )}
 
         <a
           href="/client/dashboard"
@@ -1119,7 +1225,27 @@ export default function ClientsPanel() {
           Client Portal
         </a>
 
-        {hasFilters && (
+        <button
+          onClick={() => {
+            setShowArchived((v) => !v);
+            setSearch("");
+            setSelectedIds([]);
+          }}
+          className={[
+            "self-end flex items-center gap-1.5 rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition",
+            showArchived
+              ? "border-neutral-800 bg-neutral-900 text-white hover:bg-neutral-700"
+              : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:text-neutral-900",
+          ].join(" ")}
+        >
+          <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-current">
+            <path d="M2 3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2Z" />
+            <path fillRule="evenodd" d="M2 7.5h16l-.811 7.71a2 2 0 0 1-1.99 1.79H4.802a2 2 0 0 1-1.99-1.79L2 7.5ZM7 11a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" clipRule="evenodd" />
+          </svg>
+          Archived Accounts
+        </button>
+
+        {!showArchived && hasFilters && (
           <button
             onClick={() => {
               setSearch("");
@@ -1131,8 +1257,19 @@ export default function ClientsPanel() {
           </button>
         )}
 
+        {showArchived && search.trim() && (
+          <button
+            onClick={() => setSearch("")}
+            className="self-end rounded border border-neutral-200 px-3 py-1.5 text-[12px] text-neutral-500 transition hover:border-neutral-400 hover:text-neutral-700"
+          >
+            Clear search
+          </button>
+        )}
+
         <span className="ml-auto self-end text-[12px] text-neutral-400">
-          {filtered.length} of {clients.length} clients
+          {showArchived
+            ? `${filtered.length} of ${archivedClients.length} archived`
+            : `${filtered.length} of ${clients.length} clients`}
         </span>
       </div>
 
@@ -1151,22 +1288,53 @@ export default function ClientsPanel() {
           </span>
         </div>
 
-        <button
-          onClick={() => setShowBulkRemoveConfirm(true)}
-          disabled={selectedCount === 0 || bulkRemoving}
-          className="rounded border border-red-200 bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {bulkRemoving
-            ? "Removing…"
-            : `Remove Selected${selectedCount ? ` (${selectedCount})` : ""}`}
-        </button>
+        {showArchived ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleBulkRestore}
+              disabled={selectedCount === 0 || bulkRestoring}
+              className="rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {bulkRestoring
+                ? "Restoring…"
+                : `Restore Selected${selectedCount ? ` (${selectedCount})` : ""}`}
+            </button>
+            <button
+              onClick={() => setShowBulkPermanentDeleteConfirm(true)}
+              disabled={selectedCount === 0 || bulkDeleting}
+              className="rounded border border-red-200 bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {bulkDeleting
+                ? "Deleting…"
+                : `Delete Permanently${selectedCount ? ` (${selectedCount})` : ""}`}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowBulkRemoveConfirm(true)}
+            disabled={selectedCount === 0 || bulkRemoving}
+            className="rounded border border-red-200 bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {bulkRemoving
+              ? "Removing…"
+              : `Remove Selected${selectedCount ? ` (${selectedCount})` : ""}`}
+          </button>
+        )}
       </div>
 
       {/* Table */}
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        {filtered.length === 0 ? (
+        {showArchived && archivedLoading ? (
+          <div className="px-6 py-16 text-center text-sm text-neutral-400">Loading archived accounts…</div>
+        ) : showArchived && archivedError ? (
+          <div className="px-6 py-8 text-center text-sm text-red-600">{archivedError}</div>
+        ) : filtered.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-neutral-400">
-            {clients.length === 0
+            {showArchived
+              ? archivedClients.length === 0
+                ? "No archived accounts."
+                : "No archived accounts match the search."
+              : clients.length === 0
               ? "No registered clients yet."
               : "No clients match the current filters."}
           </div>
@@ -1198,15 +1366,14 @@ export default function ClientsPanel() {
                 return (
                   <tr
                     key={c._id}
-                    onClick={() => setSelected(c)}
-                    className={`cursor-pointer border-b border-neutral-100 transition last:border-0 hover:bg-neutral-50 ${
-                      i % 2 === 0 ? "bg-white" : "bg-neutral-50/40"
-                    }`}
+                    onClick={() => !showArchived && setSelected(c)}
+                    className={[
+                      "border-b border-neutral-100 transition last:border-0",
+                      showArchived ? "opacity-75" : "cursor-pointer hover:bg-neutral-50",
+                      i % 2 === 0 ? "bg-white" : "bg-neutral-50/40",
+                    ].join(" ")}
                   >
-                    <td
-                      className="px-5 py-3.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={isChecked}
@@ -1215,40 +1382,55 @@ export default function ClientsPanel() {
                         className="h-4 w-4 rounded border-neutral-300"
                       />
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-neutral-900">
+                    <td className={`px-5 py-3.5 font-medium ${showArchived ? "text-neutral-400" : "text-neutral-900"}`}>
                       {c.name || "—"}
                     </td>
-                    <td className="px-5 py-3.5 text-neutral-600">{c.email}</td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-neutral-600">
+                    <td className={`px-5 py-3.5 ${showArchived ? "text-neutral-400" : "text-neutral-600"}`}>{c.email}</td>
+                    <td className={`whitespace-nowrap px-5 py-3.5 ${showArchived ? "text-neutral-400" : "text-neutral-600"}`}>
                       {c.phone || "—"}
                     </td>
-                    <td className="px-5 py-3.5 text-neutral-600">
+                    <td className={`px-5 py-3.5 ${showArchived ? "text-neutral-400" : "text-neutral-600"}`}>
                       {CLIENT_TYPE_LABEL[c.clientType] ?? "—"}
                     </td>
                     <td className="px-5 py-3.5">
                       <AccountStatusBadge status={getAccountStatus(c)} />
                     </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-neutral-500">
+                    <td className={`whitespace-nowrap px-5 py-3.5 ${showArchived ? "text-neutral-400" : "text-neutral-500"}`}>
                       {formatDate(c.createdAt)}
                     </td>
-                    <td
-                      className="px-5 py-3.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setSelected(c)}
-                          className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={(e) => handleRowRemove(e, c._id, c.name)}
-                          className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                    <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                      {showArchived ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleRestore(c._id)}
+                            disabled={restoringId === c._id}
+                            className="rounded border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {restoringId === c._id ? "Restoring…" : "Restore"}
+                          </button>
+                          <button
+                            onClick={() => setConfirmPermanentDelete(c)}
+                            className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                          >
+                            Delete Permanently
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelected(c)}
+                            className="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-700 transition hover:border-neutral-400 hover:text-neutral-900"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={(e) => handleRowRemove(e, c._id, c.name)}
+                            className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
@@ -1276,6 +1458,28 @@ export default function ClientsPanel() {
         loading={bulkRemoving}
         onCancel={() => { if (!bulkRemoving) setShowBulkRemoveConfirm(false); }}
         onConfirm={handleBulkRemove}
+      />
+
+      <ConfirmDialog
+        open={Boolean(confirmPermanentDelete)}
+        title="Permanently delete account?"
+        message={`This will permanently remove ${confirmPermanentDelete?.name || "this account"}'s account and all associated data from the database. This action cannot be undone.`}
+        confirmLabel="Delete Permanently"
+        loading={deletingPermanent}
+        onCancel={() => { if (!deletingPermanent) setConfirmPermanentDelete(null); }}
+        onConfirm={handlePermanentDelete}
+      />
+
+      <ConfirmDialog
+        open={showBulkPermanentDeleteConfirm}
+        title="Permanently delete selected accounts?"
+        message={`This will permanently remove ${selectedCount} selected ${
+          selectedCount === 1 ? "account" : "accounts"
+        } and all associated data from the database. This action cannot be undone.`}
+        confirmLabel="Delete Permanently"
+        loading={bulkDeleting}
+        onCancel={() => { if (!bulkDeleting) setShowBulkPermanentDeleteConfirm(false); }}
+        onConfirm={handleBulkPermanentDelete}
       />
     </div>
   );

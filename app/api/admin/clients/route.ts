@@ -3,18 +3,20 @@ import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session || session.user?.role !== "admin") {
     return NextResponse.json({ message: "Unauthorised" }, { status: 401 });
   }
+
+  const archived = req.nextUrl.searchParams.get("archived") === "true";
 
   await connectDB();
 
   const clients = await User.find({
     role: "client",
     userType: { $in: ["buyer_investor", "existing_client"] },
-    isDeleted: { $ne: true },
+    ...(archived ? { isDeleted: true } : { isDeleted: { $ne: true } }),
   })
     .select("_id name email phone userType clientType accountStatus pendingApproval createdAt")
     .sort({ createdAt: -1 })

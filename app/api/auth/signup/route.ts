@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import VerificationCode from "@/models/VerificationCode";
 import { isValidPassword, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/password-validation";
-import { sendEmail } from "@/lib/email";
-import { buildWelcomeVerificationEmail } from "@/lib/email-templates";
 
 type FieldErrors = Record<string, string>;
 
@@ -38,6 +36,7 @@ export async function POST(req: NextRequest) {
       city,
       companyName,
       abn,
+      verificationCode,
     } = body;
 
     const fieldErrors: FieldErrors = {};
@@ -153,26 +152,38 @@ export async function POST(req: NextRequest) {
       if (abn?.trim()) userData.abn = abn.replace(/\s/g, "");
     }
 
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    userData.emailVerified = false;
-    userData.emailVerificationToken = rawToken;
-    userData.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Verify OTP code
+    if (!verificationCode || typeof verificationCode !== "string" || verificationCode.trim().length !== 6) {
+      return NextResponse.json(
+        { message: "Please enter the 6-digit code sent to your email.", fieldErrors: { verificationCode: "Please enter your verification code." } },
+        { status: 400 }
+      );
+    }
+
+    const storedCode = await VerificationCode.findOne({
+      email: normalizedEmail,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!storedCode) {
+      return NextResponse.json(
+        { message: "Verification code has expired or was not found. Please request a new one.", fieldErrors: { verificationCode: "Code expired. Please request a new one." } },
+        { status: 400 }
+      );
+    }
+
+    const codeMatch = await bcrypt.compare(verificationCode.trim(), storedCode.codeHash);
+    if (!codeMatch) {
+      return NextResponse.json(
+        { message: "Incorrect verification code.", fieldErrors: { verificationCode: "Incorrect code. Please try again." } },
+        { status: 400 }
+      );
+    }
+
+    userData.emailVerified = true;
 
     await User.create(userData);
-
-    const baseUrl = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const verifyLink = `${baseUrl}/verify-email?token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`;
-
-    try {
-      const { subject, html, text } = buildWelcomeVerificationEmail({
-        firstName: firstName.trim(),
-        email: normalizedEmail,
-        verifyLink,
-      });
-      await sendEmail({ to: normalizedEmail, subject, html, text });
-    } catch (emailErr) {
-      console.error("Failed to send verification email:", emailErr);
-    }
+    await VerificationCode.deleteMany({ email: normalizedEmail });
 
     return NextResponse.json(
       { message: "Account created successfully." },

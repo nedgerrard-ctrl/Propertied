@@ -80,6 +80,63 @@ export function buildWelcomeVerificationEmail({
   return { subject, text, html };
 }
 
+type VerificationCodeTemplateParams = {
+  firstName: string;
+  code: string;
+};
+
+export function buildVerificationCodeEmail({ firstName, code }: VerificationCodeTemplateParams) {
+  const subject = "Your PPM verification code";
+
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Your verification code is:",
+    "",
+    code,
+    "",
+    "This code expires in 10 minutes. Do not share it with anyone.",
+    "",
+    "If you did not request this, you can safely ignore this email.",
+  ].join("\n");
+
+  const digits = code.split("");
+  const digitBoxes = digits
+    .map(
+      (d) =>
+        `<span style="display:inline-block;width:44px;height:52px;line-height:52px;text-align:center;font-size:24px;font-weight:700;letter-spacing:0;background:#f4f1ea;border:1px solid #ddd5c8;border-radius:8px;margin:0 4px;color:#2f2923;">${d}</span>`
+    )
+    .join("");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2f2923; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <p style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #9a8f83; margin-bottom: 8px;">
+        Property Project Marketing
+      </p>
+
+      <h1 style="font-size: 26px; margin: 0 0 16px;">Verify your email</h1>
+
+      <p style="margin: 0 0 24px;">
+        Hi ${firstName}, enter this code to complete your PPM account registration.
+      </p>
+
+      <div style="margin: 0 0 24px; text-align: center;">
+        ${digitBoxes}
+      </div>
+
+      <p style="margin: 0 0 12px; color: #6e655c;">
+        This code expires in <strong>10 minutes</strong>.
+      </p>
+
+      <p style="margin: 0; color: #6e655c;">
+        If you did not request this, you can safely ignore this email.
+      </p>
+    </div>
+  `;
+
+  return { subject, text, html };
+}
+
 type ResetPasswordTemplateParams = {
   resetLink: string;
   expiryMinutes: number;
