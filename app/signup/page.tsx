@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
+import { isValidPassword } from "@/lib/password-validation";
+import { useCountryCodes } from "../contact/useCountryCodes";
 
 const AUSTRALIAN_CITIES = [
   "Melbourne",
@@ -28,6 +30,12 @@ const AUSTRALIAN_CITIES = [
   "Launceston",
 ];
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// After stripping all non-digits: starts with 61 (international) or 0 (local), second area digit 2–9, then 8 more
+const AU_PHONE_REGEX = /^(61|0)[2-9]\d{8}$/;
+// Overseas: digits only, 6–15 digits (country code entered via dropdown)
+const OVERSEAS_PHONE_REGEX = /^[0-9]{6,15}$/;
+
 type UserType = "buyer_investor" | "developer" | "existing_client";
 type FieldErrors = Record<string, string>;
 
@@ -40,9 +48,93 @@ function getFieldClass(hasError: boolean) {
   ].join(" ");
 }
 
+function getCountrySelectClass(hasError: boolean) {
+  return [
+    "flex-shrink-0 w-40 rounded-xl bg-[#fbfaf7] px-3 py-3 text-[14px] text-[#2f2923] outline-none transition",
+    hasError
+      ? "border border-[#dc2626] focus:border-[#dc2626] focus:ring-2 focus:ring-[#dc2626]/10"
+      : "border border-[#c8bfb4] focus:border-[#2f2923] focus:ring-2 focus:ring-[#2f2923]/10",
+  ].join(" ");
+}
+
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
   return <p className="mt-1.5 text-[13px] text-[#dc2626]">{msg}</p>;
+}
+
+function validateForm(values: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  phoneCountryCode: string;
+  locationKind: string;
+  city: string;
+  clientType: string;
+  abn: string;
+  userType: string;
+}): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (!values.firstName.trim()) errors.firstName = "First name is required.";
+  if (!values.lastName.trim()) errors.lastName = "Last name is required.";
+
+  if (!values.email.trim()) {
+    errors.email = "Email address is required.";
+  } else if (!EMAIL_REGEX.test(values.email.trim())) {
+    errors.email = "Please enter a valid email address.";
+  }
+
+  if (!values.password) {
+    errors.password = "Password is required.";
+  } else if (!isValidPassword(values.password)) {
+    errors.password = "Password does not meet the requirements below.";
+  }
+
+  if (!values.confirmPassword) {
+    errors.confirmPassword = "Please confirm your password.";
+  } else if (values.confirmPassword !== values.password) {
+    errors.confirmPassword = "Passwords do not match.";
+  }
+
+  if (!values.locationKind) {
+    errors.locationKind = "Please select your location.";
+  } else if (values.locationKind === "local" && !values.city.trim()) {
+    errors.city = "Please select your city.";
+  }
+
+  // Phone is optional; format depends on location
+  const phoneTrimmed = values.phone.trim();
+  if (phoneTrimmed) {
+    if (values.locationKind === "local") {
+      const stripped = phoneTrimmed.replace(/\D/g, "");
+      if (!AU_PHONE_REGEX.test(stripped)) {
+        errors.phone = "Please enter a valid Australian phone number (e.g. 0412 345 678).";
+      }
+    } else if (values.locationKind === "overseas") {
+      const stripped = phoneTrimmed.replace(/\D/g, "");
+      if (!OVERSEAS_PHONE_REGEX.test(stripped)) {
+        errors.phone = "Please enter a valid phone number (digits only, 6–15 digits).";
+      }
+      if (!values.phoneCountryCode) {
+        errors.phoneCountryCode = "Please select a country code.";
+      }
+    }
+  }
+
+  if (values.userType === "buyer_investor" && !values.clientType) {
+    errors.clientType = "Please select whether you are an investor or owner-occupier.";
+  }
+
+  if (values.userType === "developer" && values.abn.trim()) {
+    if (!/^\d{11}$/.test(values.abn.replace(/\s/g, ""))) {
+      errors.abn = "ABN must be 11 digits.";
+    }
+  }
+
+  return errors;
 }
 
 const ROLE_OPTIONS: { value: UserType; label: string; description: string }[] = [
@@ -62,6 +154,51 @@ const ROLE_OPTIONS: { value: UserType; label: string; description: string }[] = 
     description: "Already working with PPM — request account access",
   },
 ];
+
+// ─── Password Strength Hints ───────────────────────────────────────────────────
+
+function PasswordStrengthHints({ password }: { password: string }) {
+  const checks = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "Uppercase letter (A–Z)", met: /[A-Z]/.test(password) },
+    { label: "Lowercase letter (a–z)", met: /[a-z]/.test(password) },
+    { label: "Number (0–9)", met: /\d/.test(password) },
+    { label: "Special character (!@#…)", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+
+  return (
+    <div className="mt-2 space-y-1">
+      {checks.map(({ label, met }) => (
+        <div key={label} className="flex items-center gap-1.5">
+          {met ? (
+            <svg
+              className="h-3.5 w-3.5 flex-shrink-0 text-[#4a9b5f]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg
+              className="h-3.5 w-3.5 flex-shrink-0 text-[#c8bfb4]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            </svg>
+          )}
+          <span className={`text-[12px] ${met ? "text-[#4a9b5f]" : "text-[#9a8f83]"}`}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ─── OTP Input ────────────────────────────────────────────────────────────────
 
@@ -157,6 +294,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("");
   const [locationKind, setLocationKind] = useState<"local" | "overseas" | "">("");
   const [city, setCity] = useState("");
   const [clientType, setClientType] = useState<"investor" | "owner-occupier" | "">("");
@@ -164,6 +302,8 @@ export default function SignupPage() {
   const [abn, setAbn] = useState("");
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [generalError, setGeneralError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -174,8 +314,118 @@ export default function SignupPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [submittingOtp, setSubmittingOtp] = useState(false);
 
-  function clearFieldError(field: string) {
-    setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+  // Server-side phone uniqueness check
+  const [phoneServerError, setPhoneServerError] = useState("");
+  const [checkingPhone, setCheckingPhone] = useState(false);
+
+  const { countries } = useCountryCodes();
+
+  // Compute all client-side errors from current state
+  const formErrors = useMemo(
+    () =>
+      validateForm({
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        phone,
+        phoneCountryCode,
+        locationKind,
+        city,
+        clientType,
+        abn,
+        userType: userType as string,
+      }),
+    [firstName, lastName, email, password, confirmPassword, phone, phoneCountryCode, locationKind, city, clientType, abn, userType]
+  );
+
+  const formIsValid = Object.keys(formErrors).length === 0;
+
+  function markTouched(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  }
+
+  function handleBlur(field: string) {
+    markTouched(field);
+    setFieldErrors((prev) => ({ ...prev, [field]: formErrors[field] ?? "" }));
+  }
+
+  // Re-validate a field on change only after it has been touched, using new value
+  function handleChangedField(field: string, newValue: string) {
+    if (!touched[field]) return;
+    const errors = validateForm({
+      firstName: field === "firstName" ? newValue : firstName,
+      lastName: field === "lastName" ? newValue : lastName,
+      email: field === "email" ? newValue : email,
+      password: field === "password" ? newValue : password,
+      confirmPassword: field === "confirmPassword" ? newValue : confirmPassword,
+      phone: field === "phone" ? newValue : phone,
+      phoneCountryCode: field === "phoneCountryCode" ? newValue : phoneCountryCode,
+      locationKind: field === "locationKind" ? newValue : locationKind,
+      city: field === "city" ? newValue : city,
+      clientType: field === "clientType" ? newValue : clientType,
+      abn: field === "abn" ? newValue : abn,
+      userType: userType as string,
+    });
+    setFieldErrors((prev) => ({ ...prev, [field]: errors[field] ?? "" }));
+  }
+
+  // When password changes, also re-validate confirmPassword if it has been touched
+  function handlePasswordChange(newVal: string) {
+    setPassword(newVal);
+    if (touched.password || touched.confirmPassword) {
+      const errors = validateForm({
+        firstName, lastName, email,
+        password: newVal,
+        confirmPassword,
+        phone, phoneCountryCode, locationKind, city, clientType, abn,
+        userType: userType as string,
+      });
+      setFieldErrors((prev) => ({
+        ...prev,
+        ...(touched.password ? { password: errors.password ?? "" } : {}),
+        ...(touched.confirmPassword ? { confirmPassword: errors.confirmPassword ?? "" } : {}),
+      }));
+    }
+  }
+
+  async function runPhoneServerCheck(overridePhone?: string, overrideCode?: string) {
+    const phoneTrimmed = (overridePhone ?? phone).trim();
+    if (!phoneTrimmed) return;
+
+    const code = overrideCode ?? phoneCountryCode;
+    const combined =
+      locationKind === "overseas" && code
+        ? `${code}${phoneTrimmed}`
+        : phoneTrimmed;
+
+    setCheckingPhone(true);
+    try {
+      const res = await fetch("/api/auth/check-phone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: combined }),
+      });
+      if (res.status === 409) {
+        setPhoneServerError("This phone number is already registered.");
+        setFieldErrors((prev) => ({ ...prev, phone: "This phone number is already registered." }));
+      }
+    } catch {
+      // silently fail — server will re-validate on final submit
+    } finally {
+      setCheckingPhone(false);
+    }
+  }
+
+  async function handlePhoneBlur() {
+    markTouched("phone");
+    const formatError = formErrors.phone ?? "";
+    setFieldErrors((prev) => ({ ...prev, phone: formatError }));
+    // Only run the server check when the format is already valid
+    if (!formatError && phone.trim()) {
+      await runPhoneServerCheck();
+    }
   }
 
   function handleRoleSelect(role: UserType) {
@@ -196,7 +446,29 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setGeneralError("");
+
+    // Run full client-side validation
+    const allErrors = validateForm({
+      firstName, lastName, email, password, confirmPassword,
+      phone, phoneCountryCode, locationKind, city, clientType, abn,
+      userType: userType as string,
+    });
+
+    // Mark every field as touched so all errors become visible
+    setTouched({
+      firstName: true, lastName: true, email: true, password: true,
+      confirmPassword: true, phone: true, phoneCountryCode: true,
+      locationKind: true, city: true, clientType: true, abn: true,
+    });
+
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors);
+      setGeneralError("Please correct the highlighted fields.");
+      return;
+    }
+
     setFieldErrors({});
+    setPhoneServerError("");
     setLoading(true);
 
     try {
@@ -261,6 +533,12 @@ export default function SignupPage() {
 
     setSubmittingOtp(true);
 
+    // Combine country code + number for overseas users
+    const combinedPhone =
+      locationKind === "overseas" && phone.trim()
+        ? `${phoneCountryCode}${phone.trim()}`
+        : phone.trim();
+
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -273,7 +551,7 @@ export default function SignupPage() {
           confirmPassword,
           userType,
           clientType,
-          phone,
+          phone: combinedPhone,
           locationKind,
           city,
           companyName,
@@ -414,7 +692,7 @@ export default function SignupPage() {
               <div className="mb-2 flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => { setStep("role"); setFieldErrors({}); setGeneralError(""); }}
+                  onClick={() => { setStep("role"); setFieldErrors({}); setGeneralError(""); setTouched({}); }}
                   className="flex items-center gap-1.5 text-[13px] text-[#7a7166] transition hover:text-[#2f2923]"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -437,7 +715,12 @@ export default function SignupPage() {
                     type="text"
                     placeholder="Jane"
                     value={firstName}
-                    onChange={(e) => { setFirstName(e.target.value.replace(/[0-9]/g, "")); clearFieldError("firstName"); }}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[0-9]/g, "");
+                      setFirstName(val);
+                      handleChangedField("firstName", val);
+                    }}
+                    onBlur={() => handleBlur("firstName")}
                     className={getFieldClass(Boolean(fieldErrors.firstName))}
                   />
                   <FieldError msg={fieldErrors.firstName} />
@@ -450,7 +733,12 @@ export default function SignupPage() {
                     type="text"
                     placeholder="Smith"
                     value={lastName}
-                    onChange={(e) => { setLastName(e.target.value.replace(/[0-9]/g, "")); clearFieldError("lastName"); }}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[0-9]/g, "");
+                      setLastName(val);
+                      handleChangedField("lastName", val);
+                    }}
+                    onBlur={() => handleBlur("lastName")}
                     className={getFieldClass(Boolean(fieldErrors.lastName))}
                   />
                   <FieldError msg={fieldErrors.lastName} />
@@ -465,7 +753,11 @@ export default function SignupPage() {
                   type="email"
                   placeholder="jane@example.com"
                   value={email}
-                  onChange={(e) => { setEmail(e.target.value); clearFieldError("email"); }}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    handleChangedField("email", e.target.value);
+                  }}
+                  onBlur={() => handleBlur("email")}
                   className={getFieldClass(Boolean(fieldErrors.email))}
                 />
                 <FieldError msg={fieldErrors.email} />
@@ -479,14 +771,14 @@ export default function SignupPage() {
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => { setPassword(e.target.value); clearFieldError("password"); }}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => { setPasswordFocused(false); handleBlur("password"); }}
                   className={getFieldClass(Boolean(fieldErrors.password))}
                 />
                 <FieldError msg={fieldErrors.password} />
-                {!fieldErrors.password && (
-                  <p className="mt-1.5 text-[12px] text-[#9a8f83]">
-                    Min. 8 characters with uppercase, lowercase, number, and special character.
-                  </p>
+                {(passwordFocused || password.length > 0) && (
+                  <PasswordStrengthHints password={password} />
                 )}
               </div>
 
@@ -498,7 +790,11 @@ export default function SignupPage() {
                   type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
-                  onChange={(e) => { setConfirmPassword(e.target.value); clearFieldError("confirmPassword"); }}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    handleChangedField("confirmPassword", e.target.value);
+                  }}
+                  onBlur={() => handleBlur("confirmPassword")}
                   className={getFieldClass(Boolean(fieldErrors.confirmPassword))}
                 />
                 <FieldError msg={fieldErrors.confirmPassword} />
@@ -513,7 +809,27 @@ export default function SignupPage() {
                     <button
                       key={kind}
                       type="button"
-                      onClick={() => { setLocationKind(kind); setCity(""); clearFieldError("locationKind"); clearFieldError("city"); }}
+                      onClick={() => {
+                        setLocationKind(kind);
+                        setCity("");
+                        setPhone("");
+                        setPhoneCountryCode("");
+                        setPhoneServerError("");
+                        setTouched((prev) => ({
+                          ...prev,
+                          locationKind: true,
+                          city: false,
+                          phone: false,
+                          phoneCountryCode: false,
+                        }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          locationKind: "",
+                          city: "",
+                          phone: "",
+                          phoneCountryCode: "",
+                        }));
+                      }}
                       className={[
                         "flex-1 rounded-xl border px-4 py-2.5 text-[14px] font-medium transition",
                         locationKind === kind
@@ -535,7 +851,11 @@ export default function SignupPage() {
                   </label>
                   <select
                     value={city}
-                    onChange={(e) => { setCity(e.target.value); clearFieldError("city"); }}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      handleChangedField("city", e.target.value);
+                    }}
+                    onBlur={() => handleBlur("city")}
                     className={getFieldClass(Boolean(fieldErrors.city))}
                   >
                     <option value="">Select your city</option>
@@ -547,18 +867,91 @@ export default function SignupPage() {
                 </div>
               )}
 
+              {/* ── Phone number ─────────────────────────────────────────── */}
               <div>
                 <label className="mb-1.5 block text-[13px] font-medium text-[#4d453d]">
-                  Phone number <span className="text-[12px] font-normal text-[#9a8f83]">(optional)</span>
+                  Phone number{" "}
+                  <span className="text-[12px] font-normal text-[#9a8f83]">(optional)</span>
                 </label>
-                <input
-                  type="tel"
-                  placeholder="+61 4XX XXX XXX"
-                  value={phone}
-                  onChange={(e) => { setPhone(e.target.value); clearFieldError("phone"); }}
-                  className={getFieldClass(Boolean(fieldErrors.phone))}
-                />
-                <FieldError msg={fieldErrors.phone} />
+
+                {locationKind === "overseas" ? (
+                  /* Overseas: country code dropdown + number input */
+                  <div className="flex gap-2">
+                    <select
+                      value={phoneCountryCode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPhoneCountryCode(val);
+                        setPhoneServerError("");
+                        setTouched((prev) => ({ ...prev, phoneCountryCode: true }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          phoneCountryCode: !val && phone.trim() ? "Please select a country code." : "",
+                        }));
+                      }}
+                      onBlur={async () => {
+                        handleBlur("phoneCountryCode");
+                        // Re-run server check if phone is already valid and a code is now selected
+                        if (phoneCountryCode && phone.trim() && !formErrors.phone) {
+                          await runPhoneServerCheck(phone, phoneCountryCode);
+                        }
+                      }}
+                      className={getCountrySelectClass(Boolean(fieldErrors.phoneCountryCode))}
+                    >
+                      <option value="">Country</option>
+                      {countries.map((country) => (
+                        <option
+                          key={`${country.code}-${country.dialCode}`}
+                          value={country.dialCode}
+                        >
+                          {country.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      placeholder="Phone number"
+                      value={phone}
+                      inputMode="numeric"
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setPhone(val);
+                        setPhoneServerError("");
+                        handleChangedField("phone", val);
+                      }}
+                      onBlur={handlePhoneBlur}
+                      className={getFieldClass(Boolean(fieldErrors.phone || phoneServerError))}
+                    />
+                  </div>
+                ) : (
+                  /* Local (Australia) or not yet selected: plain input */
+                  <input
+                    type="tel"
+                    placeholder="0412 345 678"
+                    value={phone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setPhone(val);
+                      setPhoneServerError("");
+                      handleChangedField("phone", val);
+                    }}
+                    onBlur={handlePhoneBlur}
+                    className={getFieldClass(Boolean(fieldErrors.phone || phoneServerError))}
+                  />
+                )}
+
+                {/* Show country code error, then phone format/server error */}
+                <FieldError msg={fieldErrors.phoneCountryCode || fieldErrors.phone || phoneServerError} />
+                {checkingPhone && (
+                  <p className="mt-1.5 text-[12px] text-[#9a8f83]">Checking availability…</p>
+                )}
+
+                {/* Format hint for local, only when no error */}
+                {locationKind === "local" && !fieldErrors.phone && (
+                  <p className="mt-1.5 text-[12px] text-[#9a8f83]">
+                    Australian format, e.g. 0412 345 678 or 02 9876 5432
+                  </p>
+                )}
               </div>
 
               {userType === "buyer_investor" && (
@@ -571,7 +964,11 @@ export default function SignupPage() {
                       <button
                         key={type}
                         type="button"
-                        onClick={() => { setClientType(type); clearFieldError("clientType"); }}
+                        onClick={() => {
+                          setClientType(type);
+                          setTouched((prev) => ({ ...prev, clientType: true }));
+                          setFieldErrors((prev) => ({ ...prev, clientType: "" }));
+                        }}
                         className={[
                           "flex-1 rounded-xl border px-4 py-2.5 text-[14px] font-medium transition",
                           clientType === type
@@ -615,7 +1012,11 @@ export default function SignupPage() {
                       type="text"
                       placeholder="12 345 678 901"
                       value={abn}
-                      onChange={(e) => { setAbn(e.target.value); clearFieldError("abn"); }}
+                      onChange={(e) => {
+                        setAbn(e.target.value);
+                        handleChangedField("abn", e.target.value);
+                      }}
+                      onBlur={() => handleBlur("abn")}
                       className={getFieldClass(Boolean(fieldErrors.abn))}
                     />
                     <FieldError msg={fieldErrors.abn} />
@@ -637,7 +1038,7 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={!formIsValid || Boolean(phoneServerError) || checkingPhone || loading}
                 className="mt-1 w-full rounded-xl bg-[#2f2923] px-4 py-3.5 text-[15px] font-medium text-[#f4f1ea] transition hover:bg-[#3d342c] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Sending code…" : "Create account"}
