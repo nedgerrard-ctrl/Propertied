@@ -351,6 +351,7 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
   const previewHref = isInvestors ? "/buyers/investors" : "/buyers/owner-occupiers";
 
   const [content, setContent] = useState<BuyerContentData>(buyerDefaults);
+  const [lastSaved, setLastSaved] = useState<BuyerContentData>(buyerDefaults);
   const [projects, setProjects] = useState<DynamicProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -376,6 +377,7 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
       fetch("/api/admin/projects").then((r) => r.json()),
     ]).then(([cmsData, projectsData]) => {
       setContent((prev) => ({ ...prev, ...cmsData }));
+      setLastSaved((prev) => ({ ...prev, ...cmsData }));
       setProjects(projectsData);
       setLoading(false);
     });
@@ -386,11 +388,10 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
   async function confirmRevert() {
     setRevertOpen(false);
     for (const [field, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el && field in buyerDefaults) el.innerText = buyerDefaults[field as keyof typeof buyerDefaults] as string;
+      if (el && field in lastSaved) el.innerText = lastSaved[field as keyof typeof lastSaved] as string;
     }
-    setContent(buyerDefaults);
-    await fetch("/api/admin/content/buyer", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ section, ...buyerDefaults }) });
-    showToast("success", "Content reverted to defaults.");
+    setContent(lastSaved);
+    showToast("success", "Changes discarded.");
   }
 
   async function save() {
@@ -401,7 +402,7 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
     setSaving(true);
     const res = await fetch("/api/admin/content/buyer", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ section, ...updates }) });
     setSaving(false);
-    if (res.ok) { setContent((prev) => ({ ...prev, ...updates } as BuyerContentData)); showToast("success", "Changes saved successfully."); }
+    if (res.ok) { setContent((prev) => ({ ...prev, ...updates } as BuyerContentData)); setLastSaved((prev) => ({ ...prev, ...updates } as BuyerContentData)); showToast("success", "Changes saved successfully."); }
     else { const data = await res.json().catch(() => ({})); showToast("error", data.error || "Failed to save changes."); }
   }
 
@@ -452,7 +453,7 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
             Preview ↗
           </a>
           <button onClick={() => setRevertOpen(true)} className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black">
-            Revert to Default
+            Discard Changes
           </button>
           <button onClick={save} disabled={saving} className="bg-black px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-400 transition hover:bg-black/80 disabled:opacity-50">
             {saving ? "Saving…" : "Save Changes"}
@@ -639,8 +640,8 @@ export default function BuyerEditor({ section }: { section: "investors" | "owner
       {revertOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-neutral-900">Revert to default</h2>
-            <p className="mt-3 text-sm leading-6 text-neutral-600">This will reset all text content back to the original defaults and overwrite any saved changes. Projects are not affected. This cannot be undone.</p>
+            <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">This will undo all unsaved edits and restore the page to the last saved state. Projects are not affected.</p>
             <div className="mt-6 flex justify-end gap-3">
               <button type="button" onClick={() => setRevertOpen(false)} className="rounded border border-neutral-200 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-900">Cancel</button>
               <button type="button" onClick={confirmRevert} className="rounded border border-neutral-900 bg-neutral-900 px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-neutral-700">Confirm</button>

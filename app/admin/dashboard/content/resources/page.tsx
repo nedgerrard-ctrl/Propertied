@@ -401,6 +401,7 @@ export default function ResourcesInlineEditor() {
   const [sections,    setSections]    = useState<ResourceSection[]>(resourcesDefaults.sections);
   const [footerNote,  setFooterNote]  = useState(resourcesDefaults.footerNote);
   const [footerEmail, setFooterEmail] = useState(resourcesDefaults.footerEmail);
+  const [lastSaved,   setLastSaved]   = useState<ResourcesContentData>(resourcesDefaults);
 
   const [loading,     setLoading]     = useState(true);
   const [saving,      setSaving]      = useState(false);
@@ -429,6 +430,7 @@ export default function ResourcesInlineEditor() {
         setSections(data.sections);
         setFooterNote(data.footerNote);
         setFooterEmail(data.footerEmail);
+        setLastSaved(data);
         setLoading(false);
       });
   }, []);
@@ -591,6 +593,7 @@ export default function ResourcesInlineEditor() {
     setSaving(false);
     if (res.ok) {
       setHeroContent(heroUpdates);
+      setLastSaved({ ...heroUpdates, sections, footerNote, footerEmail });
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -604,23 +607,18 @@ export default function ResourcesInlineEditor() {
     const fields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
     for (const f of fields) {
       const el = heroRefs.current[f];
-      if (el) el.innerText = resourcesDefaults[f];
+      if (el) el.innerText = lastSaved[f];
     }
     setHeroContent({
-      heroHeadingMain:   resourcesDefaults.heroHeadingMain,
-      heroHeadingAccent: resourcesDefaults.heroHeadingAccent,
-      heroSubtext:       resourcesDefaults.heroSubtext,
+      heroHeadingMain:   lastSaved.heroHeadingMain,
+      heroHeadingAccent: lastSaved.heroHeadingAccent,
+      heroSubtext:       lastSaved.heroSubtext,
     });
-    setSections(resourcesDefaults.sections);
-    setFooterNote(resourcesDefaults.footerNote);
-    setFooterEmail(resourcesDefaults.footerEmail);
+    setSections(lastSaved.sections);
+    setFooterNote(lastSaved.footerNote);
+    setFooterEmail(lastSaved.footerEmail);
     setUploadErrors({});
     setSaved(false);
-    await fetch("/api/admin/content/resources", {
-      method:  "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(resourcesDefaults),
-    });
   }
 
   if (loading) {
@@ -684,7 +682,7 @@ export default function ResourcesInlineEditor() {
             onClick={() => setRevertOpen(true)}
             className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black"
           >
-            Revert to Default
+            Discard Changes
           </button>
           <button
             onClick={save}
@@ -848,10 +846,9 @@ export default function ResourcesInlineEditor() {
       {revertOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-neutral-900">Revert to default</h2>
+            <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will reset the hero text, footer note, and replace all sections with the
-              original default structure. Uploaded files on Cloudinary are not deleted.
+              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button

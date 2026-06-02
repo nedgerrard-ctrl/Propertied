@@ -27,6 +27,7 @@ function EditBadge() {
 
 export default function FullDisclaimerInlineEditor() {
   const [content, setContent] = useState<FullDisclaimerContentData>(fullDisclaimerDefaults);
+  const [lastSaved, setLastSaved] = useState<FullDisclaimerContentData>(fullDisclaimerDefaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -38,6 +39,7 @@ export default function FullDisclaimerInlineEditor() {
       .then((r) => r.json())
       .then((data) => {
         setContent((prev) => ({ ...prev, ...data }));
+        setLastSaved((prev) => ({ ...prev, ...data }));
         setLoading(false);
       });
   }, []);
@@ -51,18 +53,13 @@ export default function FullDisclaimerInlineEditor() {
   async function confirmRevert() {
     setRevertOpen(false);
     for (const [field, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el && field in fullDisclaimerDefaults) {
+      if (el && field in lastSaved) {
         el.innerText =
-          fullDisclaimerDefaults[field as keyof typeof fullDisclaimerDefaults] as string;
+          lastSaved[field as keyof typeof lastSaved] as string;
       }
     }
-    setContent(fullDisclaimerDefaults);
+    setContent(lastSaved);
     setSaved(false);
-    await fetch("/api/admin/content/full-disclaimer", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fullDisclaimerDefaults),
-    });
   }
 
   async function save() {
@@ -79,6 +76,7 @@ export default function FullDisclaimerInlineEditor() {
     setSaving(false);
     if (res.ok) {
       setContent((prev) => ({ ...prev, ...updates } as FullDisclaimerContentData));
+      setLastSaved((prev) => ({ ...prev, ...updates } as FullDisclaimerContentData));
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -141,7 +139,7 @@ export default function FullDisclaimerInlineEditor() {
             onClick={() => setRevertOpen(true)}
             className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black"
           >
-            Revert to Default
+            Discard Changes
           </button>
           <button
             onClick={save}
@@ -241,10 +239,9 @@ export default function FullDisclaimerInlineEditor() {
       {revertOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-neutral-900">Revert to default</h2>
+            <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will reset all text back to the original defaults and overwrite any saved changes.
-              This cannot be undone.
+              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button

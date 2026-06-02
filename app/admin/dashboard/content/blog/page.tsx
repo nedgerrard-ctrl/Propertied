@@ -13,6 +13,7 @@ type Field = keyof BlogPageContentData;
 // ── Main editor ────────────────────────────────────────────────────────────────
 export default function BlogInlineEditor() {
   const [content, setContent]     = useState<BlogPageContentData>(blogPageDefaults);
+  const [lastSaved, setLastSaved] = useState<BlogPageContentData>(blogPageDefaults);
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [saved, setSaved]         = useState(false);
@@ -29,6 +30,7 @@ export default function BlogInlineEditor() {
       .then((res) => res.json())
       .then((data: BlogPageContentData) => {
         setContent(data);
+        setLastSaved(data);
         setLoading(false);
       });
   }, []);
@@ -50,6 +52,7 @@ export default function BlogInlineEditor() {
     setSaving(false);
     if (res.ok) {
       setContent(updates as BlogPageContentData);
+      setLastSaved(updates as BlogPageContentData);
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -63,15 +66,10 @@ export default function BlogInlineEditor() {
     const fields: Field[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
     for (const f of fields) {
       const el = refs.current[f];
-      if (el) el.innerText = blogPageDefaults[f];
+      if (el) el.innerText = lastSaved[f];
     }
-    setContent(blogPageDefaults);
+    setContent(lastSaved);
     setSaved(false);
-    await fetch("/api/admin/content/blog", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(blogPageDefaults),
-    });
   }
 
   if (loading) {
@@ -124,7 +122,7 @@ export default function BlogInlineEditor() {
             onClick={() => setRevertOpen(true)}
             className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black"
           >
-            Revert to Default
+            Discard Changes
           </button>
           <button
             onClick={save}
@@ -237,10 +235,9 @@ export default function BlogInlineEditor() {
       {revertOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-neutral-900">Revert to default</h2>
+            <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will reset the hero heading and subtext back to their original default values.
-              Blog posts are not affected.
+              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
