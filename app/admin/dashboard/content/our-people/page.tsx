@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ourPeopleDefaults, OurPeopleContentData } from "@/lib/our-people-defaults";
+import { ourPeopleDefaults, OurPeopleContentData, Person } from "@/lib/our-people-defaults";
 
-type Field = keyof OurPeopleContentData;
+type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext";
 
 const EDIT_LIGHT = "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 const EDIT_DARK  = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
@@ -20,57 +20,90 @@ function EditBadge() {
   );
 }
 
+function generateId() {
+  return `person-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
 export default function OurPeopleInlineEditor() {
   const [content, setContent] = useState<OurPeopleContentData>(ourPeopleDefaults);
+  const [people, setPeople] = useState<Person[]>(ourPeopleDefaults.people);
+  const [lastSaved, setLastSaved] = useState<OurPeopleContentData>(ourPeopleDefaults);
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
-  const refs = useRef<Partial<Record<Field, HTMLElement | null>>>({});
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const refs = useRef<Partial<Record<HeroField, HTMLElement | null>>>({});
 
   useEffect(() => {
     fetch("/api/admin/content/our-people")
       .then((r) => r.json())
-      .then((data) => {
-        setContent((prev) => ({ ...prev, ...data }));
+      .then((data: OurPeopleContentData) => {
+        setContent(data);
+        setPeople(data.people ?? ourPeopleDefaults.people);
+        setLastSaved(data);
         setLoading(false);
       });
   }, []);
 
-  function r(field: Field) {
+  function r(field: HeroField) {
     return (el: HTMLElement | null) => { refs.current[field] = el; };
   }
 
-  async function confirmRevert() {
-    setRevertOpen(false);
-    for (const [field, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el && field in ourPeopleDefaults) {
-        el.innerText = ourPeopleDefaults[field as keyof typeof ourPeopleDefaults] as string;
-      }
-    }
-    setContent(ourPeopleDefaults);
+  function updatePerson(id: string, field: keyof Omit<Person, "id">, value: string) {
     setSaved(false);
-    await fetch("/api/admin/content/our-people", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ourPeopleDefaults),
-    });
+    setPeople((prev) => prev.map((p) => p.id === id ? { ...p, [field]: value } : p));
+  }
+
+  function addPerson() {
+    setSaved(false);
+    setPeople((prev) => [
+      ...prev,
+      { id: generateId(), name: "", title: "", description: "" },
+    ]);
+  }
+
+  function confirmDelete(id: string) {
+    setDeleteTarget(id);
+  }
+
+  function doDelete() {
+    if (!deleteTarget) return;
+    setSaved(false);
+    setPeople((prev) => prev.filter((p) => p.id !== deleteTarget));
+    setDeleteTarget(null);
+  }
+
+  function confirmRevert() {
+    setRevertOpen(false);
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    for (const field of heroFields) {
+      const el = refs.current[field];
+      if (el) el.innerText = lastSaved[field];
+    }
+    setContent(lastSaved);
+    setPeople(lastSaved.people);
+    setSaved(false);
   }
 
   async function save() {
-    const updates: Partial<Record<Field, string>> = {};
-    for (const [key, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el) updates[key] = el.innerText.trim();
+    const heroUpdates: Partial<Record<HeroField, string>> = {};
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    for (const key of heroFields) {
+      const el = refs.current[key];
+      if (el) heroUpdates[key] = el.innerText.trim();
     }
+
     setSaving(true);
     const res = await fetch("/api/admin/content/our-people", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ ...heroUpdates, people }),
     });
     setSaving(false);
     if (res.ok) {
-      setContent((prev) => ({ ...prev, ...updates } as OurPeopleContentData));
+      const snapshot: OurPeopleContentData = { ...content, ...heroUpdates, people };
+      setLastSaved(snapshot);
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -104,7 +137,9 @@ export default function OurPeopleInlineEditor() {
               Edit Mode — Our People
             </p>
           </div>
-          <span className="hidden sm:inline text-[11px] text-black/50">· Click any underlined text to edit</span>
+          <span className="hidden sm:inline text-[11px] text-black/50">
+            · Click any underlined text to edit · Use the People section below to add or remove team members
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {saved && (
@@ -127,7 +162,7 @@ export default function OurPeopleInlineEditor() {
             onClick={() => setRevertOpen(true)}
             className="border border-black/30 px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-black/60 transition hover:border-black/60 hover:text-black"
           >
-            Revert to Default
+            Discard Changes
           </button>
           <button
             onClick={save}
@@ -173,88 +208,123 @@ export default function OurPeopleInlineEditor() {
 
         {/* S2: People */}
         <section className="relative bg-white py-20 lg:py-28">
-          <EditBadge />
           <div className="mx-auto max-w-3xl px-8">
-            <div className="divide-y divide-[#ede8e1]">
 
-              {/* Person 1 */}
-              <div className="py-14 first:pt-0">
-                <div className="mb-6">
-                  <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
-                    <span ref={r("person1Name")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.person1Name}</span>
-                    <span className="mx-3 text-[#ddd3c6] font-light">—</span>
-                    <span ref={r("person1Title")} contentEditable suppressContentEditableWarning className={`text-[#4a3d35] font-normal ${EDIT_LIGHT}`}>{c.person1Title}</span>
-                  </h2>
-                  <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
-                </div>
-                <div className="space-y-4">
-                  <p ref={r("person1Bio1")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person1Bio1}</p>
-                  <p ref={r("person1Bio2")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person1Bio2}</p>
-                </div>
+            {/* Section header with Add button */}
+            <div className="mb-10 flex items-center justify-between border-b border-[#ede8e1] pb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9a8f83]">
+                  Team Members
+                </span>
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                  {people.length}
+                </span>
               </div>
-
-              {/* Person 2 */}
-              <div className="py-14">
-                <div className="mb-6">
-                  <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
-                    <span ref={r("person2Name")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.person2Name}</span>
-                    <span className="mx-3 text-[#ddd3c6] font-light">—</span>
-                    <span ref={r("person2Title")} contentEditable suppressContentEditableWarning className={`text-[#4a3d35] font-normal ${EDIT_LIGHT}`}>{c.person2Title}</span>
-                  </h2>
-                  <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
-                </div>
-                <div className="space-y-4">
-                  <p ref={r("person2Bio1")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person2Bio1}</p>
-                  <p ref={r("person2Bio2")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person2Bio2}</p>
-                  <p ref={r("person2Bio3")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person2Bio3}</p>
-                </div>
-              </div>
-
-              {/* Person 3 */}
-              <div className="py-14">
-                <div className="mb-6">
-                  <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
-                    <span ref={r("person3Name")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.person3Name}</span>
-                    <span className="mx-3 text-[#ddd3c6] font-light">—</span>
-                    <span ref={r("person3Title")} contentEditable suppressContentEditableWarning className={`text-[#4a3d35] font-normal ${EDIT_LIGHT}`}>{c.person3Title}</span>
-                  </h2>
-                  <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
-                </div>
-                <div className="space-y-4">
-                  <p ref={r("person3Bio1")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person3Bio1}</p>
-                  <p ref={r("person3Bio2")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person3Bio2}</p>
-                </div>
-              </div>
-
-              {/* Person 4 */}
-              <div className="py-14 last:pb-0">
-                <div className="mb-6">
-                  <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
-                    <span ref={r("person4Name")} contentEditable suppressContentEditableWarning className={EDIT_LIGHT}>{c.person4Name}</span>
-                    <span className="mx-3 text-[#ddd3c6] font-light">—</span>
-                    <span ref={r("person4Title")} contentEditable suppressContentEditableWarning className={`text-[#4a3d35] font-normal ${EDIT_LIGHT}`}>{c.person4Title}</span>
-                  </h2>
-                  <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
-                </div>
-                <div className="space-y-4">
-                  <p ref={r("person4Bio1")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person4Bio1}</p>
-                  <p ref={r("person4Bio2")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT}`}>{c.person4Bio2}</p>
-                </div>
-              </div>
-
+              <button
+                type="button"
+                onClick={addPerson}
+                className="flex items-center gap-2 rounded-lg bg-amber-400 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-300 active:scale-95"
+              >
+                <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"/>
+                </svg>
+                Add Person
+              </button>
             </div>
+
+            {people.length === 0 && (
+              <div className="py-16 text-center">
+                <p className="text-[14px] text-[#9a8f83]">No team members yet.</p>
+                <button
+                  type="button"
+                  onClick={addPerson}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-300"
+                >
+                  Add First Person
+                </button>
+              </div>
+            )}
+
+            <div className="divide-y divide-[#ede8e1]">
+              {people.map((person) => (
+                <div key={person.id} className="py-12 first:pt-0">
+
+                  {/* Name + Title row */}
+                  <div className="mb-5 flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-2">
+                      <input
+                        type="text"
+                        value={person.name}
+                        onChange={(e) => updatePerson(person.id, "name", e.target.value)}
+                        placeholder="Full name"
+                        className={`min-w-[8rem] bg-transparent text-[1.4rem] font-semibold text-[#1f1a17] ${EDIT_LIGHT} placeholder:font-normal placeholder:text-[#c8bfb4] placeholder:text-[1rem]`}
+                      />
+                      <span className="text-[#ddd3c6] font-light text-[1.2rem]">—</span>
+                      <input
+                        type="text"
+                        value={person.title}
+                        onChange={(e) => updatePerson(person.id, "title", e.target.value)}
+                        placeholder="Title or role"
+                        className={`min-w-[8rem] flex-1 bg-transparent text-[1rem] text-[#4a3d35] ${EDIT_LIGHT} placeholder:text-[#c8bfb4]`}
+                      />
+                    </div>
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => confirmDelete(person.id)}
+                      title="Remove this person"
+                      className="flex-shrink-0 flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 hover:border-red-300 active:scale-95"
+                    >
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                      </svg>
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="mb-5 w-10 h-px bg-[#c8a96e]" />
+
+                  {/* Description textarea */}
+                  <textarea
+                    value={person.description}
+                    onChange={(e) => updatePerson(person.id, "description", e.target.value)}
+                    placeholder={"Enter description…\n\nPress Enter twice between sentences to create separate paragraphs on the public page."}
+                    rows={6}
+                    className={`w-full resize-y bg-transparent text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT} placeholder:text-[#c8bfb4] placeholder:text-[13px]`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Add button when list is non-empty */}
+            {people.length > 0 && (
+              <div className="mt-10 flex justify-center border-t border-[#ede8e1] pt-8">
+                <button
+                  type="button"
+                  onClick={addPerson}
+                  className="flex items-center gap-2 rounded-lg border border-dashed border-amber-400 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-600 transition hover:bg-amber-50 active:scale-95"
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"/>
+                  </svg>
+                  Add Another Person
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
       </main>
 
-      {/* Revert confirmation modal */}
+      {/* ── Revert confirmation modal ───────────────────────────────────────── */}
       {revertOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-neutral-900">Revert to default</h2>
+            <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will reset all text back to the original defaults and overwrite any saved changes. This cannot be undone.
+              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -270,6 +340,36 @@ export default function OurPeopleInlineEditor() {
                 className="rounded border border-neutral-900 bg-neutral-900 px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-neutral-700"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete confirmation modal ───────────────────────────────────────── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/35 px-6">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+            <h2 className="text-lg font-semibold text-neutral-900">Remove team member</h2>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">
+              Are you sure you want to remove{" "}
+              <strong>{people.find((p) => p.id === deleteTarget)?.name || "this person"}</strong>?
+              They will be permanently removed when you save.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded border border-neutral-200 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-900"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={doDelete}
+                className="rounded border border-red-600 bg-red-600 px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-red-700"
+              >
+                Remove
               </button>
             </div>
           </div>

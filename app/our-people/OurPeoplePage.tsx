@@ -9,37 +9,9 @@ const FloatingDust = dynamic(() => import('../components/FloatingDust'), {
   loading: () => null,
 })
 
-type Person = {
-  name: string
-  title: string
-  bios: string[]
-}
-
 export default function OurPeoplePage({ content }: { content: OurPeopleContentData }) {
   const c = content
-
-  const people: Person[] = [
-    {
-      name: c.person1Name,
-      title: c.person1Title,
-      bios: [c.person1Bio1, c.person1Bio2].filter(Boolean),
-    },
-    {
-      name: c.person2Name,
-      title: c.person2Title,
-      bios: [c.person2Bio1, c.person2Bio2, c.person2Bio3].filter(Boolean),
-    },
-    {
-      name: c.person3Name,
-      title: c.person3Title,
-      bios: [c.person3Bio1, c.person3Bio2].filter(Boolean),
-    },
-    {
-      name: c.person4Name,
-      title: c.person4Title,
-      bios: [c.person4Bio1, c.person4Bio2].filter(Boolean),
-    },
-  ]
+  const people = c.people.filter((p) => p.name.trim())
 
   return (
     <main className="min-h-screen w-full text-[#1f1a17]">
@@ -82,7 +54,7 @@ export default function OurPeoplePage({ content }: { content: OurPeopleContentDa
         <div className="mx-auto max-w-3xl px-8">
           <div className="divide-y divide-[#ede8e1]">
             {people.map((person) => (
-              <div key={person.name} className="py-14 first:pt-0 last:pb-0">
+              <div key={person.id} className="py-14 first:pt-0 last:pb-0">
                 <div className="mb-6">
                   <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
                     {person.name}
@@ -92,11 +64,14 @@ export default function OurPeoplePage({ content }: { content: OurPeopleContentDa
                   <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
                 </div>
                 <div className="space-y-4">
-                  {person.bios.map((bio, i) => (
-                    <p key={i} className="text-[14px] leading-[1.85] text-[#3d3530]">
-                      {bio}
-                    </p>
-                  ))}
+                  {person.description
+                    .split("\n\n")
+                    .filter(Boolean)
+                    .map((para, i) => (
+                      <p key={i} className="text-[14px] leading-[1.85] text-[#3d3530]">
+                        {para}
+                      </p>
+                    ))}
                 </div>
               </div>
             ))}

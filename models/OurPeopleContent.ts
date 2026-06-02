@@ -1,36 +1,30 @@
 import { Schema, model, models } from "mongoose";
 
+const PersonSchema = new Schema(
+  {
+    id:          { type: String, required: true },
+    name:        { type: String, default: "" },
+    title:       { type: String, default: "" },
+    description: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const OurPeopleContentSchema = new Schema(
   {
     // Hero
-    heroHeadingMain:  { type: String, default: "" },
+    heroHeadingMain:   { type: String, default: "" },
     heroHeadingAccent: { type: String, default: "" },
     heroSubtext:       { type: String, default: "" },
 
-    // Person 1
-    person1Name:  { type: String, default: "" },
-    person1Title: { type: String, default: "" },
-    person1Bio1:  { type: String, default: "" },
-    person1Bio2:  { type: String, default: "" },
+    // People (dynamic array)
+    people: { type: [PersonSchema], default: [] },
 
-    // Person 2
-    person2Name:  { type: String, default: "" },
-    person2Title: { type: String, default: "" },
-    person2Bio1:  { type: String, default: "" },
-    person2Bio2:  { type: String, default: "" },
-    person2Bio3:  { type: String, default: "" },
-
-    // Person 3
-    person3Name:  { type: String, default: "" },
-    person3Title: { type: String, default: "" },
-    person3Bio1:  { type: String, default: "" },
-    person3Bio2:  { type: String, default: "" },
-
-    // Person 4
-    person4Name:  { type: String, default: "" },
-    person4Title: { type: String, default: "" },
-    person4Bio1:  { type: String, default: "" },
-    person4Bio2:  { type: String, default: "" },
+    // Legacy flat fields kept so old data is not lost on read
+    person1Name: String, person1Title: String, person1Bio1: String, person1Bio2: String,
+    person2Name: String, person2Title: String, person2Bio1: String, person2Bio2: String, person2Bio3: String,
+    person3Name: String, person3Title: String, person3Bio1: String, person3Bio2: String,
+    person4Name: String, person4Title: String, person4Bio1: String, person4Bio2: String,
   },
   { timestamps: true }
 );
