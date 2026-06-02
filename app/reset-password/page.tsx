@@ -13,6 +13,37 @@ type ResetFieldErrors = {
   confirmPassword?: string;
 };
 
+function PasswordStrengthHints({ password }: { password: string }) {
+  const checks = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "Uppercase letter (A–Z)", met: /[A-Z]/.test(password) },
+    { label: "Lowercase letter (a–z)", met: /[a-z]/.test(password) },
+    { label: "Number (0–9)", met: /\d/.test(password) },
+    { label: "Special character (!@#…)", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+
+  return (
+    <div className="mt-2 space-y-1">
+      {checks.map(({ label, met }) => (
+        <div key={label} className="flex items-center gap-1.5">
+          {met ? (
+            <svg className="h-3.5 w-3.5 flex-shrink-0 text-[#4a9b5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="h-3.5 w-3.5 flex-shrink-0 text-[#c8bfb4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            </svg>
+          )}
+          <span className={`text-[12px] ${met ? "text-[#4a9b5f]" : "text-[#9a8f83]"}`}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function getFieldClass(hasError: boolean) {
   return [
     "w-full rounded-xl bg-[#fbfaf7] px-4 py-3 text-[15px] text-[#2f2923] outline-none transition placeholder:text-[#a49a8d]",
@@ -23,13 +54,14 @@ function getFieldClass(hasError: boolean) {
 }
 
 function validatePassword(password: string): string {
-  if (!password) return "Enter a new password";
-  if (password.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(password)) return "Include at least 1 uppercase letter";
-  if (!/[a-z]/.test(password)) return "Include at least 1 lowercase letter";
-  if (!/[0-9]/.test(password)) return "Include at least 1 number";
-  if (!/[^A-Za-z0-9]/.test(password)) return "Include at least 1 special character";
-  return "";
+  if (!password) return "Enter a new password.";
+  const valid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
+  return valid ? "" : "Password does not meet the requirements below.";
 }
 
 function validateConfirmPassword(
@@ -51,6 +83,7 @@ function ResetPasswordContent() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ResetFieldErrors>({});
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
@@ -214,6 +247,8 @@ function ResetPasswordContent() {
                         : prev.confirmPassword,
                     }));
                   }}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                   aria-invalid={Boolean(fieldErrors.password)}
                   className={`${getFieldClass(Boolean(fieldErrors.password))} pr-20`}
                 />
@@ -226,11 +261,14 @@ function ResetPasswordContent() {
                 </button>
               </div>
 
-              {fieldErrors.password ? (
-                <p className="mt-3 text-[14px] text-[#dc2626]">
+              {fieldErrors.password && !password && (
+                <p className="mt-1.5 text-[13px] text-[#dc2626]">
                   {fieldErrors.password}
                 </p>
-              ) : null}
+              )}
+              {(passwordFocused || password.length > 0) && (
+                <PasswordStrengthHints password={password} />
+              )}
             </div>
 
             <div>
@@ -317,28 +355,6 @@ function ResetPasswordContent() {
             </Link>
           </div>
 
-          <div className="my-8 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[#ddd5c8]" />
-            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#a49a8d]">
-              Password rules
-            </span>
-            <div className="h-px flex-1 bg-[#ddd5c8]" />
-          </div>
-
-          <div className="space-y-2.5 text-[13px] text-[#7a7166]">
-            <p className="flex items-start gap-2">
-              <span className="mt-0.5 text-[#b89464]">—</span>
-              At least 8 characters.
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="mt-0.5 text-[#b89464]">—</span>
-              Include uppercase, lowercase, and a number.
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="mt-0.5 text-[#b89464]">—</span>
-              Include at least 1 special character.
-            </p>
-          </div>
         </div>
       </SpotlightCard>
     </div>
