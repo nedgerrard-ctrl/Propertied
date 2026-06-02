@@ -10,12 +10,56 @@ import {
   PASSWORD_REQUIREMENTS_MESSAGE,
 } from "@/lib/password-validation";
 
+function PasswordStrengthHints({ password }: { password: string }) {
+  const checks = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "Uppercase letter (A–Z)", met: /[A-Z]/.test(password) },
+    { label: "Lowercase letter (a–z)", met: /[a-z]/.test(password) },
+    { label: "Number (0–9)", met: /\d/.test(password) },
+    { label: "Special character (!@#…)", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+
+  return (
+    <div className="mt-2 space-y-1">
+      {checks.map(({ label, met }) => (
+        <div key={label} className="flex items-center gap-1.5">
+          {met ? (
+            <svg
+              className="h-3.5 w-3.5 flex-shrink-0 text-[#4a9b5f]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg
+              className="h-3.5 w-3.5 flex-shrink-0 text-[#c8bfb4]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            </svg>
+          )}
+          <span className={`text-[12px] ${met ? "text-[#4a9b5f]" : "text-[#9a8f83]"}`}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = useMemo(() => searchParams.get("token") || "", [searchParams]);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -108,14 +152,15 @@ export default function ResetPasswordContent() {
                     placeholder="At least 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
                     className="w-full bg-transparent text-[15px] text-[#2f2923] outline-none placeholder:text-[#a49a8d]"
                     required
                   />
                 </div>
-                <p className="mt-2 text-xs leading-5 text-[#7a7166]">
-                  Must be at least 8 characters and include 1 uppercase letter,
-                  1 lowercase letter, 1 number, and 1 special character.
-                </p>
+                {(passwordFocused || password.length > 0) && (
+                  <PasswordStrengthHints password={password} />
+                )}
               </div>
 
               <div>
