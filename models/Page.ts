@@ -7,8 +7,8 @@ const PageSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: 100,
     },
-
 
     slug: {
       type: String,
@@ -16,26 +16,27 @@ const PageSchema = new Schema(
       trim: true,
       lowercase: true,
       unique: true,
+      maxlength: 100,
     },
 
     subtitle: { type: String, default: "" },
 
     // SEO
-    seoTitle: { type: String, default: "" },
-    seoDescription: { type: String, default: "" },
+    seoTitle: { type: String, default: "", maxlength: 60 },
+    seoDescription: { type: String, default: "", maxlength: 160 },
 
     // Hero section
-    heroEyebrow: { type: String, default: "" },
-    heroTitle: { type: String, default: "" },
-    heroSummary: { type: String, default: "" },
+    heroEyebrow: { type: String, default: "", maxlength: 50 },
+    heroTitle: { type: String, default: "", maxlength: 100 },
+    heroSummary: { type: String, default: "", maxlength: 300 },
 
     // Main body (double-newline separated paragraphs)
-    body: { type: String, default: "" },
+    body: { type: String, default: "", maxlength: 1000 },
 
     // CTA section
-    ctaTitle: { type: String, default: "" },
-    ctaText: { type: String, default: "" },
-    ctaLink: { type: String, default: "" },
+    ctaTitle: { type: String, default: "", maxlength: 100 },
+    ctaText: { type: String, default: "", maxlength: 300 },
+    ctaLink: { type: String, default: "", maxlength: 200 },
 
     // Paragraph blocks (legacy)
     paragraph1Title: { type: String, default: "" },
@@ -52,9 +53,9 @@ const PageSchema = new Schema(
 
     // Optional controls
     showInNavbar: { type: Boolean, default: false },
-    navLabel: { type: String, default: "" },
-    pageGroup: { type: String, default: "more" },
-    statusLabel: { type: String, default: "" },
+    navLabel: { type: String, default: "", maxlength: 50 },
+    pageGroup: { type: String, default: "more", maxlength: 50 },
+    statusLabel: { type: String, default: "", maxlength: 50 },
     featuredImage: { type: String, default: "" },
     sortOrder: { type: Number, default: 100 },
 
@@ -68,8 +69,8 @@ const PageSchema = new Schema(
     // Sections (used by text-image template)
     sections: [
       {
-        heading: { type: String, default: "" },
-        body: { type: String, default: "" },
+        heading: { type: String, default: "", maxlength: 100 },
+        body: { type: String, default: "", maxlength: 1000 },
         image: { type: String, default: "" },
       },
     ],

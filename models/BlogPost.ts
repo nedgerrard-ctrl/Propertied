@@ -4,7 +4,7 @@ import { Schema, model, models } from "mongoose";
 const BlogSectionSchema = new Schema(
   {
     heading: { type: String, default: "" },
-    body: { type: String, required: true, trim: true },
+    body: { type: String, required: true, trim: true, maxlength: 1000 },
     image: { type: String, default: "" },
   },
   { _id: false }

@@ -30,6 +30,8 @@ type Toast = {
   message: string;
 } | null;
 
+const BODY_MAX = 1000;
+
 const emptySection: BlogSection = {
   heading: "",
   body: "",
@@ -67,6 +69,11 @@ function validateBlog(form: BlogFormData): ValidationErrors {
   const hasBody = form.content.some((section) => section.body.trim().length > 0);
   if (!hasBody) {
     errors.content = "At least one blog body section is required.";
+  }
+
+  const overLimit = form.content.some((section) => section.body.length > BODY_MAX);
+  if (overLimit) {
+    errors.content = `Each body section must be ${BODY_MAX.toLocaleString()} characters or fewer.`;
   }
 
   return errors;
@@ -564,13 +571,23 @@ export default function BlogForm({
                       updateSection(index, "body", e.target.value)
                     }
                     rows={7}
+                    maxLength={BODY_MAX}
                     className={`resize-none rounded border bg-white px-3 py-2 text-sm outline-none transition ${
-                      touched.content && !section.body.trim()
+                      touched.content && (!section.body.trim() || section.body.length > BODY_MAX)
                         ? "border-red-200"
                         : "border-neutral-300 focus:border-amber-400"
                     }`}
                     placeholder="Write the article content here."
                   />
+                  <p className={`text-right text-[11px] ${
+                    section.body.length >= BODY_MAX
+                      ? "font-medium text-red-600"
+                      : section.body.length >= BODY_MAX * 0.9
+                        ? "text-amber-600"
+                        : "text-neutral-400"
+                  }`}>
+                    {section.body.length.toLocaleString()} / {BODY_MAX.toLocaleString()}
+                  </p>
                 </label>
 
                 <div className="mt-4 grid gap-2">

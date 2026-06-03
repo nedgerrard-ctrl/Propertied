@@ -34,6 +34,24 @@ type ValidationErrors = Partial<
 
 type Toast = { type: "success" | "error"; message: string } | null;
 
+const LIMITS = {
+  title: 100,
+  slug: 100,
+  seoTitle: 60,
+  seoDescription: 160,
+  navLabel: 50,
+  heroEyebrow: 50,
+  heroTitle: 100,
+  heroSummary: 300,
+  body: 1000,
+  sectionHeading: 100,
+  ctaTitle: 100,
+  ctaText: 300,
+  ctaLink: 200,
+  pageGroup: 50,
+  statusLabel: 50,
+} as const;
+
 const emptySection: PageSection = { heading: "", body: "", image: "" };
 
 function makeSlug(value: string) {
@@ -48,19 +66,24 @@ function makeSlug(value: string) {
 function validatePage(form: PageFormData): ValidationErrors {
   const errors: ValidationErrors = {};
   if (!form.title.trim()) errors.title = "Title is required.";
+  if (form.title.length > LIMITS.title)
+    errors.title = `Title must be ${LIMITS.title} characters or fewer.`;
   if (
     form.slug.trim() &&
     !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())
   )
-    errors.slug =
-      "Slug can only use lowercase letters, numbers, and hyphens.";
+    errors.slug = "Slug can only use lowercase letters, numbers, and hyphens.";
   if (form.templateKey === "text-only" && !form.body.trim())
     errors.body = "Body content is required.";
+  if (form.templateKey === "text-only" && form.body.length > LIMITS.body)
+    errors.body = `Body must be ${LIMITS.body.toLocaleString()} characters or fewer.`;
   if (form.templateKey === "text-image") {
     const hasBody = form.sections.some((s) => s.body.trim().length > 0);
     if (!hasBody)
-      errors.sections =
-        "At least one section with body content is required.";
+      errors.sections = "At least one section with body content is required.";
+    const overLimit = form.sections.some((s) => s.body.length > LIMITS.body);
+    if (overLimit)
+      errors.sections = `Each section body must be ${LIMITS.body.toLocaleString()} characters or fewer.`;
   }
   return errors;
 }
@@ -68,6 +91,20 @@ function validatePage(form: PageFormData): ValidationErrors {
 function ErrorText({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-[12px] font-medium text-red-600">{message}</p>;
+}
+
+function CharCount({ current, max }: { current: number; max: number }) {
+  return (
+    <p className={`text-right text-[11px] ${
+      current >= max
+        ? "font-medium text-red-600"
+        : current >= max * 0.9
+          ? "text-amber-600"
+          : "text-neutral-400"
+    }`}>
+      {current.toLocaleString()} / {max.toLocaleString()}
+    </p>
+  );
 }
 
 function FieldLabel({
@@ -447,6 +484,7 @@ export default function PageForm({
                   setTouched((t) => ({ ...t, title: true }))
                 }
                 onChange={(e) => updateField("title", e.target.value)}
+                maxLength={LIMITS.title}
                 className={`rounded border px-3 py-2 text-sm outline-none transition ${
                   touched.title && errors.title
                     ? "border-red-300 bg-red-50"
@@ -454,9 +492,10 @@ export default function PageForm({
                 }`}
                 placeholder="FIRB Guide for Overseas Buyers"
               />
-              <ErrorText
-                message={touched.title ? errors.title : undefined}
-              />
+              <div className="flex items-center justify-between gap-3">
+                <ErrorText message={touched.title ? errors.title : undefined} />
+                <CharCount current={form.title.length} max={LIMITS.title} />
+              </div>
             </label>
 
             <label className="grid gap-2">
@@ -470,6 +509,7 @@ export default function PageForm({
                   !isEditing && updateField("slug", e.target.value)
                 }
                 disabled={isEditing}
+                maxLength={LIMITS.slug}
                 className={`rounded border px-3 py-2 text-sm outline-none transition ${
                   isEditing
                     ? "cursor-not-allowed border-neutral-200 bg-neutral-50 text-neutral-400"
@@ -479,16 +519,18 @@ export default function PageForm({
                 }`}
                 placeholder="firb-guide-overseas-buyers"
               />
-              {isEditing ? (
-                <p className="text-[11px] text-neutral-400">
-                  Slug is locked after creation. Public URL: /more/{form.slug}
-                </p>
-              ) : (
-                <p className="text-[11px] text-neutral-400">
-                  Becomes the public URL: /more/
-                  {form.slug || "your-page-slug"}
-                </p>
-              )}
+              <div className="flex items-center justify-between gap-3">
+                {isEditing ? (
+                  <p className="text-[11px] text-neutral-400">
+                    Slug is locked after creation. Public URL: /more/{form.slug}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-neutral-400">
+                    Becomes the public URL: /more/{form.slug || "your-page-slug"}
+                  </p>
+                )}
+                {!isEditing && <CharCount current={form.slug.length} max={LIMITS.slug} />}
+              </div>
               <ErrorText
                 message={!isEditing && touched.slug ? errors.slug : undefined}
               />
@@ -500,18 +542,22 @@ export default function PageForm({
                 <input
                   value={form.seoTitle}
                   onChange={(e) => updateField("seoTitle", e.target.value)}
+                  maxLength={LIMITS.seoTitle}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="FIRB Guide | PPM"
                 />
+                <CharCount current={form.seoTitle.length} max={LIMITS.seoTitle} />
               </label>
               <label className="grid gap-2">
                 <FieldLabel>Navigation Label</FieldLabel>
                 <input
                   value={form.navLabel}
                   onChange={(e) => updateField("navLabel", e.target.value)}
+                  maxLength={LIMITS.navLabel}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="FIRB Guide"
                 />
+                <CharCount current={form.navLabel.length} max={LIMITS.navLabel} />
               </label>
             </div>
 
@@ -523,9 +569,11 @@ export default function PageForm({
                   updateField("seoDescription", e.target.value)
                 }
                 rows={3}
+                maxLength={LIMITS.seoDescription}
                 className="resize-none rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                 placeholder="A practical overview of FIRB requirements for overseas property buyers."
               />
+              <CharCount current={form.seoDescription.length} max={LIMITS.seoDescription} />
             </label>
           </div>
         </div>
@@ -549,9 +597,11 @@ export default function PageForm({
                   onChange={(e) =>
                     updateField("heroEyebrow", e.target.value)
                   }
+                  maxLength={LIMITS.heroEyebrow}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="Overseas Buyers"
                 />
+                <CharCount current={form.heroEyebrow.length} max={LIMITS.heroEyebrow} />
               </label>
               <label className="grid gap-2">
                 <FieldLabel>Hero Title</FieldLabel>
@@ -560,9 +610,11 @@ export default function PageForm({
                   onChange={(e) =>
                     updateField("heroTitle", e.target.value)
                   }
+                  maxLength={LIMITS.heroTitle}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="Understanding FIRB Before You Buy"
                 />
+                <CharCount current={form.heroTitle.length} max={LIMITS.heroTitle} />
               </label>
             </div>
             <label className="grid gap-2">
@@ -573,9 +625,11 @@ export default function PageForm({
                   updateField("heroSummary", e.target.value)
                 }
                 rows={3}
+                maxLength={LIMITS.heroSummary}
                 className="resize-none rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                 placeholder="A clear introduction shown below the hero title."
               />
+              <CharCount current={form.heroSummary.length} max={LIMITS.heroSummary} />
             </label>
           </div>
         </div>
@@ -608,6 +662,7 @@ export default function PageForm({
                 }
                 onChange={(e) => updateField("body", e.target.value)}
                 rows={14}
+                maxLength={LIMITS.body}
                 className={`resize-none rounded border px-3 py-2 text-sm outline-none transition ${
                   touched.body && errors.body
                     ? "border-red-300 bg-red-50"
@@ -615,6 +670,7 @@ export default function PageForm({
                 }`}
                 placeholder={`Write your page content here.\n\nUse blank lines to separate paragraphs.\n\nEach paragraph will be displayed as a separate block of text on the live page.`}
               />
+              <CharCount current={form.body.length} max={LIMITS.body} />
             </label>
           </div>
         ) : (
@@ -672,9 +728,11 @@ export default function PageForm({
                       onChange={(e) =>
                         updateSection(index, "heading", e.target.value)
                       }
+                      maxLength={LIMITS.sectionHeading}
                       className="rounded border border-neutral-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                       placeholder="Optional section heading"
                     />
+                    <CharCount current={section.heading.length} max={LIMITS.sectionHeading} />
                   </label>
 
                   <label className="mt-4 grid gap-2">
@@ -688,13 +746,15 @@ export default function PageForm({
                         updateSection(index, "body", e.target.value)
                       }
                       rows={6}
+                      maxLength={LIMITS.body}
                       className={`resize-none rounded border bg-white px-3 py-2 text-sm outline-none transition ${
-                        touched.sections && !section.body.trim()
+                        touched.sections && (!section.body.trim() || section.body.length > LIMITS.body)
                           ? "border-red-200"
                           : "border-neutral-300 focus:border-amber-400"
                       }`}
                       placeholder="Write the section body text here."
                     />
+                    <CharCount current={section.body.length} max={LIMITS.body} />
                   </label>
 
                   <div className="mt-4 grid gap-2">
@@ -765,9 +825,11 @@ export default function PageForm({
                   onChange={(e) =>
                     updateField("ctaTitle", e.target.value)
                   }
+                  maxLength={LIMITS.ctaTitle}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="Speak With Our Team"
                 />
+                <CharCount current={form.ctaTitle.length} max={LIMITS.ctaTitle} />
               </label>
               <label className="grid gap-2">
                 <FieldLabel>CTA Link</FieldLabel>
@@ -776,9 +838,11 @@ export default function PageForm({
                   onChange={(e) =>
                     updateField("ctaLink", e.target.value)
                   }
+                  maxLength={LIMITS.ctaLink}
                   className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                   placeholder="/contact/buyers-investors"
                 />
+                <CharCount current={form.ctaLink.length} max={LIMITS.ctaLink} />
               </label>
             </div>
             <label className="grid gap-2">
@@ -787,9 +851,11 @@ export default function PageForm({
                 value={form.ctaText}
                 onChange={(e) => updateField("ctaText", e.target.value)}
                 rows={3}
+                maxLength={LIMITS.ctaText}
                 className="resize-none rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                 placeholder="Our team can help you identify suitable off-the-plan opportunities."
               />
+              <CharCount current={form.ctaText.length} max={LIMITS.ctaText} />
             </label>
           </div>
         </div>
@@ -805,9 +871,11 @@ export default function PageForm({
               <input
                 value={form.pageGroup}
                 onChange={(e) => updateField("pageGroup", e.target.value)}
+                maxLength={LIMITS.pageGroup}
                 className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                 placeholder="guides"
               />
+              <CharCount current={form.pageGroup.length} max={LIMITS.pageGroup} />
             </label>
             <label className="grid gap-2">
               <FieldLabel>Status Label</FieldLabel>
@@ -816,9 +884,11 @@ export default function PageForm({
                 onChange={(e) =>
                   updateField("statusLabel", e.target.value)
                 }
+                maxLength={LIMITS.statusLabel}
                 className="rounded border border-neutral-300 px-3 py-2 text-sm outline-none transition focus:border-amber-400"
                 placeholder="Guide"
               />
+              <CharCount current={form.statusLabel.length} max={LIMITS.statusLabel} />
             </label>
             <label className="grid gap-2">
               <FieldLabel>Sort Order</FieldLabel>
