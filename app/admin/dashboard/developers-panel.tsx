@@ -90,13 +90,14 @@ function formatFileSize(bytes: number) {
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const key = status as DeveloperAccountStatus;
   return (
     <span
       className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-        DEV_STATUS_BADGE[status] ?? "bg-neutral-100 text-neutral-500"
+        DEV_STATUS_BADGE[key] ?? "bg-neutral-100 text-neutral-500"
       }`}
     >
-      {DEV_STATUS_LABEL[status] ?? status}
+      {DEV_STATUS_LABEL[key] ?? status}
     </span>
   );
 }
