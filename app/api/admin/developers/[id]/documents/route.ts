@@ -50,7 +50,7 @@ export async function POST(
 
   await connectDB();
 
-  const developer = await User.findOne({ _id: id, role: "client", clientType: "developer" });
+  const developer = await User.findOne({ _id: id, role: "client", userType: "developer" });
   if (!developer) {
     return NextResponse.json({ message: "Developer not found" }, { status: 404 });
   }
@@ -60,14 +60,18 @@ export async function POST(
   const dataUri = `data:${file.type};base64,${b64}`;
 
   const isRaw =
+    file.type === "application/pdf" ||
     file.type === "application/msword" ||
     file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+  const ext = file.name.includes(".") ? file.name.split(".").pop()!.toLowerCase() : "";
+  const uniqueId = Math.random().toString(36).slice(2, 10);
+  const publicId = isRaw && ext ? `${uniqueId}.${ext}` : undefined;
 
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: `ppm/developer-documents/${id}`,
     resource_type: isRaw ? "raw" : "image",
-    use_filename: true,
-    unique_filename: true,
+    ...(publicId ? { public_id: publicId } : { use_filename: true, unique_filename: true }),
   });
 
   const doc = {
@@ -109,7 +113,7 @@ export async function PATCH(
 
   await connectDB();
 
-  const developer = await User.findOne({ _id: id, role: "client", clientType: "developer" });
+  const developer = await User.findOne({ _id: id, role: "client", userType: "developer" });
   if (!developer) {
     return NextResponse.json({ message: "Developer not found" }, { status: 404 });
   }
@@ -147,7 +151,7 @@ export async function DELETE(
 
   await connectDB();
 
-  const developer = await User.findOne({ _id: id, role: "client", clientType: "developer" });
+  const developer = await User.findOne({ _id: id, role: "client", userType: "developer" });
   if (!developer) {
     return NextResponse.json({ message: "Developer not found" }, { status: 404 });
   }
@@ -158,6 +162,7 @@ export async function DELETE(
 
   if (doc) {
     const isRaw =
+      doc.fileType === "application/pdf" ||
       doc.fileType === "application/msword" ||
       doc.fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     await cloudinary.uploader.destroy(storedName, { resource_type: isRaw ? "raw" : "image" }).catch(() => {});
