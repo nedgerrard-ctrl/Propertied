@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import LogoutButton from "./logout-button";
 
 type Enquiry = {
   _id: string;
@@ -90,9 +91,12 @@ export default function DashboardClient({ firstName }: { firstName: string }) {
   return (
     <main className="flex-1 px-8 py-8 space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-neutral-500">Welcome back, {firstName}.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-neutral-900">Dashboard</h1>
+          <p className="mt-1 text-sm text-neutral-500">Welcome back, {firstName}.</p>
+        </div>
+        <LogoutButton />
       </div>
 
       {/* Stat cards */}
