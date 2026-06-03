@@ -1,11 +1,19 @@
 import { auth } from "@/auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import DeveloperNavbar from "../components/DeveloperNavbar";
 
 export default async function DeveloperPortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
-  const isAdmin = session?.user?.role === "admin";
+  const role = session?.user?.role;
+  const userType = (session?.user as { userType?: string } | undefined)?.userType;
+  const isAdmin = role === "admin";
+  const isDeveloper = role === "client" && userType === "developer";
+
+  if (!session || (!isAdmin && !isDeveloper)) {
+    redirect("/developer");
+  }
 
   return (
     <div className="flex min-h-screen bg-white">
