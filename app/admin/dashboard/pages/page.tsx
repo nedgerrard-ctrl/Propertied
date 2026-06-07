@@ -84,6 +84,13 @@ export default function PagesList() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
 
+  // Footer state
+  const [footerPublished, setFooterPublished] = useState(true);
+  const [footerArchived, setFooterArchived]   = useState(false);
+  const [footerLoading, setFooterLoading]     = useState(true);
+  const [footerToggling, setFooterToggling]   = useState(false);
+  const [footerArchiving, setFooterArchiving] = useState(false);
+
   // Shared feedback
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -99,7 +106,51 @@ export default function PagesList() {
     fetch("/api/admin/pages")
       .then((r) => r.json())
       .then((data) => { setPages(data); setLoading(false); });
+
+    fetch("/api/admin/content/footer")
+      .then((r) => r.json())
+      .then((data) => {
+        setFooterPublished(data.published ?? true);
+        setFooterArchived(data.archived ?? false);
+        setFooterLoading(false);
+      });
   }, []);
+
+  // ── Footer actions ────────────────────────────────────────────────────────
+
+  async function footerTogglePublish() {
+    setFooterToggling(true);
+    const next = !footerPublished;
+    const res = await fetch("/api/admin/content/footer", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ published: next }),
+    });
+    setFooterToggling(false);
+    if (res.ok) {
+      setFooterPublished(next);
+      showMsg(next ? "Footer published." : "Footer hidden.");
+    } else {
+      showErr("Failed to update footer status.");
+    }
+  }
+
+  async function footerArchive() {
+    if (!confirm("Archive the footer? It will revert to default content on the site. You can restore it from Archived Pages.")) return;
+    setFooterArchiving(true);
+    const res = await fetch("/api/admin/content/footer", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archived: true }),
+    });
+    setFooterArchiving(false);
+    if (res.ok) {
+      setFooterArchived(true);
+      showMsg("Footer archived.");
+    } else {
+      showErr("Failed to archive footer.");
+    }
+  }
 
   // ── CMS actions ───────────────────────────────────────────────────────────
 
@@ -235,6 +286,101 @@ export default function PagesList() {
             {errorMessage}
           </div>
         )}
+
+        {/* ── Section: Global Elements ────────────────────────────────────── */}
+        <div className="mb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+            Global Elements
+          </p>
+          <p className="mt-0.5 text-[12px] text-neutral-400">
+            Site-wide components that appear on every page.
+          </p>
+        </div>
+
+        <div className="mb-10 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          {footerLoading ? (
+            <div className="flex items-center justify-center py-10 text-sm text-neutral-400">Loading…</div>
+          ) : footerArchived ? (
+            <div className="py-10 text-center text-sm text-neutral-400">
+              Footer is archived.{" "}
+              <Link href="/admin/dashboard/pages/archived" className="text-[#2f2a24] underline">
+                View in Archived Pages
+              </Link>
+              .
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-neutral-100 bg-neutral-50">
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Element</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Admin Note</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Updated</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Status</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className={!footerPublished ? "bg-neutral-50/80" : ""}>
+                  <td className="px-6 py-4">
+                    <p className="font-medium text-neutral-900">Footer</p>
+                    <p className="mt-1 text-[11px] text-neutral-400">Appears on every page</p>
+                  </td>
+                  <td className="px-6 py-4 text-[12px] text-neutral-400">—</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-[12px] text-neutral-400">—</td>
+                  <td className="px-6 py-4">
+                    {footerPublished ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[11px] font-semibold text-green-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                        Live
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
+                        Hidden
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href="/#site-footer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded border border-neutral-200 px-3 py-1.5 text-[11px] font-medium text-neutral-600 transition hover:border-neutral-400 hover:text-neutral-900"
+                      >
+                        Preview ↗
+                      </a>
+                      <Link
+                        href="/admin/dashboard/content/footer"
+                        className="rounded border border-[#5f5245] bg-[#2f2a24] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#1f1a17]"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={footerTogglePublish}
+                        disabled={footerToggling}
+                        className={`rounded px-3 py-1.5 text-[11px] font-medium transition disabled:opacity-50 ${
+                          footerPublished
+                            ? "border border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+                            : "border border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                        }`}
+                      >
+                        {footerToggling ? "…" : footerPublished ? "Unpublish" : "Publish"}
+                      </button>
+                      <button
+                        onClick={footerArchive}
+                        disabled={footerArchiving}
+                        className="rounded border border-orange-200 bg-orange-50 px-3 py-1.5 text-[11px] font-medium text-orange-600 transition hover:bg-orange-100 disabled:opacity-50"
+                      >
+                        {footerArchiving ? "…" : "Archive"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+        </div>
 
         {/* ── Section: Site Pages ─────────────────────────────────────────── */}
         <div className="mb-2">

@@ -37,6 +37,10 @@ export default function ArchivedPagesPage() {
   const [loading, setLoading] = useState(true);
   const [restoringId, setRestoringId] = useState<string | null>(null);
 
+  const [footerArchived, setFooterArchived]     = useState(false);
+  const [footerLoading, setFooterLoading]       = useState(true);
+  const [footerRestoring, setFooterRestoring]   = useState(false);
+
   useEffect(() => {
     fetch("/api/admin/cms-pages/archived")
       .then((r) => r.json())
@@ -45,7 +49,26 @@ export default function ArchivedPagesPage() {
     fetch("/api/admin/pages/archived")
       .then((r) => r.json())
       .then((data) => { setPages(data); setLoading(false); });
+
+    fetch("/api/admin/content/footer")
+      .then((r) => r.json())
+      .then((data) => { setFooterArchived(data.archived ?? false); setFooterLoading(false); });
   }, []);
+
+  async function restoreFooter() {
+    setFooterRestoring(true);
+    const res = await fetch("/api/admin/content/footer", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archived: false }),
+    });
+    setFooterRestoring(false);
+    if (res.ok) {
+      setFooterArchived(false);
+    } else {
+      alert("Failed to restore footer.");
+    }
+  }
 
   async function restoreCmsPage(page: CmsPage) {
     setCmsRestoringSlug(page.slug);
@@ -88,6 +111,47 @@ export default function ArchivedPagesPage() {
           <p className="mt-1 text-sm text-neutral-500">
             Archived pages show a 404 on the public site. Restore them to make them live again.
           </p>
+        </div>
+
+        {/* ── Archived Global Elements ────────────────────────────────────── */}
+        <div className="mb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+            Global Elements
+          </p>
+        </div>
+
+        <div className="mb-10 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          {footerLoading ? (
+            <div className="flex items-center justify-center py-10 text-sm text-neutral-400">Loading…</div>
+          ) : !footerArchived ? (
+            <div className="py-10 text-center text-sm text-neutral-400">No archived global elements.</div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-neutral-100 bg-neutral-50">
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Element</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-orange-50/30">
+                  <td className="px-6 py-4">
+                    <p className="font-medium text-neutral-900">Footer</p>
+                    <p className="mt-1 text-[11px] text-neutral-400">Site-wide footer</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={restoreFooter}
+                      disabled={footerRestoring}
+                      className="rounded border border-green-300 bg-green-50 px-3 py-1.5 text-[11px] font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-50"
+                    >
+                      {footerRestoring ? "Restoring…" : "Restore"}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* ── Archived Site Pages ─────────────────────────────────────────── */}
