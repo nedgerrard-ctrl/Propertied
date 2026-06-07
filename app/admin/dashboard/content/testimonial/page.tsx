@@ -25,7 +25,7 @@ type DynamicTestimonial = {
 
 type ToastData = { type: "success" | "error"; message: string } | null;
 
-type TestimonialDraft = { quote?: string; client?: string; rating?: number; image?: string };
+type TestimonialDraft = { quote?: string; client?: string; image?: string };
 
 const EDIT_DARK = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
@@ -67,17 +67,6 @@ function Toast({ toast, onClose }: { toast: ToastData; onClose: () => void }) {
   );
 }
 
-function Stars({ value }: { value: number }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i <= value ? "fill-[#c8a96e]" : "fill-[#d9cec0]"}`}>
-          <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
 
 const cinematicItems = [
   { quoteField: "cine1Quote" as TextField, clientField: "cine1Client" as TextField, align: "items-start text-left  md:pr-[25%]" },
@@ -96,18 +85,17 @@ function AddModal({
   initialValues?: TestimonialDraft;
   onDraftSaved: (d: TestimonialDraft) => void;
 }) {
-  const [quote, setQuote]   = useState(initialValues.quote   ?? "");
-  const [client, setClient] = useState(initialValues.client  ?? "");
-  const [rating, setRating] = useState(initialValues.rating  ?? 5);
-  const [image, setImage]   = useState(initialValues.image   ?? "");
+  const [quote, setQuote]   = useState(initialValues.quote  ?? "");
+  const [client, setClient] = useState(initialValues.client ?? "");
+  const [image, setImage]   = useState(initialValues.image  ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
-  const draftRef = useRef({ quote, client, rating, image });
-  useEffect(() => { draftRef.current = { quote, client, rating, image }; }, [quote, client, rating, image]);
+  const draftRef = useRef({ quote, client, image });
+  useEffect(() => { draftRef.current = { quote, client, image }; }, [quote, client, image]);
   useEffect(() => { return () => { onDraftSaved(draftRef.current); }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleQuote(v: string) {
@@ -148,7 +136,7 @@ function AddModal({
     const res = await fetch("/api/admin/testimonials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quote: quote.trim(), client: client.trim(), rating, image }),
+      body: JSON.stringify({ quote: quote.trim(), client: client.trim(), image }),
     });
     const data = await res.json();
     setSaving(false);
@@ -256,26 +244,6 @@ function AddModal({
             {errors.client && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.client}</p>}
           </div>
 
-          <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-2">
-              Rating
-            </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setRating(i)}
-                  className="p-0.5 focus:outline-none transition hover:scale-110"
-                  title={`${i} star${i > 1 ? "s" : ""}`}
-                >
-                  <svg viewBox="0 0 24 24" className={`h-6 w-6 transition ${i <= rating ? "fill-[#c8a96e]" : "fill-neutral-200"}`}>
-                    <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="mt-7 flex justify-end gap-3">
@@ -299,6 +267,179 @@ function AddModal({
   );
 }
 
+// ── Edit Testimonial Modal ─────────────────────────────────────────────────────
+
+function EditModal({
+  testimonial,
+  onClose,
+  onUpdated,
+}: {
+  testimonial: DynamicTestimonial;
+  onClose: () => void;
+  onUpdated: (t: DynamicTestimonial) => void;
+}) {
+  const [quote, setQuote]   = useState(testimonial.quote);
+  const [client, setClient] = useState(testimonial.client);
+  const [image, setImage]   = useState(testimonial.image ?? "");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  async function handleImageFile(file: File) {
+    setUploadingImage(true);
+    setUploadError("");
+    try {
+      const url = await uploadImage(file);
+      setImage(url);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setApiError("");
+    const newErrors = {
+      quote: quote.trim() ? "" : "Required",
+      client: client.trim() ? "" : "Required",
+    };
+    setErrors(newErrors);
+    if (Object.values(newErrors).some((v) => v)) return;
+
+    setSaving(true);
+    const res = await fetch(`/api/admin/testimonials/${testimonial._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quote: quote.trim(), client: client.trim(), image }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (!res.ok) {
+      setApiError(data.error || "Failed to update testimonial.");
+    } else {
+      onUpdated({ ...testimonial, quote: data.quote, client: data.client, image: data.image || undefined });
+      onClose();
+    }
+  }
+
+  const inputBase = "w-full rounded border px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:outline-none transition-colors";
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4">
+      <form onSubmit={submit} className="w-full max-w-lg rounded-xl bg-white p-7 shadow-2xl">
+        <h2 className="text-lg font-semibold text-neutral-900">Edit Testimonial</h2>
+        <p className="mt-1 text-sm text-neutral-500">Changes apply immediately to the public page.</p>
+
+        {apiError && (
+          <div className="mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M7.018 1.49A.75.75 0 0 1 8 .75h.002a.75.75 0 0 1 .75.748v.002l-.112 6.502a.75.75 0 0 1-1.498 0L7.018 1.49ZM8 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Z" />
+            </svg>
+            <p className="text-[12px] font-medium text-red-700">{apiError}</p>
+          </div>
+        )}
+
+        <div className="mt-6 space-y-4">
+          {/* Client photo */}
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-2">
+              Client Photo <span className="font-normal normal-case tracking-normal text-neutral-400">(optional)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              {image ? (
+                <img src={image} alt="Client" className="h-12 w-12 rounded-full object-cover ring-2 ring-neutral-200 shrink-0" />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-neutral-100 ring-2 ring-neutral-200 shrink-0 flex items-center justify-center">
+                  <svg className="h-6 w-6 text-neutral-300" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5">
+                <label className="cursor-pointer">
+                  <span className="inline-flex items-center gap-1.5 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100">
+                    {uploadingImage ? "Uploading…" : image ? "Replace Photo" : "Upload Photo"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploadingImage}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleImageFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {image && (
+                  <button
+                    type="button"
+                    onClick={() => setImage("")}
+                    className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {uploadError && <p className="text-[11px] text-red-500">{uploadError}</p>}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5">
+              Quote *
+            </label>
+            <textarea
+              value={quote}
+              onChange={(e) => { setQuote(e.target.value); setErrors((p) => ({ ...p, quote: e.target.value.trim() ? "" : "Required" })); }}
+              rows={4}
+              placeholder="What the client said…"
+              className={`${inputBase} resize-none ${errors.quote ? "border-red-400 bg-red-50/30 focus:border-red-500" : "border-neutral-200 focus:border-amber-400"}`}
+            />
+            {errors.quote && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.quote}</p>}
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5">
+              Client Name *
+            </label>
+            <input
+              type="text"
+              value={client}
+              onChange={(e) => { setClient(e.target.value); setErrors((p) => ({ ...p, client: e.target.value.trim() ? "" : "Required" })); }}
+              placeholder="e.g. Sarah T. — Property Investor"
+              className={`${inputBase} ${errors.client ? "border-red-400 bg-red-50/30 focus:border-red-500" : "border-neutral-200 focus:border-amber-400"}`}
+            />
+            {errors.client && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.client}</p>}
+          </div>
+        </div>
+
+        <div className="mt-7 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded border border-neutral-200 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-400"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving || uploadingImage}
+            className="rounded bg-amber-400 px-5 py-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-300 disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save Changes"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 // ── Main editor ───────────────────────────────────────────────────────────────
 
 export default function TestimonialInlineEditor() {
@@ -308,9 +449,10 @@ export default function TestimonialInlineEditor() {
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
-  const [addOpen, setAddOpen]       = useState(false);
-  const [addDraft, setAddDraft]     = useState<TestimonialDraft>({});
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [addOpen, setAddOpen]             = useState(false);
+  const [addDraft, setAddDraft]           = useState<TestimonialDraft>({});
+  const [editingTestimonial, setEditingTestimonial] = useState<DynamicTestimonial | null>(null);
+  const [deletingId, setDeletingId]       = useState<string | null>(null);
   const [toast, setToast]           = useState<ToastData>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refs = useRef<Partial<Record<TextField, HTMLElement | null>>>({});
@@ -388,6 +530,11 @@ export default function TestimonialInlineEditor() {
     } else {
       showToast("error", "Failed to delete testimonial.");
     }
+  }
+
+  function updateTestimonial(updated: DynamicTestimonial) {
+    setTestimonials((prev) => prev.map((t) => t._id === updated._id ? updated : t));
+    showToast("success", "Testimonial updated.");
   }
 
   const c = content;
@@ -500,42 +647,53 @@ export default function TestimonialInlineEditor() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8">
                 {testimonials.map((t) => (
                   <div key={t._id} className="relative border border-[#e3d8ca] bg-white p-6 group">
-                    {/* Photo + stars row */}
-                    <div className="flex items-center gap-3 mb-3">
+                    {/* Photo row */}
+                    <div className="mb-3">
                       {t.image ? (
-                        <img src={t.image} alt={t.client} className="h-9 w-9 rounded-full object-cover ring-1 ring-[#e3d8ca] shrink-0" />
+                        <img src={t.image} alt={t.client} className="h-9 w-9 rounded-full object-cover ring-1 ring-[#e3d8ca]" />
                       ) : (
-                        <div className="h-9 w-9 rounded-full bg-[#f0ebe4] ring-1 ring-[#e3d8ca] shrink-0 flex items-center justify-center">
+                        <div className="h-9 w-9 rounded-full bg-[#f0ebe4] ring-1 ring-[#e3d8ca] flex items-center justify-center">
                           <svg className="h-4 w-4 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
                           </svg>
                         </div>
                       )}
-                      <Stars value={t.rating} />
                     </div>
                     <p className="text-[13px] italic text-[#2a1f1a] leading-relaxed">
                       &ldquo;{t.quote}&rdquo;
                     </p>
                     <p className="mt-4 text-[10px] tracking-[0.22em] text-[#8a7b6d] uppercase">{t.client}</p>
 
-                    {/* Delete button */}
-                    <button
-                      onClick={() => deleteTestimonial(t._id)}
-                      disabled={deletingId === t._id}
-                      className="absolute top-3 right-3 flex items-center gap-1 rounded bg-red-50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500 opacity-0 group-hover:opacity-100 transition hover:bg-red-100 disabled:opacity-50"
-                      title="Delete this testimonial"
-                    >
-                      {deletingId === t._id ? (
-                        "Deleting…"
-                      ) : (
-                        <>
-                          <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.559a.75.75 0 1 0-1.492.12l.66 8.25A1.75 1.75 0 0 0 5.405 16.5h5.19a1.75 1.75 0 0 0 1.741-1.57l.66-8.25a.75.75 0 1 0-1.492-.12l-.66 8.25a.25.25 0 0 1-.249.224H5.405a.25.25 0 0 1-.249-.224l-.66-8.25Z"/>
-                          </svg>
-                          Delete
-                        </>
-                      )}
-                    </button>
+                    {/* Edit / Delete buttons */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                      <button
+                        onClick={() => setEditingTestimonial(t)}
+                        className="flex items-center gap-1 rounded bg-amber-50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100"
+                        title="Edit this testimonial"
+                      >
+                        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Z" />
+                        </svg>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteTestimonial(t._id)}
+                        disabled={deletingId === t._id}
+                        className="flex items-center gap-1 rounded bg-red-50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500 transition hover:bg-red-100 disabled:opacity-50"
+                        title="Delete this testimonial"
+                      >
+                        {deletingId === t._id ? (
+                          "Deleting…"
+                        ) : (
+                          <>
+                            <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                              <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.559a.75.75 0 1 0-1.492.12l.66 8.25A1.75 1.75 0 0 0 5.405 16.5h5.19a1.75 1.75 0 0 0 1.741-1.57l.66-8.25a.75.75 0 1 0-1.492-.12l-.66 8.25a.25.25 0 0 1-.249.224H5.405a.25.25 0 0 1-.249-.224l-.66-8.25Z"/>
+                            </svg>
+                            Delete
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -571,6 +729,15 @@ export default function TestimonialInlineEditor() {
             setTestimonials((prev) => [t, ...prev]);
             showToast("success", "Testimonial added successfully.");
           }}
+        />
+      )}
+
+      {/* Edit testimonial modal */}
+      {editingTestimonial && (
+        <EditModal
+          testimonial={editingTestimonial}
+          onClose={() => setEditingTestimonial(null)}
+          onUpdated={updateTestimonial}
         />
       )}
 
