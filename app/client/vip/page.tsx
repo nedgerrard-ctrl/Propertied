@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { connectDB } from "@/lib/mongodb";
 import VipPost from "@/models/VipPost";
@@ -15,7 +15,7 @@ export default async function VipPage() {
     !session?.user?.pendingApproval;
 
   if (!isAdmin && !isApprovedExistingClient) {
-    notFound();
+    redirect("/client/dashboard");
   }
 
   await connectDB();
