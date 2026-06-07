@@ -51,7 +51,7 @@ function ContactTabs() {
         href="/contact/buyers-investors"
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
       >
-        Investors / Owner-Occupiers
+        Buyers
       </Link>
 
       <Link
@@ -232,7 +232,7 @@ export default function DevelopersContactPage() {
         title: "Not Allowed",
         message:
           userType === "buyer_investor"
-            ? "As a buyer or investor, please use the Investors / Owner-Occupiers enquiry form."
+            ? "As a buyer or investor, please use the Buyers enquiry form."
             : "As an existing client, you are not permitted to submit developer enquiries.",
         success: false,
       });

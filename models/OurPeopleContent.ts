@@ -6,6 +6,7 @@ const PersonSchema = new Schema(
     name:        { type: String, default: "" },
     title:       { type: String, default: "" },
     description: { type: String, default: "" },
+    image:       { type: String, default: "" },
   },
   { _id: false }
 );

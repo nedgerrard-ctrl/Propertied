@@ -3,6 +3,7 @@ export type Person = {
   name: string;
   title: string;
   description: string; // paragraphs separated by \n\n
+  image?: string;
 };
 
 export type OurPeopleContentData = {

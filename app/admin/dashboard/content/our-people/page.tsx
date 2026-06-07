@@ -6,6 +6,15 @@ import { ourPeopleDefaults, OurPeopleContentData, Person } from "@/lib/our-peopl
 
 type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext";
 
+async function uploadImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Upload failed.");
+  return data.path as string;
+}
+
 const EDIT_LIGHT = "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 const EDIT_DARK  = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
@@ -33,6 +42,8 @@ export default function OurPeopleInlineEditor() {
   const [saved, setSaved]       = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [uploadingPersonId, setUploadingPersonId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string>("");
   const refs = useRef<Partial<Record<HeroField, HTMLElement | null>>>({});
 
   useEffect(() => {
@@ -53,6 +64,23 @@ export default function OurPeopleInlineEditor() {
   function updatePerson(id: string, field: keyof Omit<Person, "id">, value: string) {
     setSaved(false);
     setPeople((prev) => prev.map((p) => p.id === id ? { ...p, [field]: value } : p));
+  }
+
+  async function handlePersonImageUpload(id: string, file: File) {
+    setUploadingPersonId(id);
+    setUploadError("");
+    try {
+      const url = await uploadImage(file);
+      updatePerson(id, "image", url);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setUploadingPersonId(null);
+    }
+  }
+
+  function removePersonImage(id: string) {
+    updatePerson(id, "image", "");
   }
 
   function addPerson() {
@@ -285,6 +313,72 @@ export default function OurPeopleInlineEditor() {
                   </div>
 
                   <div className="mb-5 w-10 h-px bg-[#c8a96e]" />
+
+                  {/* Photo upload */}
+                  <div className="mb-5 flex items-center gap-4">
+                    {person.image ? (
+                      <img
+                        src={person.image}
+                        alt={person.name || "Photo"}
+                        className="h-16 w-16 rounded-full object-cover ring-2 ring-[#ede8e1]"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-[#f0ebe4] ring-2 ring-[#ede8e1] flex items-center justify-center">
+                        <svg className="h-7 w-7 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="cursor-pointer">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100 active:scale-95">
+                          {uploadingPersonId === person.id ? (
+                            "Uploading…"
+                          ) : person.image ? (
+                            <>
+                              <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Z" />
+                              </svg>
+                              Replace Photo
+                            </>
+                          ) : (
+                            <>
+                              <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8.75 1.75a.75.75 0 0 0-1.5 0V7H1.75a.75.75 0 0 0 0 1.5H7.25v5.25a.75.75 0 0 0 1.5 0V8.5h5.25a.75.75 0 0 0 0-1.5H8.75V1.75Z" />
+                              </svg>
+                              Add Photo
+                            </>
+                          )}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          disabled={uploadingPersonId === person.id}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handlePersonImageUpload(person.id, f);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      {person.image && (
+                        <button
+                          type="button"
+                          onClick={() => removePersonImage(person.id)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 active:scale-95"
+                        >
+                          <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.559a.75.75 0 1 0-1.492.12l.66 8.25A1.75 1.75 0 0 0 5.405 16.5h5.19a1.75 1.75 0 0 0 1.741-1.57l.66-8.25a.75.75 0 1 0-1.492-.12l-.66 8.25a.25.25 0 0 1-.249.224H5.405a.25.25 0 0 1-.249-.224l-.66-8.25Z" />
+                          </svg>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    {uploadError && uploadingPersonId === null && (
+                      <p className="text-[11px] text-red-600">{uploadError}</p>
+                    )}
+                  </div>
 
                   {/* Description textarea */}
                   <textarea

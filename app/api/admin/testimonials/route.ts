@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   await connectDB();
-  const { quote, client, rating } = await req.json();
+  const { quote, client, rating, image } = await req.json();
 
   if (!quote?.trim() || !client?.trim()) {
     return NextResponse.json({ error: "Quote and client are required." }, { status: 400 });
@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Rating must be 1–5." }, { status: 400 });
   }
 
-  const doc = await Testimonial.create({ quote: quote.trim(), client: client.trim(), rating: r });
+  const doc = await Testimonial.create({
+    quote: quote.trim(),
+    client: client.trim(),
+    rating: r,
+    image: typeof image === "string" ? image.trim() : "",
+  });
   return NextResponse.json(doc, { status: 201 });
 }

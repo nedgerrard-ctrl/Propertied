@@ -633,6 +633,9 @@ export default function SignupPage() {
             <h1 className="mt-3 text-[2rem] font-medium tracking-tight text-[#2f2923] sm:text-[2.4rem]">
               Create an account
             </h1>
+            <p className="mt-1.5 text-[14px] leading-6 text-[#6e655c]">
+              Get exclusive access to property listings, reports, and project updates.
+            </p>
             <p className="mt-2 text-sm leading-6 text-[#6e655c]">
               Already have an account?{" "}
               <Link href="/login" className="text-[#2f2923] underline underline-offset-4 transition hover:text-[#b89464]">

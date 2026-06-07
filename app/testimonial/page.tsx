@@ -11,6 +11,7 @@ export type DynamicTestimonial = {
   quote: string
   client: string
   rating: number
+  image?: string
 }
 
 const SEED_TESTIMONIALS = [
@@ -65,6 +66,7 @@ export default async function TestimonialServerPage() {
     quote:  d.quote  as string,
     client: d.client as string,
     rating: d.rating as number,
+    image:  (d.image as string | undefined) || undefined,
   }))
 
   return <TestimonialPage content={content} testimonials={testimonials} />

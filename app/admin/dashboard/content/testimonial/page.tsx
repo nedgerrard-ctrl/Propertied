@@ -4,6 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { testimonialDefaults, TestimonialContentData } from "@/lib/testimonial-defaults";
 
+async function uploadImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Upload failed.");
+  return data.path as string;
+}
+
 type TextField = "cine1Quote" | "cine1Client" | "cine2Quote" | "cine2Client" | "cine3Quote" | "cine3Client" | "ctaHeading";
 
 type DynamicTestimonial = {
@@ -11,11 +20,12 @@ type DynamicTestimonial = {
   quote: string;
   client: string;
   rating: number;
+  image?: string;
 };
 
 type ToastData = { type: "success" | "error"; message: string } | null;
 
-type TestimonialDraft = { quote?: string; client?: string; rating?: number };
+type TestimonialDraft = { quote?: string; client?: string; rating?: number; image?: string };
 
 const EDIT_DARK = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
@@ -89,15 +99,17 @@ function AddModal({
   const [quote, setQuote]   = useState(initialValues.quote   ?? "");
   const [client, setClient] = useState(initialValues.client  ?? "");
   const [rating, setRating] = useState(initialValues.rating  ?? 5);
+  const [image, setImage]   = useState(initialValues.image   ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
-  const draftRef = useRef({ quote, client, rating });
-  useEffect(() => { draftRef.current = { quote, client, rating }; }, [quote, client, rating]);
+  const draftRef = useRef({ quote, client, rating, image });
+  useEffect(() => { draftRef.current = { quote, client, rating, image }; }, [quote, client, rating, image]);
   useEffect(() => { return () => { onDraftSaved(draftRef.current); }; }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Live validation wrappers
   function handleQuote(v: string) {
     setQuote(v);
     setErrors((p) => ({ ...p, quote: v.trim() ? "" : "Required" }));
@@ -106,6 +118,19 @@ function AddModal({
   function handleClient(v: string) {
     setClient(v);
     setErrors((p) => ({ ...p, client: v.trim() ? "" : "Required" }));
+  }
+
+  async function handleImageFile(file: File) {
+    setUploadingImage(true);
+    setUploadError("");
+    try {
+      const url = await uploadImage(file);
+      setImage(url);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -123,7 +148,7 @@ function AddModal({
     const res = await fetch("/api/admin/testimonials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quote: quote.trim(), client: client.trim(), rating }),
+      body: JSON.stringify({ quote: quote.trim(), client: client.trim(), rating, image }),
     });
     const data = await res.json();
     setSaving(false);
@@ -131,7 +156,7 @@ function AddModal({
       setApiError(data.error || "Failed to add testimonial.");
     } else {
       onDraftSaved({});
-      onAdded({ _id: data._id, quote: data.quote, client: data.client, rating: data.rating });
+      onAdded({ _id: data._id, quote: data.quote, client: data.client, rating: data.rating, image: data.image || undefined });
       onClose();
     }
   }
@@ -157,6 +182,52 @@ function AddModal({
         )}
 
         <div className="mt-6 space-y-4">
+          {/* Client photo */}
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-2">
+              Client Photo <span className="font-normal normal-case tracking-normal text-neutral-400">(optional)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              {image ? (
+                <img src={image} alt="Client" className="h-12 w-12 rounded-full object-cover ring-2 ring-neutral-200 shrink-0" />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-neutral-100 ring-2 ring-neutral-200 shrink-0 flex items-center justify-center">
+                  <svg className="h-6 w-6 text-neutral-300" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+                  </svg>
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5">
+                <label className="cursor-pointer">
+                  <span className="inline-flex items-center gap-1.5 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100">
+                    {uploadingImage ? "Uploading…" : image ? "Replace Photo" : "Upload Photo"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploadingImage}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleImageFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {image && (
+                  <button
+                    type="button"
+                    onClick={() => setImage("")}
+                    className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {uploadError && <p className="text-[11px] text-red-500">{uploadError}</p>}
+            </div>
+          </div>
+
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5">
               Quote *
@@ -217,7 +288,7 @@ function AddModal({
           </button>
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploadingImage}
             className="rounded bg-amber-400 px-5 py-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-300 disabled:opacity-50"
           >
             {saving ? "Adding…" : "Add Testimonial"}
@@ -429,8 +500,20 @@ export default function TestimonialInlineEditor() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8">
                 {testimonials.map((t) => (
                   <div key={t._id} className="relative border border-[#e3d8ca] bg-white p-6 group">
-                    <Stars value={t.rating} />
-                    <p className="mt-3 text-[13px] italic text-[#2a1f1a] leading-relaxed">
+                    {/* Photo + stars row */}
+                    <div className="flex items-center gap-3 mb-3">
+                      {t.image ? (
+                        <img src={t.image} alt={t.client} className="h-9 w-9 rounded-full object-cover ring-1 ring-[#e3d8ca] shrink-0" />
+                      ) : (
+                        <div className="h-9 w-9 rounded-full bg-[#f0ebe4] ring-1 ring-[#e3d8ca] shrink-0 flex items-center justify-center">
+                          <svg className="h-4 w-4 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+                          </svg>
+                        </div>
+                      )}
+                      <Stars value={t.rating} />
+                    </div>
+                    <p className="text-[13px] italic text-[#2a1f1a] leading-relaxed">
                       &ldquo;{t.quote}&rdquo;
                     </p>
                     <p className="mt-4 text-[10px] tracking-[0.22em] text-[#8a7b6d] uppercase">{t.client}</p>

@@ -103,7 +103,7 @@ function CinematicQuote({
 
 // ─── Compact grid card ────────────────────────────────────────────────────────
 
-function GridCard({ quote, client, rating }: { quote: string; client: string; rating: number }) {
+function GridCard({ quote, client, rating, image }: { quote: string; client: string; rating: number; image?: string }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -112,13 +112,28 @@ function GridCard({ quote, client, rating }: { quote: string; client: string; ra
       transition={{ duration: 0.85, ease: 'easeOut' }}
       className="border-t border-[#d9cec0] pt-8"
     >
-      {/* Stars */}
-      <div className="flex gap-1 mb-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i < rating ? 'fill-[#c8a96e]' : 'fill-[#d9cec0]'}`}>
-            <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
-          </svg>
-        ))}
+      {/* Photo + Stars row */}
+      <div className="flex items-center gap-3 mb-4">
+        {image ? (
+          <img
+            src={image}
+            alt={client}
+            className="h-10 w-10 rounded-full object-cover ring-1 ring-[#d9cec0] shrink-0"
+          />
+        ) : (
+          <div className="h-10 w-10 rounded-full bg-[#ede8e1] ring-1 ring-[#d9cec0] shrink-0 flex items-center justify-center">
+            <svg className="h-5 w-5 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+            </svg>
+          </div>
+        )}
+        <div className="flex gap-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i < rating ? 'fill-[#c8a96e]' : 'fill-[#d9cec0]'}`}>
+              <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
+            </svg>
+          ))}
+        </div>
       </div>
 
       <p className={`${cormorant.className} text-[1.25rem] italic text-[#2a1f1a] leading-relaxed`}>
@@ -172,7 +187,7 @@ export default function TestimonialPage({
               <p className="col-span-full text-[13px] text-[#8a7b6d] italic">No reviews yet.</p>
             )}
             {grid.map((item) => (
-              <GridCard key={item._id} quote={item.quote} client={item.client} rating={item.rating} />
+              <GridCard key={item._id} quote={item.quote} client={item.client} rating={item.rating} image={item.image} />
             ))}
           </div>
         </div>
