@@ -186,8 +186,6 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
     : isLoginPage || isSignupPage
     ? 'bg-[#0f0c0a]/50 backdrop-blur-md'
     : 'bg-transparent'
-  const logoColor  = scrolled ? 'text-[#0f0c0a]'                      : 'text-white'
-  const subColor   = scrolled ? 'text-[#6b5e54]'                      : 'text-[#c8a96e]/70'
   const linkBase   = scrolled ? 'text-[#4a3d35] hover:text-[#0f0c0a]' : 'text-white/70 hover:text-white'
   const linkActive = scrolled ? 'text-[#0f0c0a]'                      : 'text-white'
   const sepColor   = scrolled ? 'bg-[#0f0c0a]/15'                     : 'bg-white/10'
@@ -225,22 +223,19 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
           href="/"
           tabIndex={scrolled ? -1 : undefined}
           className={[
-            'group flex items-center gap-3 shrink-0 overflow-hidden',
+            'group shrink-0 overflow-hidden',
             'transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
             scrolled
               ? 'opacity-0 pointer-events-none lg:max-w-0'
-              : 'opacity-100 max-w-[200px]',
+              : 'opacity-100 max-w-[400px]',
           ].join(' ')}
         >
-          <span className="block h-7 w-0.5 bg-[#c8a96e]" />
-          <span>
-            <span className={`block text-[13px] font-bold uppercase tracking-[0.22em] leading-none transition-colors duration-500 ${logoColor} group-hover:opacity-70`}>
-              PPM
-            </span>
-            <span className={`block text-[8.5px] uppercase tracking-[0.14em] mt-1 leading-none transition-colors duration-500 ${subColor} group-hover:opacity-70`}>
-              Property Project Marketing
-            </span>
-          </span>
+          <img
+            src="/images/logo.png"
+            alt="Property Project Marketing"
+            className="transition-opacity duration-300 group-hover:opacity-70"
+            style={{ height: 44, width: 120 }}
+          />
         </Link>
 
         {/* ── Desktop nav — centers when scrolled ───────────────────────── */}
