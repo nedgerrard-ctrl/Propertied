@@ -15,6 +15,9 @@ const FullDisclaimerContentSchema = new Schema(
 
     // Licence line
     licenceLine: { type: String, default: "" },
+
+    // Per-element text overrides for the 20-section body
+    sectionOverrides: { type: Object, default: {} },
   },
   { timestamps: true }
 );

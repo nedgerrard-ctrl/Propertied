@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  fullDisclaimerDefaults,
-  FullDisclaimerContentData,
-} from "@/lib/full-disclaimer-defaults";
+import { fullDisclaimerDefaults, FullDisclaimerContentData } from "@/lib/full-disclaimer-defaults";
+import { disclaimerSections, DisclaimerSection, defaultSectionFields, resolveText } from "@/lib/full-disclaimer-sections";
 
-type Field = keyof FullDisclaimerContentData;
+type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext";
 
-const EDIT_LIGHT =
-  "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
-const EDIT_DARK =
-  "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
+const EDIT_DARK  = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
+const EDIT_LIGHT = "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 
 function EditBadge() {
   return (
@@ -25,6 +21,140 @@ function EditBadge() {
   );
 }
 
+// ── Editable section block ─────────────────────────────────────────────────────
+
+function EditableSectionBlock({
+  section,
+  overrides,
+  sectionRefs,
+}: {
+  section: DisclaimerSection
+  overrides: Record<string, string>
+  sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>
+}) {
+  const n = section.number
+  const t = (key: string, def: string) => resolveText(key, overrides, def)
+
+  function ref(key: string) {
+    return (el: HTMLElement | null) => { sectionRefs.current[key] = el }
+  }
+
+  const body = (() => {
+    if (section.type === 'paragraphs') {
+      return (
+        <div className="space-y-4">
+          {section.paragraphs.map((p, i) => (
+            <p
+              key={i}
+              ref={ref(`s${n}p${i}`)}
+              contentEditable
+              suppressContentEditableWarning
+              className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+            >
+              {t(`s${n}p${i}`, p)}
+            </p>
+          ))}
+        </div>
+      )
+    }
+
+    if (section.type === 'mixed') {
+      return (
+        <div className="space-y-4">
+          {section.blocks.map((block, bi) => {
+            if (block.kind === 'paragraph') {
+              return (
+                <p
+                  key={bi}
+                  ref={ref(`s${n}k${bi}`)}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+                >
+                  {t(`s${n}k${bi}`, block.text)}
+                </p>
+              )
+            }
+            return (
+              <div key={bi} className="space-y-2">
+                {block.intro && (
+                  <p
+                    ref={ref(`s${n}k${bi}i`)}
+                    contentEditable
+                    suppressContentEditableWarning
+                    className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+                  >
+                    {t(`s${n}k${bi}i`, block.intro)}
+                  </p>
+                )}
+                <ul className="space-y-2 pl-4">
+                  {block.bullets.map((b, bui) => (
+                    <li key={bui} className="flex gap-3 text-[14px] leading-[1.9] text-[#3d3530]">
+                      <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
+                      <span
+                        ref={ref(`s${n}k${bi}b${bui}`)}
+                        contentEditable
+                        suppressContentEditableWarning
+                        className={`flex-1 ${EDIT_LIGHT}`}
+                      >
+                        {t(`s${n}k${bi}b${bui}`, b)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
+
+    if (section.type === 'contact') {
+      return (
+        <div className="space-y-4">
+          {section.paragraphs.map((p, i) => (
+            <p
+              key={i}
+              ref={ref(`s${n}p${i}`)}
+              contentEditable
+              suppressContentEditableWarning
+              className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+            >
+              {t(`s${n}p${i}`, p)}
+            </p>
+          ))}
+          <div className="border-l-2 border-[#c8a96e] pl-5 space-y-1">
+            {section.details.map((d, i) => (
+              <p
+                key={i}
+                ref={ref(`s${n}d${i}`)}
+                contentEditable
+                suppressContentEditableWarning
+                className={`text-[13px] leading-[1.8] text-[#1f1a17] ${EDIT_LIGHT}`}
+              >
+                {t(`s${n}d${i}`, d)}
+              </p>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  })()
+
+  return (
+    <div className="py-8 border-t border-[#ede8e1] first:border-t-0 first:pt-0">
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#c8a96e] mb-4">
+        {section.number}. {section.heading}
+      </h2>
+      {body}
+    </div>
+  )
+}
+
+// ── Main editor ───────────────────────────────────────────────────────────────
+
 export default function FullDisclaimerInlineEditor() {
   const [content, setContent] = useState<FullDisclaimerContentData>(fullDisclaimerDefaults);
   const [lastSaved, setLastSaved] = useState<FullDisclaimerContentData>(fullDisclaimerDefaults);
@@ -32,7 +162,9 @@ export default function FullDisclaimerInlineEditor() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
-  const refs = useRef<Partial<Record<Field, HTMLElement | null>>>({});
+
+  const heroRefs = useRef<Partial<Record<HeroField, HTMLElement | null>>>({});
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
     fetch("/api/admin/content/full-disclaimer")
@@ -44,39 +176,49 @@ export default function FullDisclaimerInlineEditor() {
       });
   }, []);
 
-  function r(field: Field) {
-    return (el: HTMLElement | null) => {
-      refs.current[field] = el;
-    };
+  function rh(field: HeroField) {
+    return (el: HTMLElement | null) => { heroRefs.current[field] = el; };
   }
 
   async function confirmRevert() {
     setRevertOpen(false);
-    for (const [field, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el && field in lastSaved) {
-        el.innerText =
-          lastSaved[field as keyof typeof lastSaved] as string;
-      }
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    for (const f of heroFields) {
+      const el = heroRefs.current[f];
+      if (el) el.innerText = lastSaved[f] as string;
+    }
+    const defaults = defaultSectionFields();
+    const savedOverrides = lastSaved.sectionOverrides ?? {};
+    for (const [key, el] of Object.entries(sectionRefs.current)) {
+      if (el) el.innerText = resolveText(key, savedOverrides, defaults[key] ?? "");
     }
     setContent(lastSaved);
     setSaved(false);
   }
 
   async function save() {
-    const updates: Partial<Record<Field, string>> = {};
-    for (const [key, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el) updates[key] = el.innerText.trim();
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    const heroUpdates: Partial<Record<HeroField, string>> = {};
+    for (const f of heroFields) {
+      const el = heroRefs.current[f];
+      if (el) heroUpdates[f] = el.innerText.trim();
     }
+
+    const sectionOverrides: Record<string, string> = {};
+    for (const [key, el] of Object.entries(sectionRefs.current)) {
+      if (el) sectionOverrides[key] = el.innerText.trim();
+    }
+
     setSaving(true);
     const res = await fetch("/api/admin/content/full-disclaimer", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ ...heroUpdates, sectionOverrides }),
     });
     setSaving(false);
     if (res.ok) {
-      setContent((prev) => ({ ...prev, ...updates } as FullDisclaimerContentData));
-      setLastSaved((prev) => ({ ...prev, ...updates } as FullDisclaimerContentData));
+      setContent((prev) => ({ ...prev, ...heroUpdates, sectionOverrides }));
+      setLastSaved((prev) => ({ ...prev, ...heroUpdates, sectionOverrides }));
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -85,6 +227,7 @@ export default function FullDisclaimerInlineEditor() {
   }
 
   const c = content;
+  const overrides = c.sectionOverrides ?? {};
 
   if (loading) {
     return (
@@ -164,72 +307,56 @@ export default function FullDisclaimerInlineEditor() {
             </div>
             <div className="mt-8 border-t border-[#3a302a] pt-12 lg:pt-16">
               <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-light leading-[1.06] text-white max-w-4xl">
-                <span
-                  ref={r("heroHeadingMain")}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className={EDIT_DARK}
-                >
+                <span ref={rh("heroHeadingMain")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>
                   {c.heroHeadingMain}
                 </span>
                 <br />
-                <span
-                  ref={r("heroHeadingAccent")}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className={`text-[#c8a96e] ${EDIT_DARK}`}
-                >
+                <span ref={rh("heroHeadingAccent")} contentEditable suppressContentEditableWarning className={`text-[#c8a96e] ${EDIT_DARK}`}>
                   {c.heroHeadingAccent}
                 </span>
               </h1>
             </div>
-            <p
-              ref={r("heroSubtext")}
-              contentEditable
-              suppressContentEditableWarning
-              className={`mt-8 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}
-            >
+            <p ref={rh("heroSubtext")} contentEditable suppressContentEditableWarning className={`mt-8 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}>
               {c.heroSubtext}
             </p>
           </div>
         </section>
 
-        {/* S2: Content */}
+        {/* S2: Document header — static metadata */}
+        <section className="bg-[#f6f2eb] border-b border-[#e3d8ca] py-10">
+          <div className="mx-auto max-w-3xl px-8">
+            <p className="text-[13px] font-semibold text-[#1f1a17]">Full Website Disclaimer</p>
+            <p className="mt-1 text-[12px] text-[#8a7b6d]">Effective date: 1 July 2026</p>
+            <p className="mt-0.5 text-[12px] text-[#8a7b6d]">
+              Published at www.ppmproperty.com.au/disclaimer and linked from every footer.
+            </p>
+          </div>
+        </section>
+
+        {/* S3: All 20 sections — fully editable */}
         <section className="relative bg-white py-20 lg:py-28">
           <EditBadge />
           <div className="mx-auto max-w-3xl px-8">
-
-            <div className="divide-y divide-[#ede8e1]">
-              {(["para1", "para2", "para3", "para4"] as Field[]).map((key) => (
-                <p
-                  key={key}
-                  ref={r(key)}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className={`py-8 first:pt-0 text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
-                >
-                  {c[key]}
-                </p>
+            <div>
+              {disclaimerSections.map((section) => (
+                <EditableSectionBlock
+                  key={section.number}
+                  section={section}
+                  overrides={overrides}
+                  sectionRefs={sectionRefs}
+                />
               ))}
             </div>
-
-            {/* Licence line */}
-            <p
-              ref={r("licenceLine")}
-              contentEditable
-              suppressContentEditableWarning
-              className={`mt-10 border-t border-[#ede8e1] pt-8 text-[12px] tracking-[0.1em] text-[#8a7b6d] ${EDIT_LIGHT}`}
-            >
-              {c.licenceLine}
-            </p>
-
-            {/* Footer credit */}
-            <div className="mt-12 border-t border-[#ede8e1] pt-6 text-center">
+            <div className="mt-12 border-t border-[#ede8e1] pt-8">
+              <p className="text-[12px] text-[#8a7b6d]">
+                © 2026 Property Project Marketing Pty Ltd. All rights reserved.
+              </p>
+            </div>
+            <div className="mt-8 border-t border-[#ede8e1] pt-6 text-center">
               <p className="text-[11px] tracking-[0.18em] text-[#b0a090]">
                 PPM · Property Project Marketing · www.onlineprojects.com.au
               </p>
             </div>
-
           </div>
         </section>
 
@@ -241,7 +368,7 @@ export default function FullDisclaimerInlineEditor() {
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
             <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
+              This will undo all unsaved edits and restore the page to the last saved state.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
