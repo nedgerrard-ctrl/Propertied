@@ -168,6 +168,10 @@ function StatsStrip({ content }: { content: LandingContentData }) {
             </motion.div>
           ))}
         </div>
+        <p className="border-t border-white/[0.06] py-4 px-10 text-center text-[10px] text-[#6b5e54]">
+          *Cap maintained at $100M{' '}
+          <span className="text-[#c8a96e] italic">(to protect asset value)</span>
+        </p>
       </div>
     </section>
   )
