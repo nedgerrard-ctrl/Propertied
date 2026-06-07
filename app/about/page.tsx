@@ -57,6 +57,11 @@ export default async function AboutPage() {
       {/* ── Timeline ──────────────────────────────────────────────────────── */}
       <section className="bg-white py-20 lg:py-28">
         <div className="mx-auto max-w-2xl px-8">
+          {c.introText && (
+            <p className="text-[14px] leading-[1.85] text-[#3d3530] mb-14">
+              {c.introText}
+            </p>
+          )}
           {eras.map((era) => (
             <div key={era.year} className="mb-14 last:mb-0">
               <p className="text-2xl font-semibold text-[#c8a96e] mb-3">
@@ -90,6 +95,69 @@ export default async function AboutPage() {
               → How we work for buyers
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── Owner-Occupier Steps ─────────────────────────────────────────── */}
+      <section className="bg-[#f6f2eb] py-20 lg:py-28">
+        <div className="mx-auto max-w-2xl px-8">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e] mb-6">
+            {c.aboutOwnerStepsLabel}
+          </p>
+          <ol className="space-y-5 mb-10">
+            {[c.aboutOwnerStep1, c.aboutOwnerStep2, c.aboutOwnerStep3].map((item, i) => {
+              const sep = item.indexOf(' — ')
+              const bold = sep !== -1 ? item.slice(0, sep) : item
+              const rest = sep !== -1 ? item.slice(sep) : ''
+              return (
+                <li key={i} className="flex gap-4 text-[14px] leading-[1.85] text-[#1f1a17]">
+                  <span className="shrink-0 font-semibold text-[#c8a96e]">{i + 1}.</span>
+                  <span><strong>{bold}</strong>{rest}</span>
+                </li>
+              )
+            })}
+          </ol>
+          <Link
+            href="/buyers/owner-occupiers"
+            className="text-[13px] text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
+          >
+            We also sell established property
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Established Property ──────────────────────────────────────────── */}
+      <section className="bg-[#2f2a24] py-20 lg:py-28">
+        <div className="mx-auto max-w-2xl px-8">
+          <p className="text-[14px] leading-[1.95] text-[#9e8d7a] mb-10">
+            {c.establishedBody}
+          </p>
+          <div className="flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
+            <Link
+              href="/contact"
+              className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
+            >
+              → Request a strategic asset review
+            </Link>
+            <Link
+              href="/off-the-plan-explainer"
+              className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
+            >
+              → What is off-the-plan?
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Start with your brief ─────────────────────────────────────────── */}
+      <section className="bg-white py-20 lg:py-28">
+        <div className="mx-auto max-w-2xl px-8">
+          <h2 className="text-[1.35rem] font-bold text-[#c8a96e] leading-snug mb-5">
+            {c.briefHeading}
+          </h2>
+          <p className="text-[14px] leading-[1.95] text-[#3d3530]">
+            {c.briefBody}
+          </p>
         </div>
       </section>
 

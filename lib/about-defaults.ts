@@ -4,7 +4,7 @@ export const aboutDefaults = {
   heroHeadingAccent: "Melbourne’s development industry.",
 
   introText:
-    "PPM’s track record was not built in the consumer property market. It was built inside Melbourne’s development industry, competing against the largest agencies in the country. That history is the buyers’ advantage.",
+    "PPM’s track record was not built in the consumer property market. It was built inside Melbourne’s development industry — not by moving quickly from one project to another collecting transactional commissions, but by being retained for the long-term until a successful outcome was achieved.",
 
   era1Year: "2013",
   era1Heading: "Founded to sell boutique off-the-plan projects",
@@ -22,6 +22,21 @@ export const aboutDefaults = {
     "In partnership with Monash University, PPM has transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers seeking a trusted third-party partner.",
   era3Body2:
     "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
+
+  // Owner-occupier steps section (about page)
+  aboutOwnerStepsLabel: "THREE STEPS FOR OWNER-OCCUPIERS",
+  aboutOwnerStep1: "We source — We find the right new home, vet the developer, the build quality and location.",
+  aboutOwnerStep2: "You buy — Guided from contract to settlement, at zero cost. The developer pays our fee.",
+  aboutOwnerStep3: "We sell your existing home — Developer-grade marketing applied to your sale, with transition support.",
+
+  // Established property section
+  establishedBody:
+    "PPM’s sales capability is not limited to new and off-the-plan property. As clients who originally purchased through PPM hold their assets and eventually choose to exit, those properties are established — and PPM manages their resale with the same analytical thoroughness and marketing discipline applied to any new acquisition. We understand the pricing history, the original specification and the buyer profile of these assets better than any general agent could. If you hold an established residential property — whether originally purchased through PPM or not — and are considering a sale, we would welcome a conversation. Our commission rates for returning clients are preferential; terms are available on request.",
+
+  // Start with your brief section
+  briefHeading: "Start with your brief",
+  briefBody:
+    "Every PPM engagement — whether for an investor building a portfolio or an owner-occupier searching for the right home — begins with a structured client brief. Tell us your location preferences, configuration, budget, timeline and objectives. We match your brief against the Melbourne market in real time and bring you only the opportunities worth your attention. There is no catalogue to scroll through and no shortlist padded to look impressive. Submit your enquiry via the Contact page and we will promptly be in touch.",
 
   pullQuote: "After 13 years working under our clients’ brands, PPM now works directly for buyers.",
   storyP1:
