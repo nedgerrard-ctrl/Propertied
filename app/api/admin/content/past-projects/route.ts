@@ -18,7 +18,7 @@ export async function PATCH(req: NextRequest) {
   const updates: Record<string, unknown> = {};
 
   // Hero flat fields
-  const heroFields = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"] as const;
+  const heroFields = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext", "closingText"] as const;
   for (const field of heroFields) {
     if (typeof raw[field] === "string" && raw[field].trim() !== "") {
       updates[field] = raw[field].trim();

@@ -121,6 +121,17 @@ export default function PastProjectsPage({
         </div>
       </section>
 
+      {/* ── Closing text ────────────────────────────────────────────────── */}
+      {c.closingText && (
+        <section className="bg-[#f6f2eb] py-20 lg:py-28">
+          <div className="mx-auto max-w-2xl px-8">
+            <p className="text-[14px] leading-[1.95] text-[#3d3530]">
+              {c.closingText}
+            </p>
+          </div>
+        </section>
+      )}
+
       <Footer />
     </main>
   )

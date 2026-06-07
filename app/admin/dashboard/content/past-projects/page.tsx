@@ -9,7 +9,7 @@ import {
 } from "@/lib/past-projects-defaults";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext";
+type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext" | "closingText";
 
 // ── Style constants ────────────────────────────────────────────────────────────
 const EDIT_DARK =
@@ -262,6 +262,7 @@ export default function PastProjectsInlineEditor() {
     heroHeadingMain:   pastProjectsDefaults.heroHeadingMain,
     heroHeadingAccent: pastProjectsDefaults.heroHeadingAccent,
     heroSubtext:       pastProjectsDefaults.heroSubtext,
+    closingText:       pastProjectsDefaults.closingText,
   });
   const [projects, setProjects]     = useState<PastProject[]>(pastProjectsDefaults.projects);
   const [lastSaved, setLastSaved]   = useState<PastProjectsContentData>(pastProjectsDefaults);
@@ -284,6 +285,7 @@ export default function PastProjectsInlineEditor() {
           heroHeadingMain:   data.heroHeadingMain,
           heroHeadingAccent: data.heroHeadingAccent,
           heroSubtext:       data.heroSubtext,
+          closingText:       data.closingText,
         });
         setProjects(data.projects);
         setLastSaved(data);
@@ -365,6 +367,7 @@ export default function PastProjectsInlineEditor() {
       heroHeadingMain:   heroRefs.current.heroHeadingMain?.innerText.trim()   || heroContent.heroHeadingMain,
       heroHeadingAccent: heroRefs.current.heroHeadingAccent?.innerText.trim() || heroContent.heroHeadingAccent,
       heroSubtext:       heroRefs.current.heroSubtext?.innerText.trim()       || heroContent.heroSubtext,
+      closingText:       heroRefs.current.closingText?.innerText.trim()       || heroContent.closingText,
     };
 
     setSaving(true);
@@ -387,7 +390,7 @@ export default function PastProjectsInlineEditor() {
   // ── Revert ─────────────────────────────────────────────────────────────────
   async function confirmRevert() {
     setRevertOpen(false);
-    const fields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    const fields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext", "closingText"];
     for (const f of fields) {
       const el = heroRefs.current[f];
       if (el) el.innerText = lastSaved[f];
@@ -396,6 +399,7 @@ export default function PastProjectsInlineEditor() {
       heroHeadingMain:   lastSaved.heroHeadingMain,
       heroHeadingAccent: lastSaved.heroHeadingAccent,
       heroSubtext:       lastSaved.heroSubtext,
+      closingText:       lastSaved.closingText,
     });
     setProjects(lastSaved.projects);
     setUploadErrors({});
@@ -581,6 +585,21 @@ export default function PastProjectsInlineEditor() {
               <strong>Save Changes</strong> in the toolbar to persist all card details and hero text.
             </div>
 
+          </div>
+        </section>
+
+        {/* ── S3: Closing text ─────────────────────────────────────────────── */}
+        <section className="relative bg-[#f6f2eb] py-20 lg:py-28">
+          <EditBadge />
+          <div className="mx-auto max-w-2xl px-8">
+            <p
+              ref={rh("closingText")}
+              contentEditable
+              suppressContentEditableWarning
+              className={`text-[14px] leading-[1.95] text-[#3d3530] ${EDIT_DARK}`}
+            >
+              {heroContent.closingText}
+            </p>
           </div>
         </section>
       </div>

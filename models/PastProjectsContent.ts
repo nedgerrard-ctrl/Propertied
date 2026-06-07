@@ -16,6 +16,7 @@ const PastProjectsContentSchema = new Schema(
     heroHeadingMain:   { type: String, default: "" },
     heroHeadingAccent: { type: String, default: "" },
     heroSubtext:       { type: String, default: "" },
+    closingText:       { type: String, default: "" },
     projects:          { type: [ProjectItemSchema], default: [] },
   },
   { timestamps: true }
