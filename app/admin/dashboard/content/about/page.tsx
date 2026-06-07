@@ -185,6 +185,9 @@ export default function AboutInlineEditor() {
         <section className="relative bg-white py-20 lg:py-28">
           <EditBadge />
           <div className="mx-auto max-w-2xl px-8">
+            <p ref={r("introText")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.85] text-[#3d3530] mb-14 ${EDIT_LIGHT}`}>
+              {c.introText}
+            </p>
             {eras.map(({ yearField, headingField, bodyFields }) => (
               <div key={yearField} className="mb-14 last:mb-0">
                 <p className="text-2xl font-semibold text-[#c8a96e] mb-3">
@@ -207,6 +210,62 @@ export default function AboutInlineEditor() {
               <span className="text-[13px] text-[#1f1a17] opacity-50 cursor-default">→ Meet our people</span>
               <span className="text-[13px] text-[#1f1a17] opacity-50 cursor-default">→ How we work for buyers</span>
             </div>
+          </div>
+        </section>
+
+        {/* S3: Owner-Occupier Steps */}
+        <section className="relative bg-[#f6f2eb] py-20 lg:py-28">
+          <EditBadge />
+          <div className="mx-auto max-w-2xl px-8">
+            <p ref={r("aboutOwnerStepsLabel")} contentEditable suppressContentEditableWarning className={`text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e] mb-6 ${EDIT_LIGHT}`}>
+              {c.aboutOwnerStepsLabel}
+            </p>
+            <ol className="space-y-5 mb-10">
+              {(["aboutOwnerStep1", "aboutOwnerStep2", "aboutOwnerStep3"] as const).map((field, i) => {
+                const item = c[field]
+                const sep = item.indexOf(' — ')
+                const bold = sep !== -1 ? item.slice(0, sep) : item
+                const rest = sep !== -1 ? item.slice(sep) : ''
+                return (
+                  <li key={field} className="flex gap-4 text-[14px] leading-[1.85] text-[#1f1a17]">
+                    <span className="shrink-0 font-semibold text-[#c8a96e]">{i + 1}.</span>
+                    <p ref={r(field)} contentEditable suppressContentEditableWarning className={`${EDIT_LIGHT}`}>
+                      <strong>{bold}</strong>{rest}
+                    </p>
+                  </li>
+                )
+              })}
+            </ol>
+            <span className="text-[13px] text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">
+              We also sell established property
+            </span>
+          </div>
+        </section>
+
+        {/* S4: Established Property */}
+        <section className="relative bg-[#2f2a24] py-20 lg:py-28">
+          <EditBadge />
+          <div className="mx-auto max-w-2xl px-8">
+            <p ref={r("establishedBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#9e8d7a] mb-10 ${EDIT_DARK}`}>
+              {c.establishedBody}
+            </p>
+            <div className="flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Request a strategic asset review</span>
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ What is off-the-plan?</span>
+            </div>
+          </div>
+        </section>
+
+        {/* S5: Start with your brief */}
+        <section className="relative bg-white py-20 lg:py-28">
+          <EditBadge />
+          <div className="mx-auto max-w-2xl px-8">
+            <h2 ref={r("briefHeading")} contentEditable suppressContentEditableWarning className={`text-[1.35rem] font-bold text-[#c8a96e] leading-snug mb-5 ${EDIT_LIGHT}`}>
+              {c.briefHeading}
+            </h2>
+            <p ref={r("briefBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#3d3530] ${EDIT_LIGHT}`}>
+              {c.briefBody}
+            </p>
           </div>
         </section>
 

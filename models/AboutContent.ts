@@ -21,6 +21,19 @@ const AboutContentSchema = new Schema(
     era3Body1:   { type: String, default: "" },
     era3Body2:   { type: String, default: "" },
 
+    // Owner-occupier steps (about page)
+    aboutOwnerStepsLabel: { type: String, default: "" },
+    aboutOwnerStep1:      { type: String, default: "" },
+    aboutOwnerStep2:      { type: String, default: "" },
+    aboutOwnerStep3:      { type: String, default: "" },
+
+    // Established property
+    establishedBody: { type: String, default: "" },
+
+    // Start with your brief
+    briefHeading: { type: String, default: "" },
+    briefBody:    { type: String, default: "" },
+
     // Brand Story
     pullQuote: { type: String, default: "" },
     storyP1: { type: String, default: "" },
@@ -95,5 +108,9 @@ const AboutContentSchema = new Schema(
   },
   { timestamps: true }
 );
+
+if (process.env.NODE_ENV !== "production") {
+  delete (models as Record<string, unknown>)["AboutContent"];
+}
 
 export default models.AboutContent || model("AboutContent", AboutContentSchema);
