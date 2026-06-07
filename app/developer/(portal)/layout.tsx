@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import DeveloperNavbar from "../components/DeveloperNavbar";
 
 export default async function DeveloperPortalLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,11 @@ export default async function DeveloperPortalLayout({ children }: { children: Re
   const isDeveloper = role === "client" && userType === "developer";
 
   if (!session || (!isAdmin && !isDeveloper)) {
+    if (!session) {
+      const headersList = await headers();
+      const pathname = headersList.get("x-pathname") ?? "";
+      redirect(`/login${pathname ? `?callbackUrl=${encodeURIComponent(pathname)}` : ""}`);
+    }
     redirect("/developer");
   }
 
