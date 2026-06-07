@@ -103,7 +103,7 @@ function CinematicQuote({
 
 // ─── Compact grid card ────────────────────────────────────────────────────────
 
-function GridCard({ quote, client, rating, image }: { quote: string; client: string; rating: number; image?: string }) {
+function GridCard({ quote, client, image }: { quote: string; client: string; image?: string }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -112,7 +112,7 @@ function GridCard({ quote, client, rating, image }: { quote: string; client: str
       transition={{ duration: 0.85, ease: 'easeOut' }}
       className="border-t border-[#d9cec0] pt-8"
     >
-      {/* Photo + Stars row */}
+      {/* Photo row */}
       <div className="flex items-center gap-3 mb-4">
         {image ? (
           <img
@@ -127,13 +127,6 @@ function GridCard({ quote, client, rating, image }: { quote: string; client: str
             </svg>
           </div>
         )}
-        <div className="flex gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <svg key={i} viewBox="0 0 24 24" className={`h-3 w-3 ${i < rating ? 'fill-[#c8a96e]' : 'fill-[#d9cec0]'}`}>
-              <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.58 6.1 20.67l1.13-6.57L2.45 9.44l6.6-.96L12 2.5z" />
-            </svg>
-          ))}
-        </div>
       </div>
 
       <p className={`${cormorant.className} text-[1.25rem] italic text-[#2a1f1a] leading-relaxed`}>
@@ -187,7 +180,7 @@ export default function TestimonialPage({
               <p className="col-span-full text-[13px] text-[#8a7b6d] italic">No reviews yet.</p>
             )}
             {grid.map((item) => (
-              <GridCard key={item._id} quote={item.quote} client={item.client} rating={item.rating} image={item.image} />
+              <GridCard key={item._id} quote={item.quote} client={item.client} image={item.image} />
             ))}
           </div>
         </div>
