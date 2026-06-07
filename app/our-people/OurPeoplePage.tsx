@@ -55,41 +55,43 @@ export default function OurPeoplePage({ content }: { content: OurPeopleContentDa
           <div className="divide-y divide-[#ede8e1]">
             {people.map((person) => (
               <div key={person.id} className="py-14 first:pt-0 last:pb-0">
-                <div className="mb-6 flex items-start gap-6">
-                  {/* Photo */}
-                  <div className="shrink-0">
+                <div className="flex gap-6 items-start">
+                  {/* Square photo */}
+                  <div className="shrink-0 w-36 h-36 bg-[#ede8e1] overflow-hidden">
                     {person.image ? (
                       <img
                         src={person.image}
                         alt={person.name}
-                        className="h-20 w-20 rounded-full object-cover ring-2 ring-[#ede8e1]"
+                        className="w-full h-full object-cover object-center"
                       />
                     ) : (
-                      <div className="h-20 w-20 rounded-full bg-[#f0ebe4] ring-2 ring-[#ede8e1] flex items-center justify-center">
-                        <svg className="h-9 w-9 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="h-12 w-12 text-[#c0b5aa]" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
                         </svg>
                       </div>
                     )}
                   </div>
+
+                  {/* Name, title, description */}
                   <div className="min-w-0 flex-1">
                     <h2 className="text-[1.5rem] font-semibold text-[#1f1a17] leading-snug">
                       {person.name}
                       <span className="mx-3 text-[#ddd3c6] font-light">—</span>
                       <span className="text-[#4a3d35] font-normal">{person.title}</span>
                     </h2>
-                    <div className="mt-3 w-10 h-px bg-[#c8a96e]" />
+                    <div className="mt-3 mb-5 w-10 h-px bg-[#c8a96e]" />
+                    <div className="space-y-4">
+                      {person.description
+                        .split("\n\n")
+                        .filter(Boolean)
+                        .map((para, i) => (
+                          <p key={i} className="text-[14px] leading-[1.85] text-[#3d3530]">
+                            {para}
+                          </p>
+                        ))}
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  {person.description
-                    .split("\n\n")
-                    .filter(Boolean)
-                    .map((para, i) => (
-                      <p key={i} className="text-[14px] leading-[1.85] text-[#3d3530]">
-                        {para}
-                      </p>
-                    ))}
                 </div>
               </div>
             ))}
