@@ -185,7 +185,7 @@ function LoginForm() {
               Sign in
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#6e655c]">
-              Access your portal to manage enquiries and leads.{" "}
+              Sign-in here to access your account.{" "}
               <Link
                 href="/signup"
                 className="text-[#2f2923] underline underline-offset-4 transition hover:text-[#b89464]"
