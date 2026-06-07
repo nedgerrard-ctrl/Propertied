@@ -20,6 +20,10 @@ const LandingContentSchema = new Schema(
     stat3Unit: { type: String, default: "" },
     stat3Label: { type: String, default: "" },
 
+    // Who We Are
+    whoWeAreHeading: { type: String, default: "" },
+    whoWeAreBody:    { type: String, default: "" },
+
     // Ethos
     ethosHeading: { type: String, default: "" },
     ethosBody: { type: String, default: "" },
@@ -43,13 +47,14 @@ const LandingContentSchema = new Schema(
     budgetDisclaimer: { type: String, default: "" },
 
     // Why Choose PPM
-    whyHeading: { type: String, default: "" },
-    why1: { type: String, default: "" },
-    why2: { type: String, default: "" },
-    why3: { type: String, default: "" },
-    why4: { type: String, default: "" },
-    why5: { type: String, default: "" },
-    why6: { type: String, default: "" },
+    whyHeading:     { type: String, default: "" },
+    why1:           { type: String, default: "" },
+    why2:           { type: String, default: "" },
+    why3:           { type: String, default: "" },
+    why4:           { type: String, default: "" },
+    why5:           { type: String, default: "" },
+    why6:           { type: String, default: "" },
+    whyStewardBody: { type: String, default: "" },
 
     // CTA
     ctaHeading: { type: String, default: "" },
@@ -75,5 +80,10 @@ const LandingContentSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Delete the cached model in development so schema changes take effect without a full restart
+if (process.env.NODE_ENV !== "production") {
+  delete (models as Record<string, unknown>)["LandingContent"];
+}
 
 export default models.LandingContent || model("LandingContent", LandingContentSchema);

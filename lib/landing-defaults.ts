@@ -4,7 +4,7 @@ export const landingDefaults = {
   heroAccent: "Licensed Real Estate Agents.",
   heroLine3: "Off-the-Plan Specialists.",
   heroSubtext:
-    "PPM is not a standard real estate agency. We are professional management consultants who hold a real estate licence — a combination that is unlikely to exist elsewhere in the residential property market. From boutique to mega projects we have 13 years of insider knowledge buyers simply can't get alone.",
+    "PPM is not a standard real estate agency. We are professional management consultants who hold a real estate licence — a combination that is unlikely to exist elsewhere in the Melbourne residential property market. Our model is built on depth, not volume: thirteen years of interactive project experience at the highest level and a deliberate decision to specialise rather than to diversify. The result is a quality of inside knowledge buyers simply cannot access anywhere else.",
 
   stat1Value: "$1.5B",
   stat1Unit: "",
@@ -16,6 +16,12 @@ export const landingDefaults = {
   stat3Unit: "",
   stat3Label: "Managed Portfolio",
 
+  // Who We Are section
+  whoWeAreHeading:
+    "Management Consultants. Licensed Real Estate Agents. Off-the-Plan Specialists.",
+  whoWeAreBody:
+    "PPM is not a standard real estate agency. We are professional management consultants who hold a real estate licence — a combination that is unlikely to exist elsewhere in the Melbourne residential property market. Our model is built on depth, not volume: thirteen years of interactive project experience at the highest level and a deliberate decision to specialise rather than to diversify. The result is a quality of inside knowledge buyers simply cannot access anywhere else.",
+
   ethosHeading:
     "We sell new homes. We manage them. We resell them.",
   ethosBody:
@@ -25,7 +31,7 @@ export const landingDefaults = {
 
   // What We Do additional paragraphs
   whatWeDoBody2:
-    "Both journeys start with the same foundation: buying off-the-plan, having the property independently selected and then sold at the appropriate time.",
+    "Both journeys start on the same path: having the property independently selected, buying off-the-plan and then sold at the appropriate time.",
   whatWeDoBody3:
     "Buying off-the-plan is a better stepping stone into the property market than established property — and from 1 July 2027, a tax-advantaged one.",
 
@@ -34,9 +40,9 @@ export const landingDefaults = {
   transitionP1:
     "After 13 years of working under our clients' brands, PPM has now partnered with Monash University to establish its own brand.",
   transitionP2:
-    "This business re-launch enables the company to operate independently of any developer influence, which means there is no contract to push any specific project.",
+    "This business re-launch enables the company to operate independently of any developer influence. There is no requirement to push any specific project, no volume quota to fill, and no third-party sales network to manage. Our only obligation is to the client in front of us.",
   transitionP3:
-    "For the first time, our insider knowledge, real-time market intelligence and proven track record work directly and exclusively for buyers from investors to owner-occupiers.",
+    "For the first time, our insider knowledge, real-time market intelligence and proven track record work directly and exclusively for buyers who are either investors or owner-occupiers.",
   transitionP4:
     "We also maintain our developer relationships as selective third-party agents and provide access to our established buyer database of qualified local and overseas investors.",
 
@@ -46,7 +52,7 @@ export const landingDefaults = {
   budgetBullet1:
     "Negative gearing. Preserved for new builds. Restricted for established homes.",
   budgetBullet2:
-    "50% CGT discount. Available to new build investors at election. Replaced for other investors.",
+    "50% CGT discount only available to new build investors. Other investors are much worse off.",
   budgetBody:
     "New builds — primarily off-the-plan apartments and townhouses — are the qualifying asset class. The after-tax position of new builds and established housing will diverge materially from that date.",
   budgetDisclaimer:
@@ -54,12 +60,16 @@ export const landingDefaults = {
 
   // Why Choose PPM
   whyHeading: "Six things no other Melbourne agency can offer.",
-  why1: "Insider knowledge — 13 years inside the projects.",
+  why1: "Insider knowledge — Years of working on every aspect of a project, not just on parts of it.",
   why2: "Real-time intelligence — we see the market before published data does.",
-  why3: "Genuine independence — no quotas, no agenda, unbiased recommendations.",
+  why3: "Genuine independence — no quotas, no agenda, unbiased buyer recommendations.",
   why4: "One relationship — buy, manage, sell, repeat.",
   why5: "Zero buyer fees — the vendor pays us.",
-  why6: "We steward, not manage — portfolio capped at $100M on purpose.",
+  why6: "We steward not just manage — your asset is looked after at the highest level.",
+
+  // Why Choose PPM — stewardship addendum
+  whyStewardBody:
+    "Property management is a licensed trust account business with statutory consequences that most agencies quietly delegate to junior staff. At PPM, that responsibility stays at the highest level — always.",
 
   // Services grid
   svc1Label: "Buyers",
