@@ -44,6 +44,7 @@ export default function OurPeopleInlineEditor() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [uploadingPersonId, setUploadingPersonId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string>("");
+  const [newPersonId, setNewPersonId] = useState<string | null>(null);
   const refs = useRef<Partial<Record<HeroField, HTMLElement | null>>>({});
 
   useEffect(() => {
@@ -56,6 +57,13 @@ export default function OurPeopleInlineEditor() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (!newPersonId) return;
+    const el = document.querySelector(`[data-person-id="${newPersonId}"]`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setNewPersonId(null);
+  }, [people, newPersonId]);
 
   function r(field: HeroField) {
     return (el: HTMLElement | null) => { refs.current[field] = el; };
@@ -84,11 +92,10 @@ export default function OurPeopleInlineEditor() {
   }
 
   function addPerson() {
+    const id = generateId();
     setSaved(false);
-    setPeople((prev) => [
-      ...prev,
-      { id: generateId(), name: "", title: "", description: "" },
-    ]);
+    setPeople((prev) => [...prev, { id, name: "", title: "", description: "" }]);
+    setNewPersonId(id);
   }
 
   function confirmDelete(id: string) {
@@ -275,34 +282,15 @@ export default function OurPeopleInlineEditor() {
 
             <div className="divide-y divide-[#ede8e1]">
               {people.map((person) => (
-                <div key={person.id} className="py-12 first:pt-0">
+                <div key={person.id} data-person-id={person.id} className="py-12 first:pt-0">
 
-                  {/* Name + Title row */}
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-2">
-                      <input
-                        type="text"
-                        value={person.name}
-                        onChange={(e) => updatePerson(person.id, "name", e.target.value)}
-                        placeholder="Full name"
-                        className={`min-w-[8rem] bg-transparent text-[1.4rem] font-semibold text-[#1f1a17] ${EDIT_LIGHT} placeholder:font-normal placeholder:text-[#c8bfb4] placeholder:text-[1rem]`}
-                      />
-                      <span className="text-[#ddd3c6] font-light text-[1.2rem]">—</span>
-                      <input
-                        type="text"
-                        value={person.title}
-                        onChange={(e) => updatePerson(person.id, "title", e.target.value)}
-                        placeholder="Title or role"
-                        className={`min-w-[8rem] flex-1 bg-transparent text-[1rem] text-[#4a3d35] ${EDIT_LIGHT} placeholder:text-[#c8bfb4]`}
-                      />
-                    </div>
-
-                    {/* Delete button */}
+                  {/* Delete button row */}
+                  <div className="mb-5 flex justify-end">
                     <button
                       type="button"
                       onClick={() => confirmDelete(person.id)}
                       title="Remove this person"
-                      className="flex-shrink-0 flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 hover:border-red-300 active:scale-95"
+                      className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 hover:border-red-300 active:scale-95"
                     >
                       <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
@@ -312,38 +300,46 @@ export default function OurPeopleInlineEditor() {
                     </button>
                   </div>
 
-                  <div className="mb-5 w-10 h-px bg-[#c8a96e]" />
+                  {/* Photo + text side-by-side */}
+                  <div className="flex gap-6 items-start">
 
-                  {/* Photo upload */}
-                  <div className="mb-5 flex items-center gap-4">
-                    {person.image ? (
-                      <img
-                        src={person.image}
-                        alt={person.name || "Photo"}
-                        className="h-16 w-16 rounded-full object-cover ring-2 ring-[#ede8e1]"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-[#f0ebe4] ring-2 ring-[#ede8e1] flex items-center justify-center">
-                        <svg className="h-7 w-7 text-[#c8bfb4]" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
-                        </svg>
+                    {/* Square photo column */}
+                    <div className="flex-shrink-0 flex flex-col items-stretch gap-2 w-36">
+                      <div className="relative w-36 h-36 bg-[#ede8e1] overflow-hidden">
+                        {person.image ? (
+                          <img
+                            src={person.image}
+                            alt={person.name || "Photo"}
+                            className="w-full h-full object-cover object-center"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                            <svg className="h-12 w-12 text-[#c0b5aa]" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4Z" />
+                            </svg>
+                            <span className="text-[10px] uppercase tracking-[0.14em] text-[#b5aaa0]">Photo</span>
+                          </div>
+                        )}
+                        {uploadingPersonId === person.id && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-white/70">
+                            <span className="text-[11px] font-semibold text-[#9a8f83]">Uploading…</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="cursor-pointer">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100 active:scale-95">
-                          {uploadingPersonId === person.id ? (
-                            "Uploading…"
-                          ) : person.image ? (
+
+                      {/* Upload / remove buttons below photo */}
+                      <label className="cursor-pointer w-full">
+                        <span className="flex items-center justify-center gap-1.5 border border-amber-300 bg-amber-50 px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700 transition hover:bg-amber-100 active:scale-95">
+                          {uploadingPersonId === person.id ? "…" : person.image ? (
                             <>
-                              <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                              <svg className="h-2.5 w-2.5" viewBox="0 0 16 16" fill="currentColor">
                                 <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Z" />
                               </svg>
-                              Replace Photo
+                              Replace
                             </>
                           ) : (
                             <>
-                              <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                              <svg className="h-2.5 w-2.5" viewBox="0 0 16 16" fill="currentColor">
                                 <path d="M8.75 1.75a.75.75 0 0 0-1.5 0V7H1.75a.75.75 0 0 0 0 1.5H7.25v5.25a.75.75 0 0 0 1.5 0V8.5h5.25a.75.75 0 0 0 0-1.5H8.75V1.75Z" />
                               </svg>
                               Add Photo
@@ -366,28 +362,50 @@ export default function OurPeopleInlineEditor() {
                         <button
                           type="button"
                           onClick={() => removePersonImage(person.id)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 active:scale-95"
+                          className="flex items-center justify-center gap-1 border border-red-200 bg-red-50 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600 transition hover:bg-red-100 active:scale-95"
                         >
-                          <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                          <svg className="h-2.5 w-2.5" viewBox="0 0 16 16" fill="currentColor">
                             <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.559a.75.75 0 1 0-1.492.12l.66 8.25A1.75 1.75 0 0 0 5.405 16.5h5.19a1.75 1.75 0 0 0 1.741-1.57l.66-8.25a.75.75 0 1 0-1.492-.12l-.66 8.25a.25.25 0 0 1-.249.224H5.405a.25.25 0 0 1-.249-.224l-.66-8.25Z" />
                           </svg>
                           Remove
                         </button>
                       )}
+                      {uploadError && uploadingPersonId === null && (
+                        <p className="text-[10px] text-red-600 text-center">{uploadError}</p>
+                      )}
                     </div>
-                    {uploadError && uploadingPersonId === null && (
-                      <p className="text-[11px] text-red-600">{uploadError}</p>
-                    )}
-                  </div>
 
-                  {/* Description textarea */}
-                  <textarea
-                    value={person.description}
-                    onChange={(e) => updatePerson(person.id, "description", e.target.value)}
-                    placeholder={"Enter description…\n\nPress Enter twice between sentences to create separate paragraphs on the public page."}
-                    rows={6}
-                    className={`w-full resize-y bg-transparent text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT} placeholder:text-[#c8bfb4] placeholder:text-[13px]`}
-                  />
+                    {/* Text column */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-2 mb-4">
+                        <input
+                          type="text"
+                          value={person.name}
+                          onChange={(e) => updatePerson(person.id, "name", e.target.value)}
+                          placeholder="Full name"
+                          className={`min-w-[8rem] bg-transparent text-[1.4rem] font-semibold text-[#1f1a17] ${EDIT_LIGHT} placeholder:font-normal placeholder:text-[#c8bfb4] placeholder:text-[1rem]`}
+                        />
+                        <span className="text-[#ddd3c6] font-light text-[1.2rem]">—</span>
+                        <input
+                          type="text"
+                          value={person.title}
+                          onChange={(e) => updatePerson(person.id, "title", e.target.value)}
+                          placeholder="Title or role"
+                          className={`min-w-[8rem] flex-1 bg-transparent text-[1rem] text-[#4a3d35] ${EDIT_LIGHT} placeholder:text-[#c8bfb4]`}
+                        />
+                      </div>
+
+                      <div className="mb-4 w-10 h-px bg-[#c8a96e]" />
+
+                      <textarea
+                        value={person.description}
+                        onChange={(e) => updatePerson(person.id, "description", e.target.value)}
+                        placeholder={"Enter description…\n\nPress Enter twice between sentences to create separate paragraphs on the public page."}
+                        rows={6}
+                        className={`w-full resize-y bg-transparent text-[14px] leading-[1.85] text-[#3d3530] ${EDIT_LIGHT} placeholder:text-[#c8bfb4] placeholder:text-[13px]`}
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
