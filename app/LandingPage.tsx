@@ -173,7 +173,58 @@ function StatsStrip({ content }: { content: LandingContentData }) {
   )
 }
 
+function WhoWeAreSection({ content }: { content: LandingContentData }) {
+  return (
+    <section className="bg-[#1c1814] py-24 lg:py-32 px-8">
+      <div className="mx-auto max-w-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-8%' }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#c8a96e] mb-5">
+            Who We Are
+          </p>
+
+          <h2 className="text-[1.75rem] md:text-[2.1rem] font-bold leading-[1.18] text-white mb-8 max-w-3xl">
+            {content.whoWeAreHeading}
+          </h2>
+
+          <p className="text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[68ch] mb-8">
+            {content.whoWeAreBody}
+          </p>
+
+          <Link
+            href="/our-people"
+            className="text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
+          >
+            → Meet our team
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+function inlineLink(text: string, word: string, href: string) {
+  const idx = text.indexOf(word)
+  if (idx === -1) return <>{text}</>
+  return (
+    <>
+      {text.slice(0, idx)}
+      <Link href={href} className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
+        {word}
+      </Link>
+      {text.slice(idx + word.length)}
+    </>
+  )
+}
+
 function WhatWeDoSection({ content }: { content: LandingContentData }) {
+  const LINK_PHRASE = "on the same path: having the property independently selected, buying off-the-plan"
+  const body2Idx = content.whatWeDoBody2.indexOf(LINK_PHRASE)
+
   return (
     <section className="bg-[#f6f2eb] py-24 lg:py-32 px-8">
       <div className="mx-auto max-w-5xl">
@@ -193,7 +244,17 @@ function WhatWeDoSection({ content }: { content: LandingContentData }) {
 
           <div className="space-y-5 text-[14px] leading-[1.95] text-[#3d3530] max-w-[68ch] mb-12">
             <p>{content.ethosBody}</p>
-            <p>{content.whatWeDoBody2}</p>
+            <p>
+              {body2Idx !== -1 ? (
+                <>
+                  {content.whatWeDoBody2.slice(0, body2Idx)}
+                  <Link href="/off-the-plan-explainer" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
+                    {LINK_PHRASE}
+                  </Link>
+                  {content.whatWeDoBody2.slice(body2Idx + LINK_PHRASE.length)}
+                </>
+              ) : content.whatWeDoBody2}
+            </p>
           </div>
 
           <div className="border-t border-[#ddd3c6] pt-10 mb-10">
@@ -227,6 +288,9 @@ function WhatWeDoSection({ content }: { content: LandingContentData }) {
 }
 
 function OurTransitionSection({ content }: { content: LandingContentData }) {
+  const SPLIT = "investors or owner-occupiers"
+  const p3idx = content.transitionP3.indexOf(SPLIT)
+
   return (
     <section className="bg-[#2f2a24] py-24 lg:py-32 px-8">
       <div className="mx-auto max-w-5xl">
@@ -247,7 +311,21 @@ function OurTransitionSection({ content }: { content: LandingContentData }) {
           <div className="space-y-5 text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch] mb-12">
             <p>{content.transitionP1}</p>
             <p>{content.transitionP2}</p>
-            <p>{content.transitionP3}</p>
+            <p>
+              {p3idx !== -1 ? (
+                <>
+                  {content.transitionP3.slice(0, p3idx)}
+                  <Link href="/buyers/investors" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
+                    investors
+                  </Link>
+                  {' or '}
+                  <Link href="/buyers/owner-occupiers" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
+                    owner-occupiers
+                  </Link>
+                  {content.transitionP3.slice(p3idx + SPLIT.length)}
+                </>
+              ) : content.transitionP3}
+            </p>
             <p>{content.transitionP4}</p>
           </div>
 
@@ -287,12 +365,14 @@ function FederalBudgetSection({ content }: { content: LandingContentData }) {
           </h2>
 
           <ul className="space-y-4 mb-8">
-            {[content.budgetBullet1, content.budgetBullet2].map((bullet) => (
-              <li key={bullet} className="flex items-start gap-4 text-[13.5px] leading-[1.85] text-[#1f1a17]">
-                <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
-                <span className="font-medium">{bullet}</span>
-              </li>
-            ))}
+            <li className="flex items-start gap-4 text-[13.5px] leading-[1.85] text-[#1f1a17]">
+              <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
+              <span className="font-medium">{content.budgetBullet1}</span>
+            </li>
+            <li className="flex items-start gap-4 text-[13.5px] leading-[1.85] text-[#1f1a17]">
+              <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
+              <span className="font-medium">{content.budgetBullet2}</span>
+            </li>
           </ul>
 
           <p className="text-[14px] leading-[1.95] text-[#3d3530] max-w-[68ch] mb-10">
@@ -316,6 +396,8 @@ function FederalBudgetSection({ content }: { content: LandingContentData }) {
     </section>
   )
 }
+
+const LINK_CLASS = "text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]"
 
 function WhyChoosePPMSection({ content }: { content: LandingContentData }) {
   const items = [
@@ -349,6 +431,9 @@ function WhyChoosePPMSection({ content }: { content: LandingContentData }) {
               const dashIdx = item.indexOf(' — ')
               const bold = dashIdx !== -1 ? item.slice(0, dashIdx) : item
               const rest = dashIdx !== -1 ? item.slice(dashIdx) : ''
+              const restNode = i === 2
+                ? inlineLink(rest, 'buyer', '/buyers')
+                : rest
               return (
                 <motion.div
                   key={i}
@@ -363,12 +448,39 @@ function WhyChoosePPMSection({ content }: { content: LandingContentData }) {
                   </span>
                   <p className="text-[13.5px] leading-[1.85] text-[#9e8d7a]">
                     <span className="font-semibold text-white">{bold}</span>
-                    {rest}
+                    {restNode}
                   </p>
                 </motion.div>
               )
             })}
           </div>
+
+          <div className="mt-10 flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
+            <Link href="/testimonials" className={LINK_CLASS}>
+              → Read what our clients say
+            </Link>
+            <Link href="/contact" className={LINK_CLASS}>
+              → Download sales &amp; management authorities
+            </Link>
+          </div>
+
+          {content.whyStewardBody && (
+            <div className="mt-10 border-t border-white/[0.06] pt-10">
+              <p className="text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch] mb-6">
+                {content.whyStewardBody}
+              </p>
+              <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-[0.2em]">
+                <Link href="/about" className={LINK_CLASS}>
+                  → What to steward actually means for your investment
+                </Link>
+                <span className="text-[#9e8d7a]">[</span>
+                <Link href="/buyers/investors" className={LINK_CLASS}>
+                  → For Investors
+                </Link>
+                <span className="text-[#9e8d7a]">]</span>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>
@@ -425,6 +537,7 @@ export default function LandingPage({
       <Navbar />
       <VideoHero content={content} />
       <StatsStrip content={content} />
+      <WhoWeAreSection content={content} />
       <WhatWeDoSection content={content} />
       <OurTransitionSection content={content} />
       <FederalBudgetSection content={content} />

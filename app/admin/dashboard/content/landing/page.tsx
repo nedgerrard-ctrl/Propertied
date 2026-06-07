@@ -8,15 +8,6 @@ import { landingDefaults, LandingContentData } from "@/lib/landing-defaults";
 
 type Field = keyof LandingContentData;
 
-type ShowcaseProject = {
-  _id: string;
-  name: string;
-  address: string;
-  image: string;
-  order: number;
-  published: boolean;
-};
-
 type ToastData = { type: "success" | "error"; message: string } | null;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -24,25 +15,12 @@ type ToastData = { type: "success" | "error"; message: string } | null;
 const EDIT_LIGHT = "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 const EDIT_DARK  = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
 
-const inputBase   = "w-full rounded border px-3 py-2.5 text-[13px] text-neutral-800 placeholder-neutral-300 focus:outline-none transition-colors";
-const inputNormal = `${inputBase} border-neutral-200 focus:border-amber-400`;
-const inputError  = `${inputBase} border-red-400 bg-red-50/30 focus:border-red-500`;
-const labelClass  = "block text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1.5";
-
 const statGroups = [
   { vf: "stat1Value" as Field, uf: "stat1Unit" as Field, lf: "stat1Label" as Field },
   { vf: "stat2Value" as Field, uf: "stat2Unit" as Field, lf: "stat2Label" as Field },
   { vf: "stat3Value" as Field, uf: "stat3Unit" as Field, lf: "stat3Label" as Field },
 ];
 
-const svcGroups = [
-  { index: "01", lf: "svc1Label" as Field, sf: "svc1Sub" as Field, df: "svc1Desc" as Field, hasDesc: true },
-  { index: "02", lf: "svc2Label" as Field, sf: "svc2Sub" as Field, df: "svc2Desc" as Field, hasDesc: true },
-  { index: "03", lf: "svc3Label" as Field, sf: "svc3Sub" as Field, df: "svc3Desc" as Field, hasDesc: true },
-  { index: "04", lf: "svc4Label" as Field, sf: "svc4Sub" as Field, df: "svc4Desc" as Field, hasDesc: true },
-  { index: "05", lf: "svc5Label" as Field, sf: "svc5Sub" as Field, df: "svc5Desc" as Field, hasDesc: true },
-  { index: "06", lf: "svc6Label" as Field, sf: "svc6Sub" as Field, df: null,               hasDesc: false },
-];
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
@@ -76,153 +54,6 @@ function Toast({ toast, onClose }: { toast: ToastData; onClose: () => void }) {
   );
 }
 
-// ─── Showcase modals ──────────────────────────────────────────────────────────
-
-function ShowcaseModal({
-  initial,
-  title,
-  onClose,
-  onSave,
-}: {
-  initial: { name: string; address: string; image: string; published: boolean };
-  title: string;
-  onClose: () => void;
-  onSave: (data: { name: string; address: string; image: string; published: boolean }) => Promise<void>;
-}) {
-  const [name, setName]           = useState(initial.name);
-  const [address, setAddress]     = useState(initial.address);
-  const [image, setImage]         = useState(initial.image);
-  const [published, setPublished] = useState(initial.published);
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving]       = useState(false);
-  const [errors, setErrors]       = useState<{ name?: string; address?: string }>({});
-  const [apiError, setApiError]   = useState("");
-
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res  = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (res.ok && data.path) setImage(data.path);
-      else setApiError(data.error || "Image upload failed.");
-    } catch {
-      setApiError("Image upload failed.");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setApiError("");
-    const errs: { name?: string; address?: string } = {};
-    if (!name.trim())    errs.name    = "Required";
-    if (!address.trim()) errs.address = "Required";
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setSaving(true);
-    await onSave({ name: name.trim(), address: address.trim(), image, published });
-    setSaving(false);
-  }
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8">
-      <form onSubmit={submit} className="my-auto w-full max-w-lg rounded-xl bg-white p-7 shadow-2xl">
-        <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
-        <p className="mt-1 text-sm text-neutral-500">Appears in the Completed Projects section on the home page.</p>
-
-        {apiError && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-[12px] font-medium text-red-700">{apiError}</p>
-          </div>
-        )}
-
-        <div className="mt-6 space-y-4">
-          {/* Name */}
-          <div>
-            <label className={labelClass}>Project Name *</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => { setName(e.target.value); setErrors((p) => ({ ...p, name: e.target.value.trim() ? "" : "Required" })); }}
-              placeholder="e.g. Hawthorn Park"
-              className={errors.name ? inputError : inputNormal}
-            />
-            {errors.name && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.name}</p>}
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className={labelClass}>Address *</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => { setAddress(e.target.value); setErrors((p) => ({ ...p, address: e.target.value.trim() ? "" : "Required" })); }}
-              placeholder="e.g. 55 Camberwell Rd, Hawthorn East VIC 3123"
-              className={errors.address ? inputError : inputNormal}
-            />
-            {errors.address && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.address}</p>}
-          </div>
-
-          {/* Image */}
-          <div>
-            <label className={labelClass}>Project Image</label>
-            {image && (
-              <div className="mb-2 h-36 w-full overflow-hidden rounded border border-neutral-200">
-                <img src={image} alt="preview" className="h-full w-full object-cover" />
-              </div>
-            )}
-            <label className="flex cursor-pointer items-center gap-2 rounded border border-dashed border-neutral-300 px-4 py-3 text-[12px] text-neutral-500 transition hover:border-amber-400 hover:text-amber-600">
-              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 1a.75.75 0 0 1 .75.75V6.5h4.75a.75.75 0 0 1 0 1.5H8.75v4.75a.75.75 0 0 1-1.5 0V8H2.5a.75.75 0 0 1 0-1.5h4.75V1.75A.75.75 0 0 1 8 1Z" />
-              </svg>
-              {uploading ? "Uploading…" : image ? "Change Image" : "Upload Image"}
-              <input type="file" accept="image/*" className="sr-only" onChange={handleImageChange} disabled={uploading} />
-            </label>
-            <p className="mt-1 text-[11px] text-neutral-400">JPEG, PNG or WebP — max 5 MB.</p>
-          </div>
-
-          {/* Published toggle */}
-          <div className="flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-neutral-800">Visible on home page</p>
-              <p className="text-[11px] text-neutral-400 mt-0.5">Toggle off to hide without deleting</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setPublished((p) => !p)}
-              className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${published ? "bg-amber-400" : "bg-neutral-300"}`}
-            >
-              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${published ? "translate-x-5" : "translate-x-0.5"}`} />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-7 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded border border-neutral-200 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-600 transition hover:border-neutral-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving || uploading}
-            className="rounded bg-amber-400 px-5 py-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-300 disabled:opacity-50"
-          >
-            {saving ? "Saving…" : title}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
 // ─── Main editor ──────────────────────────────────────────────────────────────
 
 export default function LandingInlineEditor() {
@@ -235,13 +66,7 @@ export default function LandingInlineEditor() {
   const [revertOpen, setRevertOpen] = useState(false);
   const refs = useRef<Partial<Record<Field, HTMLElement | null>>>({});
 
-  // ── Showcase state ──
-  const [projects, setProjects]           = useState<ShowcaseProject[]>([]);
-  const [addOpen, setAddOpen]             = useState(false);
-  const [editingProject, setEditingProject] = useState<ShowcaseProject | null>(null);
-  const [deletingId, setDeletingId]       = useState<string | null>(null);
-  const [togglingId, setTogglingId]       = useState<string | null>(null);
-  const [toast, setToast]                 = useState<ToastData>(null);
+  const [toast, setToast] = useState<ToastData>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function showToast(type: "success" | "error", message: string) {
@@ -251,15 +76,13 @@ export default function LandingInlineEditor() {
   }
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/admin/content/landing").then((r) => r.json()),
-      fetch("/api/admin/showcase").then((r) => r.json()),
-    ]).then(([cmsData, projectsData]) => {
-      setContent((prev) => ({ ...prev, ...cmsData }));
-      setLastSaved((prev) => ({ ...prev, ...cmsData }));
-      setProjects(projectsData);
-      setLoading(false);
-    });
+    fetch("/api/admin/content/landing")
+      .then((r) => r.json())
+      .then((cmsData) => {
+        setContent((prev) => ({ ...prev, ...cmsData }));
+        setLastSaved((prev) => ({ ...prev, ...cmsData }));
+        setLoading(false);
+      });
   }, []);
 
   function r(field: Field) {
@@ -302,62 +125,6 @@ export default function LandingInlineEditor() {
     }
   }
 
-  // ── Showcase CRUD ──
-  async function addProject(data: { name: string; address: string; image: string; published: boolean }) {
-    const res = await fetch("/api/admin/showcase", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, order: projects.length }),
-    });
-    const result = await res.json();
-    if (!res.ok) { showToast("error", result.error || "Failed to add project."); return; }
-    setProjects((prev) => [...prev, result]);
-    setAddOpen(false);
-    showToast("success", `"${result.name}" added to showcase.`);
-  }
-
-  async function updateProject(id: string, data: { name: string; address: string; image: string; published: boolean }) {
-    const res = await fetch(`/api/admin/showcase/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    if (!res.ok) { showToast("error", result.error || "Failed to update project."); return; }
-    setProjects((prev) => prev.map((p) => (p._id === id ? { ...p, ...result } : p)));
-    setEditingProject(null);
-    showToast("success", `"${result.name}" updated.`);
-  }
-
-  async function deleteProject(id: string) {
-    setDeletingId(id);
-    const res = await fetch(`/api/admin/showcase/${id}`, { method: "DELETE" });
-    setDeletingId(null);
-    if (res.ok) {
-      setProjects((prev) => prev.filter((p) => p._id !== id));
-      showToast("success", "Project removed from showcase.");
-    } else {
-      showToast("error", "Failed to delete project.");
-    }
-  }
-
-  async function togglePublish(project: ShowcaseProject) {
-    setTogglingId(project._id);
-    const res = await fetch(`/api/admin/showcase/${project._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ published: !project.published }),
-    });
-    setTogglingId(null);
-    if (res.ok) {
-      setProjects((prev) => prev.map((p) => p._id === project._id ? { ...p, published: !project.published } : p));
-      showToast("success", project.published ? "Project hidden from home page." : "Project is now visible.");
-    } else {
-      showToast("error", "Failed to update project.");
-    }
-  }
-
-  const sorted = [...projects].sort((a, b) => a.order - b.order);
   const c = content;
 
   if (loading) {
@@ -451,7 +218,24 @@ export default function LandingInlineEditor() {
           </div>
         </section>
 
-        {/* S3: What We Do */}
+        {/* S3: Who We Are */}
+        <section className="relative bg-[#1c1814] py-24 lg:py-32 px-8">
+          <EditBadge />
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#c8a96e] mb-5">Who We Are</p>
+            <h2 className="text-[1.75rem] md:text-[2.1rem] font-bold leading-[1.18] text-white mb-8 max-w-3xl">
+              <span ref={r("whoWeAreHeading")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.whoWeAreHeading}</span>
+            </h2>
+            <p ref={r("whoWeAreBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[68ch] mb-8 ${EDIT_DARK}`}>
+              {c.whoWeAreBody}
+            </p>
+            <span className="text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">
+              → Meet our team
+            </span>
+          </div>
+        </section>
+
+        {/* S4: What We Do */}
         <section className="relative bg-[#f6f2eb] py-24 lg:py-32 px-8">
           <EditBadge />
           <div className="mx-auto max-w-5xl">
@@ -477,11 +261,16 @@ export default function LandingInlineEditor() {
             <h2 ref={r("transitionHeading")} contentEditable suppressContentEditableWarning className={`text-3xl md:text-4xl lg:text-[2.8rem] font-light leading-[1.2] text-white mb-10 ${EDIT_DARK}`}>
               {c.transitionHeading}
             </h2>
-            <div className="space-y-5 text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch]">
+            <div className="space-y-5 text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch] mb-12">
               <p ref={r("transitionP1")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP1}</p>
               <p ref={r("transitionP2")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP2}</p>
               <p ref={r("transitionP3")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP3}</p>
               <p ref={r("transitionP4")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>{c.transitionP4}</p>
+            </div>
+            <div className="flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Investors</span>
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Owner-occupiers</span>
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Developers</span>
             </div>
           </div>
         </section>
@@ -505,6 +294,10 @@ export default function LandingInlineEditor() {
             <p ref={r("budgetBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#3d3530] max-w-[68ch] mb-8 ${EDIT_LIGHT}`}>
               {c.budgetBody}
             </p>
+            <div className="flex flex-wrap gap-8 mb-8 text-[11px] uppercase tracking-[0.2em]">
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Read the full Insights briefing</span>
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ See the 2026 advantages in detail</span>
+            </div>
             <p ref={r("budgetDisclaimer")} contentEditable suppressContentEditableWarning className={`text-[12px] italic text-[#8a7b6d] max-w-[64ch] ${EDIT_LIGHT}`}>
               {c.budgetDisclaimer}
             </p>
@@ -529,111 +322,24 @@ export default function LandingInlineEditor() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* S7: Completed Projects Showcase ─ fully interactive, not editable-text */}
-        <section className="bg-[#0d0b08] py-16 px-8 border-t border-white/[0.06] pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_label]:pointer-events-auto">
-          <div className="mx-auto max-w-7xl">
-
-            {/* Section header */}
-            <div className="mb-10 flex items-end justify-between">
-              <div>
-                <div className="h-px w-12 bg-[#c8a96e] mb-4" />
-                <p className="mb-2 text-[10px] uppercase tracking-[0.32em] text-neutral-500">Our Portfolio</p>
-                <p className="text-2xl font-light text-white">Completed Projects</p>
-                <p className="mt-1 text-[13px] text-neutral-500">
-                  {sorted.filter((p) => p.published).length} visible · {sorted.length} total
-                </p>
-              </div>
-              <button
-                onClick={() => setAddOpen(true)}
-                className="flex items-center gap-2 bg-[#c8a96e] px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#0a0806] transition hover:bg-[#b8995e]"
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z" />
-                </svg>
-                Add Project
-              </button>
+            <div className="mt-10 flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Read what our clients say</span>
+              <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ Download sales &amp; management authorities</span>
             </div>
-
-            {sorted.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded border-2 border-dashed border-neutral-700 py-24">
-                <p className="text-[13px] text-neutral-500">No showcase projects yet.</p>
-                <button
-                  onClick={() => setAddOpen(true)}
-                  className="mt-4 text-[12px] font-semibold text-[#c8a96e] underline underline-offset-2 transition hover:text-[#b8995e]"
-                >
-                  Add your first project →
-                </button>
+            <div className="mt-10 border-t border-white/[0.06] pt-10">
+              <p ref={r("whyStewardBody")} contentEditable suppressContentEditableWarning className={`text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[64ch] mb-6 ${EDIT_DARK}`}>
+                {c.whyStewardBody}
+              </p>
+              <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-[0.2em]">
+                <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ What to steward actually means for your investment</span>
+                <span className="text-[#9e8d7a]">[</span>
+                <span className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5">→ For Investors</span>
+                <span className="text-[#9e8d7a]">]</span>
               </div>
-            ) : (
-              <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-                {sorted.map((project) => (
-                  <div
-                    key={project._id}
-                    className={`group relative overflow-hidden border bg-[#0f0c0a] ${project.published ? "border-neutral-700" : "border-neutral-700/40 opacity-60"}`}
-                  >
-                    {!project.published && (
-                      <div className="absolute inset-x-0 top-0 z-10 bg-red-900/80 py-1 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-red-300">
-                        Hidden from home page
-                      </div>
-                    )}
-                    {/* Image */}
-                    <div className={`relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 ${!project.published ? "mt-6" : ""}`}>
-                      {project.image ? (
-                        <img src={project.image} alt={project.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <span className="text-[11px] uppercase tracking-[0.2em] text-neutral-600">No image</span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Info */}
-                    <div className="p-5">
-                      <p className="mb-1 text-[9px] uppercase tracking-[0.26em] text-[#c8a96e]/50">Completed</p>
-                      <h3 className="mb-1 text-xl font-light text-white">{project.name}</h3>
-                      <p className="text-[12px] uppercase tracking-[0.14em] text-neutral-500">{project.address}</p>
-                    </div>
-                    {/* Hover actions */}
-                    <div className="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 transition group-hover:opacity-100">
-                      <button
-                        onClick={() => setEditingProject(project)}
-                        className="flex items-center gap-1.5 rounded bg-neutral-700/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-200 transition hover:bg-neutral-600"
-                      >
-                        <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Z" />
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => togglePublish(project)}
-                        disabled={togglingId === project._id}
-                        className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] transition disabled:opacity-50 ${project.published ? "bg-yellow-900/80 text-yellow-300 hover:bg-yellow-800" : "bg-green-900/80 text-green-300 hover:bg-green-800"}`}
-                      >
-                        {togglingId === project._id ? "…" : project.published ? "Unpublish" : "Publish"}
-                      </button>
-                      <button
-                        onClick={() => deleteProject(project._id)}
-                        disabled={deletingId === project._id}
-                        className="flex items-center gap-1.5 rounded bg-red-900/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-300 transition hover:bg-red-700 disabled:opacity-50"
-                      >
-                        {deletingId === project._id ? "…" : (
-                          <>
-                            <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
-                              <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.559a.75.75 0 1 0-1.492.12l.66 8.25A1.75 1.75 0 0 0 5.405 16.5h5.19a1.75 1.75 0 0 0 1.741-1.57l.66-8.25a.75.75 0 1 0-1.492-.12l-.66 8.25a.25.25 0 0 1-.249.224H5.405a.25.25 0 0 1-.249-.224l-.66-8.25Z" />
-                            </svg>
-                            Delete
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         </section>
+
 
         {/* S9: CTA */}
         <section className="relative bg-[#1c1814] border-t border-white/[0.06] py-28 px-8">
@@ -647,24 +353,6 @@ export default function LandingInlineEditor() {
         </section>
 
       </main>
-
-      {/* ── Modals ─────────────────────────────────────────────────────────── */}
-      {addOpen && (
-        <ShowcaseModal
-          title="Add Project"
-          initial={{ name: "", address: "", image: "", published: true }}
-          onClose={() => setAddOpen(false)}
-          onSave={addProject}
-        />
-      )}
-      {editingProject && (
-        <ShowcaseModal
-          title="Save Changes"
-          initial={{ name: editingProject.name, address: editingProject.address, image: editingProject.image, published: editingProject.published }}
-          onClose={() => setEditingProject(null)}
-          onSave={(data) => updateProject(editingProject._id, data)}
-        />
-      )}
 
       {/* Revert confirmation */}
       {revertOpen && (
