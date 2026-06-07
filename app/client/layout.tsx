@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import ClientNavbar from "./components/ClientNavbar";
 
@@ -13,6 +14,11 @@ export default async function ClientLayout({ children }: { children: React.React
     session?.user?.userType !== "developer";
 
   if (!session || (!isAdmin && !isClient)) {
+    if (!session) {
+      const headersList = await headers();
+      const pathname = headersList.get("x-pathname") ?? "";
+      redirect(`/login${pathname ? `?callbackUrl=${encodeURIComponent(pathname)}` : ""}`);
+    }
     redirect("/login");
   }
 

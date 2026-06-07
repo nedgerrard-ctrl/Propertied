@@ -35,12 +35,19 @@ function LoginForm() {
   useEffect(() => {
     async function checkSession() {
       const session = await getSession();
-      if (session?.user?.role === "admin") router.push("/admin/dashboard");
-      else if (session?.user?.role === "developer") router.push("/developer/dashboard");
-      else if (session?.user?.role === "client") router.push("/client/dashboard");
+      if (!session) return;
+      if (callbackUrl) {
+        window.location.href = callbackUrl;
+        return;
+      }
+      if (session.user?.role === "admin") router.push("/admin/dashboard");
+      else if (session.user?.role === "client") {
+        const userType = (session.user as { userType?: string } | undefined)?.userType;
+        router.push(userType === "developer" ? "/developer/dashboard" : "/client/dashboard");
+      }
     }
     checkSession();
-  }, [router]);
+  }, [router, callbackUrl]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

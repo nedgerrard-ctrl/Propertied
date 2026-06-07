@@ -30,7 +30,12 @@ export default auth((req) => {
   if (pathname.startsWith("/developer/")) {
     const isAdmin = role === "admin";
     const isDeveloper = role === "client" && userType === "developer";
-    if (!isLoggedIn || (!isAdmin && !isDeveloper)) {
+    if (!isLoggedIn) {
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (!isAdmin && !isDeveloper) {
       return NextResponse.redirect(new URL("/developer", req.url));
     }
   }
@@ -41,11 +46,14 @@ export default auth((req) => {
     const isApprovedExistingClient =
       role === "client" && userType === "existing_client" && !pendingApproval;
     if (!isAdmin && !isApprovedExistingClient) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/client/dashboard", req.url));
     }
   }
 
-  return NextResponse.next();
+  // Forward the pathname so server-component layouts can build callbackUrls
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 });
 
 export const config = {
