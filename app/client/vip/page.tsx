@@ -36,8 +36,6 @@ export default async function VipPage() {
 
   const [featured, ...rest] = articles;
 
-  const fallbackGradient = "linear-gradient(140deg, #e8ddd0 0%, #d4c9bb 100%)";
-
   return (
     <main className="flex-1 min-h-screen bg-[#f9f6f1]">
       {/* Page header */}
@@ -65,17 +63,15 @@ export default async function VipPage() {
               href={`/client/vip/${featured.slug}`}
               className="group flex min-h-[340px] overflow-hidden rounded-sm border border-[#e3d8ca] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
             >
-              <div className="relative w-[58%] shrink-0 overflow-hidden">
-                {featured.image ? (
+              {featured.image && (
+                <div className="relative w-[58%] shrink-0 overflow-hidden">
                   <img
                     src={featured.image}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="absolute inset-0" style={{ background: fallbackGradient }} />
-                )}
-              </div>
+                </div>
+              )}
               <div className="flex flex-1 flex-col justify-center px-10 py-10">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8a6e4b]">
                   {featured.category} · {featured.date}
@@ -102,16 +98,11 @@ export default async function VipPage() {
                     href={`/client/vip/${article.slug}`}
                     className="group overflow-hidden rounded-sm border border-[#e3d8ca] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
                   >
-                    {article.image ? (
+                    {article.image && (
                       <img
                         src={article.image}
                         alt=""
                         className="h-48 w-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="h-48 w-full"
-                        style={{ background: fallbackGradient }}
                       />
                     )}
                     <div className="px-6 py-5">
