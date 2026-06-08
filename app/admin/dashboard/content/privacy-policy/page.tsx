@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  privacyPolicyDefaults,
-  PrivacyPolicyContentData,
-} from "@/lib/privacy-policy-defaults";
+import { privacyPolicyDefaults, PrivacyPolicyContentData } from "@/lib/privacy-policy-defaults";
+import { privacySections, PrivacySection, defaultSectionFields, resolveText } from "@/lib/privacy-policy-sections";
 
-type Field = keyof PrivacyPolicyContentData;
+type HeroField = "heroHeadingMain" | "heroHeadingAccent" | "heroSubtext";
 
-const EDIT_LIGHT =
-  "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
-const EDIT_DARK =
-  "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
+const EDIT_DARK  = "outline-none cursor-text border-b-2 border-dashed border-amber-400/40 hover:border-amber-400 hover:bg-amber-400/5 focus:border-amber-400 focus:bg-amber-400/10 transition-colors px-0.5";
+const EDIT_LIGHT = "outline-none cursor-text border-b-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-amber-50/60 transition-colors px-0.5";
 
 function EditBadge() {
   return (
@@ -25,15 +21,107 @@ function EditBadge() {
   );
 }
 
-const SECTIONS: { headingKey: Field; bodyKey: Field }[] = [
-  { headingKey: "section1Heading", bodyKey: "section1Body" },
-  { headingKey: "section2Heading", bodyKey: "section2Body" },
-  { headingKey: "section3Heading", bodyKey: "section3Body" },
-  { headingKey: "section4Heading", bodyKey: "section4Body" },
-  { headingKey: "section5Heading", bodyKey: "section5Body" },
-  { headingKey: "section6Heading", bodyKey: "section6Body" },
-  { headingKey: "section7Heading", bodyKey: "section7Body" },
-];
+function EditableSectionBlock({
+  section,
+  overrides,
+  sectionRefs,
+}: {
+  section: PrivacySection
+  overrides: Record<string, string>
+  sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>
+}) {
+  const n = section.number
+  const t = (key: string, def: string) => resolveText(key, overrides, def)
+
+  function ref(key: string) {
+    return (el: HTMLElement | null) => { sectionRefs.current[key] = el }
+  }
+
+  return (
+    <div className="py-8 border-t border-[#ede8e1] first:border-t-0 first:pt-0">
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#c8a96e] mb-4">
+        {n}. {section.heading}
+      </h2>
+      <div className="space-y-4">
+        {section.blocks.map((block, bi) => {
+          if (block.kind === 'paragraph') {
+            return (
+              <p
+                key={bi}
+                ref={ref(`s${n}k${bi}`)}
+                contentEditable
+                suppressContentEditableWarning
+                className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+              >
+                {t(`s${n}k${bi}`, block.text)}
+              </p>
+            )
+          }
+          if (block.kind === 'subheading') {
+            return (
+              <p
+                key={bi}
+                ref={ref(`s${n}k${bi}`)}
+                contentEditable
+                suppressContentEditableWarning
+                className={`text-[13px] font-semibold text-[#1f1a17] pt-2 ${EDIT_LIGHT}`}
+              >
+                {t(`s${n}k${bi}`, block.text)}
+              </p>
+            )
+          }
+          if (block.kind === 'bullets') {
+            return (
+              <div key={bi} className="space-y-2">
+                {block.intro && (
+                  <p
+                    ref={ref(`s${n}k${bi}i`)}
+                    contentEditable
+                    suppressContentEditableWarning
+                    className={`text-[14px] leading-[1.9] text-[#3d3530] ${EDIT_LIGHT}`}
+                  >
+                    {t(`s${n}k${bi}i`, block.intro)}
+                  </p>
+                )}
+                <ul className="space-y-2 pl-4">
+                  {block.bullets.map((b, bui) => (
+                    <li key={bui} className="flex gap-3 text-[14px] leading-[1.9] text-[#3d3530]">
+                      <span className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-[#c8a96e]" />
+                      <span
+                        ref={ref(`s${n}k${bi}b${bui}`)}
+                        contentEditable
+                        suppressContentEditableWarning
+                        className={`flex-1 ${EDIT_LIGHT}`}
+                      >
+                        {t(`s${n}k${bi}b${bui}`, b)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
+          return null
+        })}
+        {section.details && (
+          <div className="border-l-2 border-[#c8a96e] pl-5 space-y-1">
+            {section.details.map((d, i) => (
+              <p
+                key={i}
+                ref={ref(`s${n}d${i}`)}
+                contentEditable
+                suppressContentEditableWarning
+                className={`text-[13px] leading-[1.8] text-[#1f1a17] ${EDIT_LIGHT}`}
+              >
+                {t(`s${n}d${i}`, d)}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function PrivacyPolicyInlineEditor() {
   const [content, setContent] = useState<PrivacyPolicyContentData>(privacyPolicyDefaults);
@@ -42,7 +130,9 @@ export default function PrivacyPolicyInlineEditor() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
-  const refs = useRef<Partial<Record<Field, HTMLElement | null>>>({});
+
+  const heroRefs = useRef<Partial<Record<HeroField, HTMLElement | null>>>({});
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
     fetch("/api/admin/content/privacy-policy")
@@ -54,38 +144,49 @@ export default function PrivacyPolicyInlineEditor() {
       });
   }, []);
 
-  function r(field: Field) {
-    return (el: HTMLElement | null) => {
-      refs.current[field] = el;
-    };
+  function rh(field: HeroField) {
+    return (el: HTMLElement | null) => { heroRefs.current[field] = el; };
   }
 
   async function confirmRevert() {
     setRevertOpen(false);
-    for (const [field, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el && field in lastSaved) {
-        el.innerText = lastSaved[field as keyof typeof lastSaved] as string;
-      }
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    for (const f of heroFields) {
+      const el = heroRefs.current[f];
+      if (el) el.innerText = lastSaved[f] as string;
+    }
+    const defaults = defaultSectionFields();
+    const savedOverrides = lastSaved.sectionOverrides ?? {};
+    for (const [key, el] of Object.entries(sectionRefs.current)) {
+      if (el) el.innerText = resolveText(key, savedOverrides, defaults[key] ?? "");
     }
     setContent(lastSaved);
     setSaved(false);
   }
 
   async function save() {
-    const updates: Partial<Record<Field, string>> = {};
-    for (const [key, el] of Object.entries(refs.current) as [Field, HTMLElement | null][]) {
-      if (el) updates[key] = el.innerText.trim();
+    const heroFields: HeroField[] = ["heroHeadingMain", "heroHeadingAccent", "heroSubtext"];
+    const heroUpdates: Partial<Record<HeroField, string>> = {};
+    for (const f of heroFields) {
+      const el = heroRefs.current[f];
+      if (el) heroUpdates[f] = el.innerText.trim();
     }
+
+    const sectionOverrides: Record<string, string> = {};
+    for (const [key, el] of Object.entries(sectionRefs.current)) {
+      if (el) sectionOverrides[key] = el.innerText.trim();
+    }
+
     setSaving(true);
     const res = await fetch("/api/admin/content/privacy-policy", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ ...heroUpdates, sectionOverrides }),
     });
     setSaving(false);
     if (res.ok) {
-      setContent((prev) => ({ ...prev, ...updates } as PrivacyPolicyContentData));
-      setLastSaved((prev) => ({ ...prev, ...updates } as PrivacyPolicyContentData));
+      setContent((prev) => ({ ...prev, ...heroUpdates, sectionOverrides }));
+      setLastSaved((prev) => ({ ...prev, ...heroUpdates, sectionOverrides }));
       setSaved(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -94,6 +195,7 @@ export default function PrivacyPolicyInlineEditor() {
   }
 
   const c = content;
+  const overrides = c.sectionOverrides ?? {};
 
   if (loading) {
     return (
@@ -163,7 +265,7 @@ export default function PrivacyPolicyInlineEditor() {
       {/* ── Page preview (editable) ─────────────────────────────────────────── */}
       <main className="min-h-screen w-full text-[#1f1a17] pt-[48px] [&_a]:pointer-events-none [&_a]:cursor-default">
 
-        {/* Hero */}
+        {/* S1: Hero */}
         <section className="relative min-h-[60vh] bg-[#1c1814] flex flex-col justify-center overflow-hidden">
           <EditBadge />
           <div className="relative z-10 mx-auto w-full max-w-7xl px-8 py-24">
@@ -173,66 +275,55 @@ export default function PrivacyPolicyInlineEditor() {
             </div>
             <div className="mt-8 border-t border-[#3a302a] pt-12 lg:pt-16">
               <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-light leading-[1.06] text-white max-w-4xl">
-                <span
-                  ref={r("heroHeadingMain")}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className={EDIT_DARK}
-                >
+                <span ref={rh("heroHeadingMain")} contentEditable suppressContentEditableWarning className={EDIT_DARK}>
                   {c.heroHeadingMain}
                 </span>
                 <br />
-                <span
-                  ref={r("heroHeadingAccent")}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className={`text-[#c8a96e] ${EDIT_DARK}`}
-                >
+                <span ref={rh("heroHeadingAccent")} contentEditable suppressContentEditableWarning className={`text-[#c8a96e] ${EDIT_DARK}`}>
                   {c.heroHeadingAccent}
                 </span>
               </h1>
             </div>
-            <p
-              ref={r("heroSubtext")}
-              contentEditable
-              suppressContentEditableWarning
-              className={`mt-8 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}
-            >
+            <p ref={rh("heroSubtext")} contentEditable suppressContentEditableWarning className={`mt-8 max-w-[52ch] text-[14px] leading-[1.9] text-[#8a7b6d] ${EDIT_DARK}`}>
               {c.heroSubtext}
             </p>
           </div>
         </section>
 
-        {/* Content sections */}
+        {/* S2: Document header — static metadata */}
+        <section className="bg-[#f6f2eb] border-b border-[#e3d8ca] py-10">
+          <div className="mx-auto max-w-3xl px-8">
+            <p className="text-[13px] font-semibold text-[#1f1a17]">PPM Privacy Policy</p>
+            <p className="mt-1 text-[12px] text-[#8a7b6d]">Effective date: 1 July 2026  ·  Last reviewed: May 2026</p>
+            <p className="mt-0.5 text-[12px] text-[#8a7b6d]">Publication: www.ppmproperty.com.au/privacy-policy</p>
+            <p className="mt-3 text-[13px] leading-[1.8] text-[#3d3530]">
+              This privacy policy is published by Property Project Marketing Pty Ltd (ABN 99 162 429 558), trading as Online Property Services, the licensed estate agent operating under the brand &ldquo;PPM&rdquo; (Estate Agents Licence No. 074846L).
+            </p>
+          </div>
+        </section>
+
+        {/* S3: All 19 sections — fully editable */}
         <section className="relative bg-white py-20 lg:py-28">
           <EditBadge />
           <div className="mx-auto max-w-3xl px-8">
-            <div className="divide-y divide-[#ede8e1]">
-              {SECTIONS.map((s, i) => (
-                <div key={i} className="py-10 first:pt-0">
-                  <h2
-                    ref={r(s.headingKey)}
-                    contentEditable
-                    suppressContentEditableWarning
-                    className={`text-[15px] font-semibold text-[#1f1a17] mb-4 ${EDIT_LIGHT}`}
-                  >
-                    {c[s.headingKey]}
-                  </h2>
-                  <p
-                    ref={r(s.bodyKey)}
-                    contentEditable
-                    suppressContentEditableWarning
-                    className={`text-[14px] leading-[1.9] text-[#3d3530] whitespace-pre-line ${EDIT_LIGHT}`}
-                  >
-                    {c[s.bodyKey]}
-                  </p>
-                </div>
+            <div>
+              {privacySections.map((section) => (
+                <EditableSectionBlock
+                  key={section.number}
+                  section={section}
+                  overrides={overrides}
+                  sectionRefs={sectionRefs}
+                />
               ))}
             </div>
-
-            <div className="mt-12 border-t border-[#ede8e1] pt-6 text-center">
-              <p className="text-[11px] tracking-[0.18em] text-[#b0a090]">
+            <div className="mt-12 border-t border-[#ede8e1] pt-8">
+              <p className="text-[12px] text-[#8a7b6d]">
                 © 2026 Property Project Marketing Pty Ltd. All rights reserved.
+              </p>
+            </div>
+            <div className="mt-8 border-t border-[#ede8e1] pt-6 text-center">
+              <p className="text-[11px] tracking-[0.18em] text-[#b0a090]">
+                PPM · Property Project Marketing · www.onlineprojects.com.au
               </p>
             </div>
           </div>
@@ -246,7 +337,7 @@ export default function PrivacyPolicyInlineEditor() {
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
             <h2 className="text-lg font-semibold text-neutral-900">Discard changes</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-600">
-              This will undo all unsaved edits and restore the page to the last saved state. Any changes made since your last save will be lost.
+              This will undo all unsaved edits and restore the page to the last saved state.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button

@@ -14,9 +14,12 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   await connectDB();
   const raw = await req.json();
-  const updates = Object.fromEntries(
-    Object.entries(raw).filter(([, v]) => typeof v === "string" && v.trim() !== "")
+  const updates: Record<string, unknown> = Object.fromEntries(
+    Object.entries(raw).filter(([k, v]) => k !== "sectionOverrides" && typeof v === "string" && (v as string).trim() !== "")
   );
+  if (raw.sectionOverrides && typeof raw.sectionOverrides === "object") {
+    updates.sectionOverrides = raw.sectionOverrides;
+  }
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
   }
