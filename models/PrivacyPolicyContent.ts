@@ -7,7 +7,7 @@ const PrivacyPolicyContentSchema = new Schema(
     heroHeadingAccent: { type: String, default: "" },
     heroSubtext:       { type: String, default: "" },
 
-    // Sections
+    // Legacy section fields (kept for DB compatibility)
     section1Heading: { type: String, default: "" },
     section1Body:    { type: String, default: "" },
     section2Heading: { type: String, default: "" },
@@ -22,6 +22,9 @@ const PrivacyPolicyContentSchema = new Schema(
     section6Body:    { type: String, default: "" },
     section7Heading: { type: String, default: "" },
     section7Body:    { type: String, default: "" },
+
+    // Per-element text overrides for the 19-section body
+    sectionOverrides: { type: Object, default: {} },
   },
   { timestamps: true }
 );

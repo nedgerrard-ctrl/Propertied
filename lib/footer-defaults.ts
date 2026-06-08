@@ -1,9 +1,9 @@
 export const footerDefaults = {
   // Brand column
-  brandTagline:   "PPM · Property Project Marketing",
-  brandAddress:   "Property Project Marketing Pty Ltd\nT/A Online Property Services\nLevel 7, 570 St Kilda Road\nMelbourne, Victoria 3004",
-  brandLicence:   "ABN 99 162 429 558\nEstate Agents Licence No. 074846L",
-  brandLanguages: "Languages: English · 中文 · 한국어",
+  brandTagline:   "PPM  ·  Property Project Marketing",
+  brandAddress:   "Property Project Marketing Pty Ltd  T/A  Online Property Services\nLevel 7, 570 St Kilda Road, Melbourne, Victoria 3004",
+  brandLicence:   "ABN 99 162 429 558  ·  Estate Agents Licence No. 074846L\nWebsite: www.ppmproperty.com.au",
+  brandLanguages: "Languages: English  ·  中文  ·  한국어",
 
   // Services links
   service1Label: "Off-the-Plan Sales",
@@ -22,10 +22,10 @@ export const footerDefaults = {
   company2Href:  "/our-people",
   company3Label: "Insights",
   company3Href:  "/insights",
-  company4Label: "Past Projects",
-  company4Href:  "/past-projects",
-  company5Label: "Contact",
-  company5Href:  "/contact",
+  company4Label: "Contact",
+  company4Href:  "/contact",
+  company5Label: "",
+  company5Href:  "",
 
   // Contact
   contactSalesEmail:      "sales@onlinepropertyservices.com.au",
@@ -39,10 +39,10 @@ export const footerDefaults = {
   instagramUrl: "",
   facebookUrl:  "",
 
-  // Compliance bar
+  // Compliance bar (copyright is embedded in complianceText)
   complianceText:
-    "PPM is a licensed real estate agency. Licence No. 074846L · ABN 99 162 429 558. PPM does not provide financial, legal or taxation advice. Tax information on this site relates to proposed 2026-27 Budget changes and is general information only. Seek independent professional advice before making any investment decision.",
-  copyrightText: "© 2026 Property Project Marketing Pty Ltd",
+    "PPM is a licensed real estate agency. Licence No. 074846L  ABN 99 162 429 558. PPM does not provide financial, legal or taxation advice. Tax information on this site relates to proposed 2026-27 Budget changes and is general information only. Seek independent professional advice before making any investment decision.  ·  © 2026 Property Project Marketing Pty Ltd. All rights reserved.",
+  copyrightText: "",
 };
 
 export type FooterContentData = typeof footerDefaults;
