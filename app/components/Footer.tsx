@@ -81,13 +81,13 @@ export default function Footer() {
             <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e]">
               {c.brandTagline}
             </p>
-            <p className="mt-3 text-[11px] leading-[1.8] text-[#4a3f37]">
+            <p className="mt-3 text-[11px] leading-[1.8] text-[#8a7b6d]">
               {lines(c.brandAddress)}
             </p>
-            <p className="mt-3 text-[11px] leading-[1.8] text-[#4a3f37]">
+            <p className="mt-3 text-[11px] leading-[1.8] text-[#8a7b6d]">
               {lines(c.brandLicence)}
             </p>
-            <p className="mt-3 text-[11px] text-[#4a3f37]">
+            <p className="mt-3 text-[11px] text-[#8a7b6d]">
               {c.brandLanguages}
             </p>
 
@@ -133,10 +133,10 @@ export default function Footer() {
 
           {/* Column 2: Services */}
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[#6b5e54] mb-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[#8a7b6d] mb-5">
               Services
             </p>
-            <ul className="space-y-3 text-[12px] text-[#4a3f37]">
+            <ul className="space-y-3 text-[12px] text-[#8a7b6d]">
               {services.map((s, i) => (
                 <li key={i}>
                   <Link href={s.href} className="hover:text-[#c8a96e] transition-colors">
@@ -149,10 +149,10 @@ export default function Footer() {
 
           {/* Column 3: Company */}
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[#6b5e54] mb-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[#8a7b6d] mb-5">
               Company
             </p>
-            <ul className="space-y-3 text-[12px] text-[#4a3f37]">
+            <ul className="space-y-3 text-[12px] text-[#8a7b6d]">
               {company.map((s, i) => (
                 <li key={i}>
                   <Link href={s.href} className="hover:text-[#c8a96e] transition-colors">
@@ -165,10 +165,10 @@ export default function Footer() {
 
           {/* Column 4: Contact */}
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[#6b5e54] mb-5">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[#8a7b6d] mb-5">
               Contact
             </p>
-            <ul className="space-y-2 text-[12px] text-[#4a3f37]">
+            <ul className="space-y-2 text-[12px] text-[#8a7b6d]">
               {c.contactSalesEmail && (
                 <li>
                   <span className="text-[#6b5e54]">Sales:</span>{" "}
@@ -214,10 +214,10 @@ export default function Footer() {
 
         {/* Compliance line */}
         <div className="mt-12 border-t border-white/[0.06] pt-8">
-          <p className="text-[10px] leading-[1.8] text-[#3a312b] max-w-4xl">
+          <p className="text-[10px] leading-[1.8] text-[#6b5e54] max-w-4xl">
             {c.complianceText}
           </p>
-          <div className="mt-4 flex flex-wrap gap-6 text-[10px] uppercase tracking-[0.16em] text-[#4a3f37]">
+          <div className="mt-4 flex flex-wrap gap-6 text-[10px] uppercase tracking-[0.16em] text-[#6b5e54]">
             <Link href="/full-disclaimer" className="hover:text-[#c8a96e] transition-colors">Full Disclaimer →</Link>
             <Link href="/privacy-policy" className="hover:text-[#c8a96e] transition-colors">Privacy Policy →</Link>
           </div>
