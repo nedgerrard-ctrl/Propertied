@@ -19,7 +19,6 @@ type DynamicTestimonial = {
   _id: string;
   quote: string;
   client: string;
-  rating: number;
   image?: string;
 };
 
@@ -144,7 +143,7 @@ function AddModal({
       setApiError(data.error || "Failed to add testimonial.");
     } else {
       onDraftSaved({});
-      onAdded({ _id: data._id, quote: data.quote, client: data.client, rating: data.rating, image: data.image || undefined });
+      onAdded({ _id: data._id, quote: data.quote, client: data.client, image: data.image || undefined });
       onClose();
     }
   }
