@@ -1,7 +1,0 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
-onlyBuiltDependencies:
-  - msw
-patchedDependencies:
-  docusign-esign@9.0.0: patches/docusign-esign@9.0.0.patch
