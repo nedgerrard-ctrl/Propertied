@@ -87,7 +87,7 @@ export default function ClientNavbar() {
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+    pathname === href || (pathname?.startsWith(href + "/") ?? false);
 
   return (
     <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-neutral-200 bg-white px-4 py-6">
