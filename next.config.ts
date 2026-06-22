@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig = {typescript: { ignoreBuildErrors: true },
   typescript: { ignoreBuildErrors: true },
   serverExternalPackages: ["docusign-esign"],
   images: {
