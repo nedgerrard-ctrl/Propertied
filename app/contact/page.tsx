@@ -13,6 +13,8 @@ type ContactFormData = {
   email: string;
   phoneCountryCode: string;
   phone: string;
+  iAm: string;
+  howDidYouHear: string;
   message: string;
 };
 
@@ -28,6 +30,8 @@ const initialFormData: ContactFormData = {
   email: "",
   phoneCountryCode: "",
   phone: "",
+  iAm: "",
+  howDidYouHear: "",
   message: "",
 };
 
@@ -46,13 +50,6 @@ function ContactTabs() {
         className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
       >
         Buyers
-      </Link>
-
-      <Link
-        href="/contact/developers"
-        className="min-w-[180px] border border-[#cfc2b2] bg-[#f6f2eb] px-6 py-4 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-[#5b5147] transition hover:border-[#5f5245] hover:text-[#1f1a17]"
-      >
-        Developers
       </Link>
 
       <Link
@@ -352,6 +349,44 @@ export default function ContactPage() {
                 {fieldErrors.email ? (
                   <p className="mt-3 text-[14px] text-[#dc2626]">{fieldErrors.email}</p>
                 ) : null}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  I am a
+                </label>
+                <select
+                  name="iAm"
+                  value={formData.iAm}
+                  onChange={handleChange}
+                  className={getInputClass(false)}
+                >
+                  <option value="">Select…</option>
+                  <option value="Investor">Investor</option>
+                  <option value="Owner-Occupier">Owner-Occupier</option>
+                  <option value="Developer">Developer</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6b6055]">
+                  How did you hear about us?
+                </label>
+                <select
+                  name="howDidYouHear"
+                  value={formData.howDidYouHear}
+                  onChange={handleChange}
+                  className={getInputClass(false)}
+                >
+                  <option value="">Select…</option>
+                  <option value="Google">Google</option>
+                  <option value="Referral">Referral from friend or colleague</option>
+                  <option value="Social Media">Social Media</option>
+                  <option value="Industry Event">Industry Event</option>
+                  <option value="Existing Client">Existing PPM Client</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div>

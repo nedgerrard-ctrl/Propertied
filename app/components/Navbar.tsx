@@ -142,8 +142,15 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
         setBuyersOpen(false)
       }
     }
-    document.addEventListener('mousedown', onClickOutside)
-    return () => document.removeEventListener('mousedown', onClickOutside)
+    // Defer by one tick so the click that opened the dropdown doesn't
+    // immediately trigger this listener and close it again.
+    const timerId = setTimeout(() => {
+      document.addEventListener('click', onClickOutside)
+    }, 0)
+    return () => {
+      clearTimeout(timerId)
+      document.removeEventListener('click', onClickOutside)
+    }
   }, [buyersOpen])
 
   // ── CMS page visibility ───────────────────────────────────────────────────

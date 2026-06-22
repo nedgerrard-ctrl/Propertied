@@ -1,5 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Resources & Forms',
+  description: 'Downloadable forms and guides for tenants, owners, investors and partner organisations — including rental applications, instruction forms and compliance documents.',
+}
+
 import { connectDB } from '@/lib/mongodb'
 import ResourcesContent from '@/models/ResourcesContent'
 import { mergeResourcesContent } from '@/lib/resources-defaults'

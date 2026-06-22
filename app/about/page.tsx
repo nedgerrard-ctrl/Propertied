@@ -1,5 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'About PPM',
+  description: 'PPM\'s track record was built inside Melbourne\'s development industry — not as intermediaries, but as embedded management consultants driving major projects to success since 2013.',
+}
+
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
 import ThreadsBackground from './ThreadsBackground'

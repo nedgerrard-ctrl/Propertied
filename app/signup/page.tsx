@@ -1048,7 +1048,10 @@ export default function SignupPage() {
               </button>
 
               <p className="text-[12px] text-[#a49a8d]">
-                By creating an account, you agree to our Terms of Use and Privacy Policy.
+                By creating an account, you agree to our{" "}
+                <Link href="/terms" className="underline underline-offset-2 hover:text-[#2f2923]">Terms of Use</Link>
+                {" "}and{" "}
+                <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-[#2f2923]">Privacy Policy</Link>.
               </p>
             </form>
           )}

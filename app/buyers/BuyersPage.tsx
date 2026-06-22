@@ -353,9 +353,9 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                 </ol>
                 <Link
                   href="/contact/buyers-investors"
-                  className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                  className="inline-block border border-[#2f2a24] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1f1a17] transition-colors hover:bg-[#2f2a24] hover:text-white"
                 >
-                  → Speak with a PPM principal
+                  Speak with a PPM Principal
                 </Link>
               </motion.div>
             )}
@@ -392,12 +392,12 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                     )
                   })}
                 </ol>
-                <div className="flex flex-wrap gap-6">
+                <div className="flex flex-wrap items-center gap-6">
                   <Link
                     href="/contact/buyers-investors"
-                    className="border-b border-[#c8a96e]/60 pb-1 text-[11px] uppercase tracking-[0.22em] text-[#c8a96e] transition-colors hover:border-[#c8a96e]"
+                    className="inline-block border border-[#2f2a24] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1f1a17] transition-colors hover:bg-[#2f2a24] hover:text-white"
                   >
-                    → Request a strategic asset review
+                    Request a Strategic Asset Review
                   </Link>
                   <Link
                     href="/off-the-plan-explainer"

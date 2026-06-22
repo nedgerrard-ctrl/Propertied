@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PPM — Generate Admin Hash</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1c1814;
+      color: #f4f1ea;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: #2a2219;
+      border: 1px solid #3a302a;
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    .logo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #c8a96e;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: #f4f1ea;
+      margin-bottom: 0.5rem;
+    }
+    p.sub {
+      font-size: 13px;
+      color: #8a7b6d;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8a7b6d;
+      margin-bottom: 0.5rem;
+    }
+    input {
+      width: 100%;
+      background: #1c1814;
+      border: 1px solid #3a302a;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 15px;
+      color: #f4f1ea;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 1.25rem;
+    }
+    input:focus { border-color: #c8a96e; }
+    .rules {
+      background: #1c1814;
+      border: 1px solid #3a302a;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .rules p {
+      font-size: 11px;
+      color: #8a7b6d;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .rule {
+      font-size: 12px;
+      color: #6a5f55;
+      padding: 2px 0;
+      transition: color 0.2s;
+    }
+    .rule.met { color: #6ab187; }
+    button {
+      width: 100%;
+      background: #c8a96e;
+      color: #1c1814;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #b89458; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .result {
+      margin-top: 1.5rem;
+      display: none;
+    }
+    .result.show { display: block; }
+    .result label { color: #6ab187; }
+    .hash-box {
+      background: #1c1814;
+      border: 1px solid #3a302a;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 12px;
+      font-family: monospace;
+      color: #c8a96e;
+      word-break: break-all;
+      margin-bottom: 0.75rem;
+    }
+    .copy-btn {
+      background: #3a302a;
+      color: #f4f1ea;
+      font-size: 12px;
+      padding: 0.6rem;
+      margin-bottom: 0;
+    }
+    .copy-btn:hover { background: #4a3f37; }
+    .steps {
+      margin-top: 1.5rem;
+      background: #1c1814;
+      border: 1px solid #3a302a;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .steps p {
+      font-size: 11px;
+      color: #8a7b6d;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .step {
+      font-size: 12px;
+      color: #8a7b6d;
+      line-height: 1.7;
+      padding: 3px 0;
+    }
+    .step span {
+      display: inline-block;
+      background: #c8a96e;
+      color: #1c1814;
+      font-weight: 700;
+      font-size: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 18px;
+      margin-right: 8px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #1c1814;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .email-display {
+      font-size: 13px;
+      color: #c8a96e;
+      font-family: monospace;
+      margin-top: 0.25rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">PPM · Admin Setup</div>
+    <h1>Generate Admin Hash</h1>
+    <p class="sub">Enter your email and choose a password. This tool generates the hash locally — nothing is sent anywhere.</p>
+
+    <label for="email">Admin Email</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="off" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Choose a strong password" autocomplete="new-password" oninput="checkRules()" />
+
+    <div class="rules">
+      <p>Password must include</p>
+      <div class="rule" id="r-len">✗ &nbsp;At least 8 characters</div>
+      <div class="rule" id="r-upper">✗ &nbsp;Uppercase letter (A–Z)</div>
+      <div class="rule" id="r-lower">✗ &nbsp;Lowercase letter (a–z)</div>
+      <div class="rule" id="r-num">✗ &nbsp;Number (0–9)</div>
+      <div class="rule" id="r-special">✗ &nbsp;Special character (!@#$…)</div>
+    </div>
+
+    <button id="btn" onclick="generate()" disabled>Generate Hash</button>
+
+    <div class="result" id="result">
+      <p class="sub" style="margin-top:1.5rem; color:#6ab187;">Hash generated. Now follow the steps below.</p>
+
+      <label>Your email</label>
+      <div class="email-display" id="email-display"></div>
+
+      <label>Bcrypt hash (copy this)</label>
+      <div class="hash-box" id="hash-output"></div>
+      <button class="copy-btn" onclick="copyHash()">Copy Hash</button>
+
+      <div class="steps">
+        <p>Next steps — MongoDB Atlas</p>
+        <div class="step"><span>1</span>Go to <strong style="color:#f4f1ea">cloud.mongodb.com</strong> and sign in</div>
+        <div class="step"><span>2</span>Open your cluster → Browse Collections → select the <strong style="color:#f4f1ea">ppm</strong> database → <strong style="color:#f4f1ea">users</strong> collection</div>
+        <div class="step"><span>3</span>Click <strong style="color:#f4f1ea">Insert Document</strong></div>
+        <div class="step"><span>4</span>Switch to JSON view and paste the document below</div>
+        <div class="step"><span>5</span>Click Insert — you can now sign in at /login</div>
+      </div>
+
+      <label style="margin-top:1.25rem;">MongoDB document (paste into Atlas)</label>
+      <div class="hash-box" id="doc-output" style="font-size:11px; line-height:1.7;"></div>
+      <button class="copy-btn" onclick="copyDoc()">Copy Document</button>
+    </div>
+  </div>
+
+  <script>
+    function checkRules() {
+      const pw = document.getElementById('password').value;
+      const rules = [
+        ['r-len',     pw.length >= 8],
+        ['r-upper',   /[A-Z]/.test(pw)],
+        ['r-lower',   /[a-z]/.test(pw)],
+        ['r-num',     /[0-9]/.test(pw)],
+        ['r-special', /[^A-Za-z0-9]/.test(pw)],
+      ];
+      let allMet = true;
+      rules.forEach(([id, met]) => {
+        const el = document.getElementById(id);
+        el.classList.toggle('met', met);
+        el.textContent = (met ? '✓' : '✗') + '  ' + el.textContent.slice(2);
+        if (!met) allMet = false;
+      });
+      document.getElementById('btn').disabled = !allMet || !document.getElementById('email').value.trim();
+    }
+
+    document.getElementById('email').addEventListener('input', checkRules);
+
+    async function generate() {
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('btn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Generating…';
+
+      await new Promise(r => setTimeout(r, 50)); // let UI repaint
+
+      const hash = dcodeIO.bcrypt.hashSync(password, 12);
+      const now = new Date().toISOString();
+
+      const doc = {
+        name: "PPM Admin",
+        email: email,
+        passwordHash: hash,
+        role: "admin",
+        createdAt: { "$date": now },
+        updatedAt: { "$date": now }
+      };
+
+      document.getElementById('email-display').textContent = email;
+      document.getElementById('hash-output').textContent = hash;
+      document.getElementById('doc-output').textContent = JSON.stringify(doc, null, 2);
+      document.getElementById('result').classList.add('show');
+
+      btn.disabled = false;
+      btn.innerHTML = 'Re-generate';
+    }
+
+    function copyHash() {
+      navigator.clipboard.writeText(document.getElementById('hash-output').textContent);
+      event.target.textContent = 'Copied!';
+      setTimeout(() => event.target.textContent = 'Copy Hash', 2000);
+    }
+
+    function copyDoc() {
+      navigator.clipboard.writeText(document.getElementById('doc-output').textContent);
+      event.target.textContent = 'Copied!';
+      setTimeout(() => event.target.textContent = 'Copy Document', 2000);
+    }
+  </script>
+</body>
+</html>

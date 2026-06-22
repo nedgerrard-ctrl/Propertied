@@ -17,8 +17,26 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "PPM",
-  description: "Property Project Marketing Pty Ltd",
+  title: {
+    default: "PPM — Property Project Marketing | Melbourne Off-the-Plan Specialists",
+    template: "%s | PPM Property Project Marketing",
+  },
+  description:
+    "PPM are business and management consultants with a real estate licence — Melbourne's off-the-plan apartment and townhouse specialists since 2013. We find, manage and resell properties for investors and owner-occupiers.",
+  keywords: [
+    "off-the-plan Melbourne",
+    "property investment Melbourne",
+    "off-the-plan apartments Melbourne",
+    "property management Melbourne",
+    "property project marketing",
+    "new apartments Melbourne",
+    "townhouse investment Melbourne",
+  ],
+  openGraph: {
+    siteName: "PPM — Property Project Marketing",
+    locale: "en_AU",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

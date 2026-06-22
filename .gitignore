@@ -17,6 +17,18 @@
 /.next/
 /out/
 
+# local dev build output (not needed in repo)
+/dev/
+
+# design preview exports
+/claude-design-preview/
+
+# large local files - not part of the codebase
+*.zip
+*.pdf
+*.docx
+*.pem
+
 # production
 /build
 

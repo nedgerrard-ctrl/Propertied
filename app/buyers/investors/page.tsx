@@ -1,5 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'For Investors — End-to-End Property Investment',
+  description: 'PPM\'s five-step model for property investors: we source, you buy, we manage, we sell and we reinvest — a complete wealth-building journey for Melbourne off-the-plan property.',
+}
+
 import { connectDB } from '@/lib/mongodb'
 import BuyerContentModel from '@/models/BuyerContent'
 import Project from '@/models/Project'

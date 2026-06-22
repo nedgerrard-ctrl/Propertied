@@ -1,5 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Our People',
+  description: 'Meet the PPM team — experienced professionals working daily at the Melbourne property market coalface across sales, investment strategy, client operations and asset management.',
+}
+
 import { connectDB } from '@/lib/mongodb'
 import OurPeopleContent from '@/models/OurPeopleContent'
 import { mergeOurPeopleContent } from '@/lib/our-people-defaults'

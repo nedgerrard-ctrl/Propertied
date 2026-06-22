@@ -19,7 +19,7 @@ export const aboutDefaults = {
   era3Year: "2026",
   era3Heading: "The insider knowledge is now yours",
   era3Body1:
-    "In partnership with Monash University, PPM has transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers seeking a trusted third-party partner.",
+    "PPM has transitioned from working exclusively within the development industry to working directly with buyers. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers seeking a trusted third-party partner.",
   era3Body2:
     "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
 
@@ -38,13 +38,13 @@ export const aboutDefaults = {
   briefBody:
     "Every PPM engagement — whether for an investor building a portfolio or an owner-occupier searching for the right home — begins with a structured client brief. Tell us your location preferences, configuration, budget, timeline and objectives. We match your brief against the Melbourne market in real time and bring you only the opportunities worth your attention. There is no catalogue to scroll through and no shortlist padded to look impressive. Submit your enquiry via the Contact page and we will promptly be in touch.",
 
-  pullQuote: "After 13 years working under our clients’ brands, PPM now works directly for buyers.",
+  pullQuote: "Since 2013, working under our clients’ brands. From 2026, PPM works directly for buyers.",
   storyP1:
     "Founded in 2013 to sell boutique off-the-plan projects, PPM built deep coalface knowledge of Melbourne’s new property market — marketing and selling boutique townhouse and apartment projects across the city from day one.",
   storyP2:
     "From 2018, local and multinational developers engaged PPM as management consultants to rescue underperforming projects and to develop and implement full operational frameworks from concept through completion. We delivered results under their names, not ours.",
   storyP3:
-    "In 2026, in partnership with Monash University, PPM transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers.",
+    "In 2026, PPM transitioned from B2B to B2C. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers.",
   storyP4:
     "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
 
@@ -61,7 +61,7 @@ export const aboutDefaults = {
   step2Title: "Buy",
   step2Desc:
     "The developer pays our fee. You pay nothing. We guide you from contract to settlement with independent advice at every stage.",
-  step3Title: "Steward",
+  step3Title: "Manage",
   step3Desc:
     "Principal-level attention, always. Never a junior property manager. Our portfolio is strictly capped at $100M to ensure this.",
   step4Title: "Sell Again",

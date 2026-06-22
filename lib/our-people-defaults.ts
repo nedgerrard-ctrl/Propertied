@@ -32,7 +32,14 @@ export const ourPeopleDefaults: OurPeopleContentData = {
       name: "Ned Gerrard",
       title: "Director",
       description:
-        "An MBA graduate of Monash University with a career spanning senior executive roles in listed public companies and specialist management consulting engagements. Major developers retained Ned not as an external adviser but as an embedded marketing director — responsible for building entire project brands and implementing sales frameworks that delivered hundreds of millions in settlements.\n\nAt PPM, Ned applies his consulting discipline to the supply side of every investment opportunity — assessing developer feasibility, pricing strategy, construction risk, and long-term capital positioning, while at the same time being able to use his marketing skill and experience to achieve sales in his own right.\n\nThe combination of Joan's operational market intelligence and Ned's analytical framework gives PPM clients a measurable informational advantage — the ability to identify value ahead of the market and avoid risk before it becomes visible.",
+        "An MBA graduate of Monash University with a career spanning senior executive roles in listed public companies and specialist management consulting engagements. Multinational developers retained Ned not as an external adviser but as an embedded marketing director — responsible for building entire project brands and implementing sales frameworks that delivered hundreds of millions in settlements.\n\nAt PPM, Ned applies his consulting discipline to the supply side of every investment opportunity — assessing developer feasibility, pricing strategy, construction risk, and long-term capital positioning, while at the same time being able to use his marketing skill and experience to achieve sales in his own right.\n\nNed brings deep insider industry knowledge and a highly sophisticated approach to the off-the-plan market.",
+    },
+    {
+      id: "person-james",
+      name: "James Gerrard",
+      title: "Digital Operations Manager",
+      description:
+        "After studying law, James joined one of the world's largest gaming companies (15 million+ subscribers) as Creative Director. In this role he was responsible for producing, editing and promoting content across online video and social media platforms.\n\nHaving spent time in Amsterdam during the height of the Covid pandemic, James returned to Australia with deep expertise in digital interfaces and content strategy. His skills ensure PPM maintains technological efficiency and delivers a strong digital sales advantage.",
     },
     {
       id: "person-3",

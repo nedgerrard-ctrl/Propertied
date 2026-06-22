@@ -28,9 +28,9 @@ export const footerDefaults = {
   company5Href:  "",
 
   // Contact
-  contactSalesEmail:      "sales@onlinepropertyservices.com.au",
+  contactSalesEmail:      "sales@ppmproperty.com.au",
   contactManagementEmail: "rental@onlinepropertyservices.com.au",
-  contactGeneralEmail:    "admin@onlinepropertyservices.com.au",
+  contactGeneralEmail:    "admin@ppmproperty.com.au",
   contactPhone1:          "0418 520 714",
   contactPhone2:          "0409 522 394",
 
