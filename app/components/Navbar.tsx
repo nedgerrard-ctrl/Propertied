@@ -110,7 +110,7 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
 
   const isActive = (href: string) =>
     href !== '#' &&
-    (href === '/' ? pathname === '/' : pathname.startsWith(href))
+    (href === '/' ? pathname === '/' : (pathname?.startsWith(href) ?? false))
 
   // ── Entrance delay — only on the home page ────────────────────────────────
 
@@ -180,7 +180,7 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
     : ALL_PRIMARY_LINKS.filter((l) => l.slug === null || visibleSlugs.includes(l.slug))
 
   const showBuyers = visibleSlugs === null || visibleSlugs.includes('buyer')
-  const buyersActive = pathname.startsWith('/buyers')
+  const buyersActive = pathname?.startsWith('/buyers') ?? false
 
   // ─── Palette tokens ───────────────────────────────────────────────────────
 
