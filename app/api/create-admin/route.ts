@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
+
+// Pre-computed bcrypt hash of "C21MetroProjects!" (12 rounds) — avoids timeout on cold start
+const PASSWORD_HASH = "$2b$12$DsxhyAiyajTr/le/fgVn1.PEpKnLLyU6dSoBslec76B6viadQgQle";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -19,12 +21,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "Admin already exists", email: existing.email });
     }
 
-    const passwordHash = await bcrypt.hash("C21MetroProjects!", 12);
-
     const user = await User.create({
       name: "PPM Admin",
       email: "nedgerrard@gmail.com",
-      passwordHash,
+      passwordHash: PASSWORD_HASH,
       role: "admin",
       accountStatus: "active",
       isDeleted: false,
