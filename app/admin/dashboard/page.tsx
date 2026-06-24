@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LogoutButton from "./logout-button";
 import AdminTabs from "./admin-tabs";
+import ResetContentButton from "./reset-content-button";
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -33,6 +34,7 @@ export default async function AdminDashboardPage() {
 
           {/* Right: actions */}
           <div className="flex items-center gap-5">
+            <ResetContentButton />
             <Link
               href="/"
               className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/40 transition hover:text-white/80"
