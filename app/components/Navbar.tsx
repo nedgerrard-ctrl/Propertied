@@ -237,12 +237,18 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
               : 'opacity-100 max-w-[400px]',
           ].join(' ')}
         >
-          <img
-            src="/images/logo.png"
-            alt="Property Project Marketing"
-            className="transition-opacity duration-300 group-hover:opacity-70"
-            style={{ height: 44, width: 120 }}
-          />
+          <div className="flex flex-col items-start gap-0 transition-opacity duration-300 group-hover:opacity-70">
+            {/* Roofline chevron mark */}
+            <svg viewBox="0 0 132 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ width: 48, height: 26 }}>
+              <g fill="none" stroke="#C4883A" strokeWidth="7.5" strokeLinecap="square" strokeLinejoin="miter">
+                <path d="M14 60 L52 22 L90 60" opacity="0.62" />
+                <path d="M42 52 L80 14 L118 52" />
+              </g>
+            </svg>
+            {/* Wordmark */}
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, letterSpacing: '0.04em', color: '#f4f1ea', lineHeight: 1 }}>PPM</span>
+            <span style={{ fontSize: 7, fontWeight: 400, letterSpacing: '0.28em', color: '#8a7b6d', textTransform: 'uppercase', lineHeight: 1, marginTop: 3 }}>Property Project Marketing</span>
+          </div>
         </Link>
 
         {/* ── Desktop nav — centers when scrolled ───────────────────────── */}
