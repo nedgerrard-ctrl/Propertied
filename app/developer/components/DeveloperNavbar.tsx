@@ -114,4 +114,6 @@ export default function DeveloperNavbar() {
       <div className="border-t border-neutral-100 pt-3">
         <LogoutButton />
       </div>
-    </aside
+    </aside>
+  );
+}

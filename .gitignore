@@ -1,0 +1,74 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# local dev build output (not needed in repo)
+/dev/
+
+# design preview exports
+/claude-design-preview/
+
+# large local files - not part of the codebase
+*.zip
+*.pdf
+*.docx
+*.pem
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+*.key
+private.key
+jwtConfig.json
+appsettings.json
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local batch scripts (contain credentials)
+push.bat
+push2.bat
+push3.bat
+push4.bat
+push_log.txt
+push2_log.txt
+push3_log.txt
+push4_log.txt
+netlify-deploy.bat
+netlify-deploy-log.txt
+
+# local docs not part of codebase
+Implementation Plan.docx
+Technical Documentation.docx
+User Documentation.docx

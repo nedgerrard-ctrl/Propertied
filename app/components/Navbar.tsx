@@ -553,4 +553,13 @@ export default function Navbar({ blackBg }: { blackBg?: boolean } = {}) {
                 ].join(' ')}
                 onClick={closeMobile}
               >
-   
+                <span>Sign Up</span>
+                {isActive('/signup') && <span className="h-1 w-1 rounded-full bg-[#c8a96e]" />}
+              </Link>
+            </>
+          )}
+        </nav>
+      </div>
+    </motion.header>
+  )
+}
