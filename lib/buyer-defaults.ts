@@ -11,27 +11,28 @@ export const buyerDefaults = {
 
   tailoredHeading: "Tailored for every buyer",
 
-  investorsHeading: "For Investors",
-  investorsBody:    "PPM's broader model extends beyond simply introducing a buyer to a project. We are built around a wider investment journey that continues through portfolio management and eventual resale.",
-  investorsBody2:   "Access our $100M capped management portfolio and our market intelligence that is months ahead of published property data. We select the right property, manage your asset, and sell it at the peak of the market cycle — at preferential rates for PPM clients.",
+  investorsHeading: "For investors — the end-to-end model",
+  investorsBody:    "PPM's broader model extends well beyond introducing a buyer to a project. We have built it around the complete investment journey that involves the following steps:",
+  investorsBody2:   "As properties from our portfolio are sold, opportunities arise for new investors to access our $100M capped management portfolio. We use our market intelligence that is months ahead of published property data to select the right property, manage your asset and then sell it at the peak of the market cycle — at preferential rates for PPM clients.",
   investorsStepsLabel: "FIVE STEPS FOR INVESTORS",
-  investorsBullet1: "We source — Only the best Melbourne projects. The rest, you never see.",
+  investorsBullet1: "We source — Only well scrutinised Melbourne projects.",
   investorsBullet2: "You buy — The developer pays our fee. You pay nothing.",
-  investorsBullet3: "We steward — Principal-level attention, always. Never a junior property manager.",
+  investorsBullet3: "We manage — Only at senior level. Never a junior property manager handling your account.",
   investorsBullet4: "We sell again — At a discounted commission for returning clients.",
-  investorsBullet5: "We replace — Your capital moves straight into the next vetted property.",
+  investorsBullet5: "We replace — Your capital moves straight into the next property we diligently vet for you.",
 
-  ownerHeading: "For Owner-Occupiers",
-  ownerBody:    "Turn your vision into reality. We vet the developer, negotiate the contract, and guide you from deposit to settlement — at ZERO cost to you. When you are ready to sell, we apply developer-level marketing to your home sale.",
+  ownerHeading: "For owner-occupiers",
+  ownerSubheading: "Turn your vision into reality.",
+  ownerBody:    "We vet the developer, negotiate the contract, and guide you from deposit to settlement — at ZERO cost to you. When you are ready to sell, we apply developer-level marketing to your home sale.",
   ownerStepsLabel: "THREE STEPS FOR OWNER-OCCUPIERS",
-  ownerBullet1: "We source — We find the right new home, vetted on developer, build quality and location.",
+  ownerBullet1: "We source — We find the right new home, vet the developer, the build quality and location.",
   ownerBullet2: "You buy — Guided from contract to settlement, at zero cost. The developer pays our fee.",
-  ownerBullet3: "We sell your existing home — Developer-grade marketing applied to your sale, with transition support.",
+  ownerBullet3: "We sell your existing home — Our proven marketing strategies are applied to your sale and we support you all the way to settlement.",
   ownerBullet4: "Zero cost to buyers — the vendor pays our fee in full.",
   ownerBullet5: "One relationship — from deposit through to settlement and beyond.",
 
   ctaHeading: "Start your property search with PPM.",
-  ctaBody:    "Register your interest and one of our principals will be in touch to discuss your goals, budget, and the opportunities currently available.",
+  ctaBody:    "Every PPM engagement — whether for an investor building a portfolio or an owner-occupier searching for the right home — begins with a structured client brief. Tell us your location preferences, configuration, budget, timeline and objectives. We match your brief against the Melbourne market in real time and bring you only the opportunities worth your attention. There is no catalogue to scroll through and no shortlist padded to look impressive. Submit your enquiry by clicking on the link below and we will promptly be in touch.",
 };
 
 export type BuyerContentData = typeof buyerDefaults;

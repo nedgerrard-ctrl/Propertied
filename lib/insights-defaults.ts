@@ -7,7 +7,7 @@ export const insightsDefaults = {
   // Section 1
   section1Heading: "Negative gearing is being quarantined for established property.",
   section1Body:
-    "From 1 July 2027, investors in established properties purchased after 12 May 2026 will no longer be able to offset rental losses against their salary or other income. That offset will only be available against rental income or future capital gains from that specific property.",
+    "From 1 July 2027, if you buy an established property after 12 May 2026 and it runs at a loss, you will no longer be able to deduct that loss against your salary or other income. Instead, the loss can only be offset against rental income from that same property, or against the capital gain when you eventually sell it.",
 
   // Section 2
   section2Heading: "Off-the-plan and new builds are exempt.",
@@ -32,7 +32,7 @@ export const insightsDefaults = {
 
   // Links
   link1Label: "Read the official Budget tax reform page",
-  link1Url:   "#",
+  link1Url:   "https://budget.gov.au/content/04-tax-reform.htm",
   link2Label: "See off-the-plan in detail",
   link2Url:   "/off-the-plan-explainer",
 };

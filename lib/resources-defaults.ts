@@ -51,8 +51,8 @@ export const resourcesDefaults: ResourcesContentData = {
       id:      "partners",
       heading: "Partner Resources",
       items: [
-        { id: "p1", label: "Minimum Standards — Consumer Affairs Victoria",               fileUrl: "/assets/forms/minimum-standards-consumer-affairs-vic.pdf", fileName: "minimum-standards-consumer-affairs-vic.pdf" },
-        { id: "p2", label: "Detector Inspector — Comply Now Pay Later",                   fileUrl: "/assets/forms/detector-inspector-comply-now-pay-later.pdf", fileName: "detector-inspector-comply-now-pay-later.pdf" },
+        { id: "p1", label: "Property Compliance Victoria — Minimum Standards brochure",    fileUrl: "/assets/forms/minimum-standards-consumer-affairs-vic.pdf", fileName: "minimum-standards-consumer-affairs-vic.pdf" },
+        { id: "p2", label: "Detector Inspector — Safer Home compliance plans",             fileUrl: "/assets/forms/detector-inspector-comply-now-pay-later.pdf", fileName: "detector-inspector-comply-now-pay-later.pdf" },
         { id: "p3", label: "Terri Scheer — Landlord Insurance brochure",                  fileUrl: "/assets/forms/terri-scheer-landlord-insurance-brochure.pdf", fileName: "terri-scheer-landlord-insurance-brochure.pdf" },
       ],
     },

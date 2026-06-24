@@ -1,17 +1,17 @@
 export const developerDefaults = {
-  heroHeadingMain: "Advisory, Sales & Project Rescue",
-  heroHeadingAccent: "for Melbourne Developers.",
+  heroHeadingMain: "Advisory. Management. Marketing. Sales.",
+  heroHeadingAccent: "",
   heroSubtext:
     "PPM covers the full development lifecycle — from concept feasibility and pricing strategy through to targeted sales execution and full project rescue. As a selective third-party agent, we bring a qualified buyer network built across thirteen years.",
 
   networkHeadingMain: "Full lifecycle developer services —",
   networkHeadingAccent: "built on thirteen years of insider knowledge.",
   networkP1:
-    "PPM's services cover the full development lifecycle. At concept stage we provide feasibility input, finish selection guidance, pricing strategy and marketing positioning — the decisions that determine the outcome at completion. For projects already in market, we offer targeted sales execution and, where required, full project rescue and restructure. PPM has turned around developments that other agencies could not move, applying management consulting discipline to the diagnosis and proven sales capability to the solution. We engage selectively — not every project suits our model, and our model is not suited to every developer. What it does suit is a developer who wants a genuine partner invested in the outcome, not a transactional agent incentivised purely by throughput.",
+    "PPM's services cover the full development lifecycle. At concept stage we provide feasibility input, finish selection guidance, pricing strategy and marketing positioning — the decisions that determine the outcome at completion. For projects already in the market, we deliver targeted sales execution and, where required, full project rescue and restructuring. PPM has turned around developments that other agencies could not move, applying business consulting discipline to the diagnosis and proven sales capability to the execution. We engage selectively — not every project suits our model, and our model is not suited to every developer. What it does suit is a developer who wants a reliable partner invested in the outcome.",
   networkP2:
-    "As a selective third-party agent, PPM also provides developers with direct access to our established database of qualified local and overseas investors who are actively seeking Melbourne off-the-plan property. This network has been built across thirteen years of active market participation. Not being exclusively contracted to any single developer, our recommendation of a project carries genuine weight with buyers — something an in-house sales team cannot replicate.",
+    "As a selective third-party agent, PPM also provides developers with direct access to our established database of qualified local and overseas investors who are actively seeking Melbourne off-the-plan property. This network has been built across thirteen years of active market participation. Because we have moved to a B2C model and hold no direct financial tie to any single developer, our recommendation of a project carries genuine weight with buyers — something an in-house sales team cannot replicate.",
   networkP3:
-    "PPM's transition to a B2C model has not closed the door on developer relationships. It has simply changed their nature. We now engage selectively as a trusted independent partner. We take on the projects we believe in, and when we bring our network to a development, our clients trust the recommendation.",
+    "PPM's transition to a B2C model has not closed the door on developer relationships — it has simply changed their nature. We now engage as a trusted independent partner on the projects we believe in, and when we bring our network to a development, our recommendation carries genuine weight with buyers.",
   networkBullet1: "Feasibility input & pricing strategy at concept",
   networkBullet2: "Targeted sales execution for in-market projects",
   networkBullet3: "Full project rescue and restructure capability",

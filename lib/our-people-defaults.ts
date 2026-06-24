@@ -17,7 +17,7 @@ export const ourPeopleDefaults: OurPeopleContentData = {
   heroHeadingMain: "The people",
   heroHeadingAccent: "behind PPM.",
   heroSubtext:
-    "Meet the team of experienced professionals working every day at the market coalface — bringing expertise across property sales, investment strategy, client operations, and asset management.",
+    "The team behind PPM — and the depth of experience each brings to your engagement.",
 
   people: [
     {
@@ -25,14 +25,21 @@ export const ourPeopleDefaults: OurPeopleContentData = {
       name: "Joan Alcock",
       title: "Officer in Effective Control · Director",
       description:
-        "After a career in finance, Joan has spent the last thirteen years at the operational centre of Melbourne's new property market — leading sales campaigns for boutique developments and major projects alike. Her personal sales record runs to hundreds of millions of dollars. She has won local and international industry elite performance awards and was selected as the public face for two of Melbourne's most significant residential landmarks in televised campaigns.\n\nShe works daily at the market coalface — with industry stakeholders and buyers alike. Her real-time market intelligence is a primary asset of the PPM client relationship.",
+        "After a successful career in finance, Joan has worked at the operational coalface of Melbourne's new property market since 2013. She has led high profile sales campaigns for boutique developments and major projects, achieving personal sales in the hundreds of millions of dollars.\n\nJoan has won multiple industry performance awards and was chosen as the media face for two of Melbourne's most significant residential landmarks.\n\nShe brings sharp real-time market intelligence and the deep understanding of buyer needs to every PPM client relationship.",
     },
     {
       id: "person-2",
       name: "Ned Gerrard",
-      title: "Director",
+      title: "Director & Principal",
       description:
-        "An MBA graduate of Monash University with a career spanning senior executive roles in listed public companies and specialist management consulting engagements. Multinational developers retained Ned not as an external adviser but as an embedded marketing director — responsible for building entire project brands and implementing sales frameworks that delivered hundreds of millions in settlements.\n\nAt PPM, Ned applies his consulting discipline to the supply side of every investment opportunity — assessing developer feasibility, pricing strategy, construction risk, and long-term capital positioning, while at the same time being able to use his marketing skill and experience to achieve sales in his own right.\n\nNed brings deep insider industry knowledge and a highly sophisticated approach to the off-the-plan market.",
+        "With multiple business qualifications from Monash University, including an MBA, Ned has had a distinguished career spanning senior executive roles in listed public companies. Major developers retained Ned not only as an external adviser, but also as an embedded marketing director tasked with building their corporate brand and developing and implementing project sales and marketing strategies.\n\nConsulting wise he has assisted developers with their organisational structuring, operational frameworks and project turnarounds. He brings intimate industry knowledge to an unsophisticated off-the-plan market.",
+    },
+    {
+      id: "person-3",
+      name: "Christopher Kraus",
+      title: "Client Operations Manager",
+      description:
+        "A Monash University business graduate, Chris brings a rare blend of analytical discipline and frontline client-service experience. Having worked predominantly in the taxation and energy sectors, he excels at resolving complex enquiries, interpreting regulatory frameworks and managing high volume information flows with precision and accuracy under pressure.\n\nChris' service-driven mindset and strong compliance orientation are essential to PPM's premium asset management operations.",
     },
     {
       id: "person-james",
@@ -42,18 +49,11 @@ export const ourPeopleDefaults: OurPeopleContentData = {
         "After studying law, James joined one of the world's largest gaming companies (15 million+ subscribers) as Creative Director. In this role he was responsible for producing, editing and promoting content across online video and social media platforms.\n\nHaving spent time in Amsterdam during the height of the Covid pandemic, James returned to Australia with deep expertise in digital interfaces and content strategy. His skills ensure PPM maintains technological efficiency and delivers a strong digital sales advantage.",
     },
     {
-      id: "person-3",
-      name: "Christopher Kraus",
-      title: "Client Operations Manager",
-      description:
-        "Another Monash University business graduate, Chris brings to PPM a rare blend of analytical discipline and frontline client-service experience. Having worked predominantly in the taxation and energy sectors, he has developed a deep capability in resolving complex customer enquiries, interpreting regulatory frameworks and managing high volume information flows with precision, while maintaining accuracy under pressure.\n\nChris brings a service-driven mindset to PPM, exceptional communication skills and a strong compliance orientation — all essential to PPM's premium off-the-plan and property stewardship operations.",
-    },
-    {
       id: "person-4",
       name: "George Tapia",
       title: "Head of Maintenance",
       description:
-        "In a long distinguished career of military service, George developed leadership, problem-solving and personal management skills that now underpin his role as PPM's Head of Maintenance. Having established and operated his own successful business servicing Melbourne's residential inner-city properties, George has built a reputation for reliability, punctuality and high-quality workmanship.\n\nHis hands-on approach and team management ensure PPM's rental providers can have the peace of mind that their asset equity is well preserved. George is well known for his attention to detail, reflected in his meticulous reports. He oversees all maintenance operations for PPM's strictly capped $100 million portfolio.",
+        "With a long and distinguished military career, George developed exceptional leadership, problem-solving and operational management skills. He later established and ran his own successful business servicing Melbourne's inner-city residential properties. George is known for his meticulous attention to detail, reliability and high-quality workmanship.\n\nHe oversees all maintenance operations across PPM's strictly capped $100 million portfolio, ensuring asset equity is protected and rental providers have complete peace of mind.",
     },
   ],
 };
