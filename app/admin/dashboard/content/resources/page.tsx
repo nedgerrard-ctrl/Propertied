@@ -827,7 +827,7 @@ export default function ResourcesInlineEditor() {
                   <input
                     className={`${inputBase} border-amber-200 bg-white focus:border-amber-500`}
                     value={footerEmail}
-                    placeholder="admin@onlinepropertyservices.com.au"
+                    placeholder="admin@ppmproperty.com.au"
                     onChange={(e) => { setFooterEmail(e.target.value); setSaved(false); }}
                   />
                 </div>

@@ -51,7 +51,7 @@ export const developerDefaults = {
 
   ctaHeading: "Discuss your development\nin confidence.",
   ctaSubtext:
-    "To discuss your project in confidence, contact us at admin@onlinepropertyservices.com.au or register your interest below.",
+    "To discuss your project in confidence, contact us at admin@ppmproperty.com.au or register your interest below.",
 };
 
 export type DeveloperContentData = typeof developerDefaults;

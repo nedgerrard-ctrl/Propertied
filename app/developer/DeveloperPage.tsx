@@ -83,10 +83,10 @@ export default function DeveloperPage({ content }: { content: DeveloperContentDa
           <p className="mt-8 text-[14px] leading-[1.85] text-[#3d3530]">
             To discuss your project in confidence, contact us at{' '}
             <a
-              href="mailto:admin@onlinepropertyservices.com.au"
+              href="mailto:admin@ppmproperty.com.au"
               className="text-[#c8a96e] underline hover:no-underline"
             >
-              admin@onlinepropertyservices.com.au
+              admin@ppmproperty.com.au
             </a>
             {' '}or{' '}
             <Link href="/contact/developers" className="text-[#c8a96e] underline hover:no-underline">

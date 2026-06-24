@@ -190,7 +190,7 @@ export default function DeveloperInlineEditor() {
             </div>
             <p className="mt-8 text-[14px] leading-[1.85] text-[#3d3530]">
               To discuss your project in confidence, contact us at{" "}
-              <span className="text-[#c8a96e]">admin@onlinepropertyservices.com.au</span>
+              <span className="text-[#c8a96e]">admin@ppmproperty.com.au</span>
               {" "}or{" "}
               <span className="text-[#c8a96e]">register your interest below</span>.
             </p>

@@ -252,7 +252,7 @@ export const disclaimerSections: DisclaimerSection[] = [
     ],
     details: [
       'Property Project Marketing Pty Ltd  ·  Level 7, 570 St Kilda Road, Melbourne, Victoria 3004',
-      'Email: admin@onlinepropertyservices.com.au',
+      'Email: admin@ppmproperty.com.au',
       'ABN 99 162 429 558  ·  Estate Agents Licence No. 074846L',
     ],
   },
