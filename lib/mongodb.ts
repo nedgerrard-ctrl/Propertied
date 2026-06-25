@@ -37,9 +37,9 @@ export async function connectDB() {
     cached.promise = mongoose.connect(MONGODB_URI!, {
       dbName: "ppm",
       bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 3000,
+      connectTimeoutMS: 3000,
+      socketTimeoutMS: 10000,
     });
   }
 
