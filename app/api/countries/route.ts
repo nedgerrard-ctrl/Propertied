@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from "next/server";
 
 // Static country list with dial codes — sorted Australia first, then alphabetically

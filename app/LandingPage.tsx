@@ -460,7 +460,7 @@ function WhyChoosePPMSection({ content }: { content: LandingContentData }) {
           </div>
 
           <div className="mt-10 flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em]">
-            <Link href="/testimonials" className={LINK_CLASS}>
+            <Link href="/testimonial" className={LINK_CLASS}>
               → Read what our clients say
             </Link>
             <Link href="/contact" className={LINK_CLASS}>
