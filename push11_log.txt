@@ -1,0 +1,9 @@
+Adding admin password reset route... 
+warning: in the working copy of 'app/api/admin/reset-admin-password/route.ts', LF will be replaced by CRLF the next time Git touches it
+[main 7896110] Add one-time admin password reset endpoint
+ 1 file changed, 76 insertions(+)
+ create mode 100644 app/api/admin/reset-admin-password/route.ts
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   c6d6779..7896110  main -> main
+Exit code: 0 
+Done. 

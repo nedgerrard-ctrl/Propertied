@@ -1,0 +1,29 @@
+Adding API routes... 
+warning: in the working copy of 'app/api/auth/check-phone/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/forgot-password/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/login/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/reset-password/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/send-code/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/signup/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/auth/verify-email/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/contact/document-request/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/contact/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/countries/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/public/footer/route.ts', LF will be replaced by CRLF the next time Git touches it
+[main 34ef639] Add missing API routes: contact, auth, countries, public/footer
+ 11 files changed, 1029 insertions(+)
+ create mode 100644 app/api/auth/check-phone/route.ts
+ create mode 100644 app/api/auth/forgot-password/route.ts
+ create mode 100644 app/api/auth/login/route.ts
+ create mode 100644 app/api/auth/reset-password/route.ts
+ create mode 100644 app/api/auth/send-code/route.ts
+ create mode 100644 app/api/auth/signup/route.ts
+ create mode 100644 app/api/auth/verify-email/route.ts
+ create mode 100644 app/api/contact/document-request/route.ts
+ create mode 100644 app/api/contact/route.ts
+ create mode 100644 app/api/countries/route.ts
+ create mode 100644 app/api/public/footer/route.ts
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   f19dd18..34ef639  main -> main
+Exit code: 0 
+Done. 

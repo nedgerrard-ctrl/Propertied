@@ -1,0 +1,25 @@
+Removing stale git locks... 
+Committing DB resilience fix (all public pages)... 
+warning: in the working copy of 'app/blog/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/developer/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/full-disclaimer/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/insights/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/off-the-plan-explainer/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/our-people/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/past-projects/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/privacy-policy/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/resources/page.tsx', LF will be replaced by CRLF the next time Git touches it
+[main 9ccbdbc] fix: wrap all public page DB calls in try-catch so cold-start timeout never crashes the page
+ 16 files changed, 238 insertions(+), 156 deletions(-)
+Exit code: 0 
+ 
+Pushing to GitHub... 
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   b27f556..9ccbdbc  main -> main
+Exit code: 0 
+ 
+Remote last 3 commits: 
+9ccbdbc fix: wrap all public page DB calls in try-catch so cold-start timeout never crashes the page
+b27f556 fix: remove double 'From $' prefix in project price display on buyers pages
+15b7da1 Sync all accumulated changes: content defaults, page components, models, auth, CMS, footer email fix
+Done. 

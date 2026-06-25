@@ -1,0 +1,3 @@
+Running via PowerShell... 
+SUCCESS: Admin password updated. Delete this endpoint now.
+Exit code: 0 

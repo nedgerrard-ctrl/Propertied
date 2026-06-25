@@ -38,14 +38,17 @@ export default function Footer() {
   useEffect(() => {
     fetch("/api/public/footer")
       .then((r) => r.json())
-      .then((data: FooterContentData) => setC(data))
+      .then((res: { success?: boolean; content?: FooterContentData }) => {
+        if (res?.content) setC(res.content)
+      })
       .catch(() => {/* keep defaults on error */});
   }, []);
 
   const hasSocial = c.youtubeUrl || c.instagramUrl || c.facebookUrl;
 
   // Render multi-line text (newlines → <br>)
-  function lines(text: string) {
+  function lines(text: string | undefined | null) {
+    if (!text) return null
     return text.split("\n").map((line, i, arr) => (
       <span key={i}>
         {line}

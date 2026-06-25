@@ -1,0 +1,16 @@
+Removing stale git locks... 
+Committing BuyersPage price fix... 
+[main b27f556] fix: remove double 'From $' prefix in project price display on buyers pages
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+Exit code: 0 
+ 
+Pushing to GitHub... 
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   15b7da1..b27f556  main -> main
+Exit code: 0 
+ 
+Remote last 3 commits: 
+b27f556 fix: remove double 'From $' prefix in project price display on buyers pages
+15b7da1 Sync all accumulated changes: content defaults, page components, models, auth, CMS, footer email fix
+476f401 fix: extend MongoDB timeouts and add Netlify nft bundler for cold-start reliability
+Done. 

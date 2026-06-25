@@ -1,0 +1,13 @@
+Adding admin content API routes... 
+warning: in the working copy of 'app/admin/dashboard/reset-content-button.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/admin/content/[slug]/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/admin/content/reset-all/route.ts', LF will be replaced by CRLF the next time Git touches it
+[main c6d6779] Add admin content API routes (GET/PATCH/DELETE per page) + reset-all endpoint + Reset Content button in dashboard
+ 4 files changed, 224 insertions(+)
+ create mode 100644 app/admin/dashboard/reset-content-button.tsx
+ create mode 100644 app/api/admin/content/[slug]/route.ts
+ create mode 100644 app/api/admin/content/reset-all/route.ts
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   eae5972..c6d6779  main -> main
+Exit code: 0 
+Done. 

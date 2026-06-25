@@ -1,0 +1,14 @@
+Pushing email consistency fix... 
+warning: in the working copy of 'lib/developer-defaults.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/full-disclaimer-sections.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/privacy-policy-sections.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/developer/DeveloperPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/terms/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/admin/dashboard/content/developer/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/admin/dashboard/content/resources/page.tsx', LF will be replaced by CRLF the next time Git touches it
+[main f19dd18] Standardise admin email to admin@ppmproperty.com.au across all pages
+ 7 files changed, 9 insertions(+), 9 deletions(-)
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   81da853..f19dd18  main -> main
+Exit code: 0 
+Done. 

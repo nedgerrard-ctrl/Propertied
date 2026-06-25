@@ -1,0 +1,12 @@
+=== Push16 Log === 
+Using git: "C:\Users\nedge\AppData\Local\GitHubDesktop\app-3.5.12\resources\app\git\cmd\git.exe" 
+ 
+Removing stale locks... 
+Pushing to GitHub... 
+Everything up-to-date
+Exit code: 0 
+ 
+a478d10 fix: blog API route, force-dynamic on API routes, disable reset-admin-password, fix testimonial link
+9ccbdbc fix: wrap all public page DB calls in try-catch so cold-start timeout never crashes the page
+b27f556 fix: remove double 'From $' prefix in project price display on buyers pages
+ 

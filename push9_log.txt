@@ -1,0 +1,8 @@
+Adding content defaults updates... 
+warning: in the working copy of 'lib/developer-defaults.ts', LF will be replaced by CRLF the next time Git touches it
+[main eae5972] Update all content defaults from recovered Claude Design JSX files
+ 5 files changed, 33 insertions(+), 32 deletions(-)
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   34ef639..eae5972  main -> main
+Exit code: 0 
+Done. 

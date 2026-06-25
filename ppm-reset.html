@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>PPM Admin Reset</title></head>
+<body>
+<p id="msg" style="font-family:sans-serif;font-size:18px;padding:20px;">Running reset...</p>
+<script>
+fetch("https://propertied.netlify.app/api/admin/reset-admin-password", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({
+    resetKey: "ppm-admin-reset-2026",
+    email: "nedgerrard@gmail.com",
+    newPassword: "C21MetroProjects1!"
+  })
+})
+.then(r => r.json())
+.then(data => {
+  const el = document.getElementById("msg");
+  if (data.ok) {
+    el.style.color = "green";
+    el.innerHTML = "&#x2705; " + data.message + "<br><br><a href='https://propertied.netlify.app/admin/dashboard'>Go to Admin Dashboard &rarr;</a>";
+  } else {
+    el.style.color = "red";
+    el.textContent = "Error: " + (data.error || JSON.stringify(data));
+  }
+})
+.catch(err => {
+  document.getElementById("msg").textContent = "Network error: " + err.message;
+});
+</script>
+</body>
+</html>

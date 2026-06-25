@@ -1,0 +1,18 @@
+Removing stale git locks... 
+Locks cleared. 
+ 
+Committing all remaining project files... 
+[main 15b7da1] Sync all accumulated changes: content defaults, page components, models, auth, CMS, footer email fix
+ 6 files changed, 61 insertions(+), 37 deletions(-)
+Exit code: 0 
+ 
+Pushing to GitHub... 
+To https://github.com/nedgerrard-ctrl/Propertied.git
+   476f401..15b7da1  main -> main
+Exit code: 0 
+ 
+Remote last 3 commits after push: 
+15b7da1 Sync all accumulated changes: content defaults, page components, models, auth, CMS, footer email fix
+476f401 fix: extend MongoDB timeouts and add Netlify nft bundler for cold-start reliability
+7896110 Add one-time admin password reset endpoint
+Done. 
