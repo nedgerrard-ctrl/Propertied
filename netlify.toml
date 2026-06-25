@@ -6,5 +6,8 @@
 [build.environment]
   NETLIFY_USE_PNPM = "true"
 
+[functions]
+  node_bundler = "nft"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
