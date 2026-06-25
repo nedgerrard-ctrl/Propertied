@@ -12,13 +12,18 @@ import { mergeOurPeopleContent } from '@/lib/our-people-defaults'
 import OurPeoplePage from './OurPeoplePage'
 
 export default async function OurPeopleServerPage() {
-  await connectDB()
+  let content = mergeOurPeopleContent(null)
+  try {
+      await connectDB()
 
-  const { assertCmsPagePublished } = await import('@/lib/cms-published')
-  await assertCmsPagePublished('our-people')
+      const { assertCmsPagePublished } = await import('@/lib/cms-published')
+      await assertCmsPagePublished('our-people')
 
-  const doc = await OurPeopleContent.findOne().lean()
-  const content = mergeOurPeopleContent(doc as Record<string, unknown> | null)
+      const doc = await OurPeopleContent.findOne().lean()
+      content = mergeOurPeopleContent(doc as Record<string, unknown> | null)
+  } catch {
+    // DB unavailable — render with defaults
+  }
 
   return <OurPeoplePage content={content} />
 }

@@ -45,15 +45,23 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  await connectDB()
 
-  const post = await BlogPost.findOne({ slug, status: 'published' }).lean() as Post | null
+  let post: Post | null = null
+  let allPosts: { slug: string }[] = []
+
+  try {
+    await connectDB()
+    post = await BlogPost.findOne({ slug, status: 'published' }).lean() as Post | null
+    allPosts = await BlogPost.find({ status: 'published' })
+      .sort({ publishDate: -1 })
+      .select('slug')
+      .lean() as { slug: string }[]
+  } catch {
+    // DB unavailable
+  }
+
   if (!post) notFound()
 
-  const allPosts = await BlogPost.find({ status: 'published' })
-    .sort({ publishDate: -1 })
-    .select('slug')
-    .lean() as { slug: string }[]
   const postIndex = allPosts.findIndex((p) => p.slug === slug) + 1
 
   return (

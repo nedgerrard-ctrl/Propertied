@@ -12,13 +12,18 @@ import { mergeResourcesContent } from '@/lib/resources-defaults'
 import ResourcesPage from './ResourcesPage'
 
 export default async function ResourcesServerPage() {
-  await connectDB()
+  let content = mergeResourcesContent(null)
+  try {
+      await connectDB()
 
-  const { assertCmsPagePublished } = await import('@/lib/cms-published')
-  await assertCmsPagePublished('resources')
+      const { assertCmsPagePublished } = await import('@/lib/cms-published')
+      await assertCmsPagePublished('resources')
 
-  const doc = await ResourcesContent.findOne().lean()
-  const content = mergeResourcesContent(doc as Record<string, unknown> | null)
+      const doc = await ResourcesContent.findOne().lean()
+      content = mergeResourcesContent(doc as Record<string, unknown> | null)
+  } catch {
+    // DB unavailable — render with defaults
+  }
 
   return <ResourcesPage content={content} />
 }

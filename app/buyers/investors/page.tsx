@@ -14,39 +14,46 @@ import { projects as SEED_PROJECTS } from '@/lib/projects-data'
 import BuyersPage, { type DynamicProject } from '../BuyersPage'
 
 export default async function InvestorsPage() {
-  await connectDB()
-  const { assertCmsPagePublished } = await import('@/lib/cms-published')
-  await assertCmsPagePublished('buyer')
+  let content = mergeBuyerContent(null)
+  let projects: DynamicProject[] = []
 
-  const [doc, count] = await Promise.all([
-    BuyerContentModel.findOne({ section: 'investors' }).lean(),
-    Project.countDocuments(),
-  ])
+  try {
+    await connectDB()
+    const { assertCmsPagePublished } = await import('@/lib/cms-published')
+    await assertCmsPagePublished('buyer')
 
-  if (count === 0) {
-    await Project.insertMany(
-      SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest)
-    )
+    const [doc, count] = await Promise.all([
+      BuyerContentModel.findOne({ section: 'investors' }).lean(),
+      Project.countDocuments(),
+    ])
+
+    if (count === 0) {
+      await Project.insertMany(
+        SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest)
+      )
+    }
+
+    const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
+    content = mergeBuyerContent(doc as Record<string, unknown> | null)
+    projects = dynamicDocs.map((d) => ({
+      _id:              (d._id as { toString(): string }).toString(),
+      name:             d.name as string,
+      suburb:           d.suburb as string,
+      state:            d.state as string,
+      type:             d.type as DynamicProject['type'],
+      propertyInterest: d.propertyInterest as DynamicProject['propertyInterest'],
+      status:           d.status as DynamicProject['status'],
+      bedrooms:         d.bedrooms as string,
+      bathrooms:        d.bathrooms as string,
+      carSpaces:        d.carSpaces as string,
+      priceFrom:        d.priceFrom as string,
+      description:      d.description as string,
+      highlights:       (d.highlights as string[]) ?? [],
+      image:            (d.image as string) ?? '',
+    }))
+  } catch {
+    // DB unavailable — render with defaults
   }
-
-  const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
-  const content = mergeBuyerContent(doc as Record<string, unknown> | null)
-  const projects: DynamicProject[] = dynamicDocs.map((d) => ({
-    _id:              (d._id as { toString(): string }).toString(),
-    name:             d.name as string,
-    suburb:           d.suburb as string,
-    state:            d.state as string,
-    type:             d.type as DynamicProject['type'],
-    propertyInterest: d.propertyInterest as DynamicProject['propertyInterest'],
-    status:           d.status as DynamicProject['status'],
-    bedrooms:         d.bedrooms as string,
-    bathrooms:        d.bathrooms as string,
-    carSpaces:        d.carSpaces as string,
-    priceFrom:        d.priceFrom as string,
-    description:      d.description as string,
-    highlights:       (d.highlights as string[]) ?? [],
-    image:            (d.image as string) ?? '',
-  }))
 
   return <BuyersPage content={content} projects={projects} variant="investors" />
 }

@@ -70,31 +70,35 @@ const SEED_TESTIMONIALS = [
 ]
 
 export default async function TestimonialServerPage() {
-  await connectDB()
-  const { assertCmsPagePublished } = await import("@/lib/cms-published")
-  await assertCmsPagePublished("testimonial")
+  let content = mergeTestimonialContent(null)
+  let testimonials: DynamicTestimonial[] = []
 
-  const [doc, count] = await Promise.all([
-    TestimonialContent.findOne().lean(),
-    Testimonial.countDocuments(),
-  ])
+  try {
+    await connectDB()
+    const { assertCmsPagePublished } = await import("@/lib/cms-published")
+    await assertCmsPagePublished("testimonial")
 
-  if (count === 0) {
-    await Testimonial.insertMany(SEED_TESTIMONIALS)
+    const [doc, count] = await Promise.all([
+      TestimonialContent.findOne().lean(),
+      Testimonial.countDocuments(),
+    ])
+
+    if (count === 0) {
+      await Testimonial.insertMany(SEED_TESTIMONIALS)
+    }
+
+    const dynamicDocs = await Testimonial.find().sort({ createdAt: -1 }).lean()
+    content = mergeTestimonialContent(doc as Record<string, unknown> | null)
+    testimonials = dynamicDocs.map((d) => ({
+      _id:    (d._id as { toString(): string }).toString(),
+      quote:  d.quote  as string,
+      client: d.client as string,
+      rating: d.rating as number,
+      image:  (d.image as string | undefined) || undefined,
+    }))
+  } catch {
+    // DB unavailable — render with defaults
   }
-
-  const [dynamicDocs] = await Promise.all([
-    Testimonial.find().sort({ createdAt: -1 }).lean(),
-  ])
-
-  const content = mergeTestimonialContent(doc as Record<string, unknown> | null)
-  const testimonials: DynamicTestimonial[] = dynamicDocs.map((d) => ({
-    _id:    (d._id as { toString(): string }).toString(),
-    quote:  d.quote  as string,
-    client: d.client as string,
-    rating: d.rating as number,
-    image:  (d.image as string | undefined) || undefined,
-  }))
 
   return <TestimonialPage content={content} testimonials={testimonials} />
 }

@@ -14,11 +14,16 @@ import AboutContent from '@/models/AboutContent'
 import { mergeAboutContent } from '@/lib/about-defaults'
 
 export default async function AboutPage() {
-  await connectDB()
-  const { assertCmsPagePublished } = await import("@/lib/cms-published")
-  await assertCmsPagePublished("about")
-  const doc = await AboutContent.findOne().lean()
-  const c = mergeAboutContent(doc as Record<string, unknown> | null)
+  let c = mergeAboutContent(null)
+  try {
+    await connectDB()
+    const { assertCmsPagePublished } = await import("@/lib/cms-published")
+    await assertCmsPagePublished("about")
+    const doc = await AboutContent.findOne().lean()
+    c = mergeAboutContent(doc as Record<string, unknown> | null)
+  } catch {
+    // DB unavailable — render with defaults
+  }
 
   const eras = [
     { year: c.era1Year, heading: c.era1Heading, paragraphs: [c.era1Body] },

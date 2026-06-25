@@ -11,15 +11,19 @@ type Props = {
 };
 
 export default async function GuidePage({ params }: Props) {
-  await connectDB();
-
   const { slug } = await params;
+  let page: any = null;
 
-  const page = await Page.findOne({
-    slug,
-    status: "published",
-    archived: { $ne: true },
-  }).lean() as any;
+  try {
+    await connectDB();
+    page = await Page.findOne({
+      slug,
+      status: "published",
+      archived: { $ne: true },
+    }).lean();
+  } catch {
+    // DB unavailable
+  }
 
   if (!page) notFound();
 

@@ -6,13 +6,18 @@ import { mergeOffThePlanExplainerContent } from '@/lib/off-the-plan-explainer-de
 import OffThePlanExplainerPage from './OffThePlanExplainerPage'
 
 export default async function OffThePlanExplainerServerPage() {
-  await connectDB()
+  let content = mergeOffThePlanExplainerContent(null)
+  try {
+      await connectDB()
 
-  const { assertCmsPagePublished } = await import('@/lib/cms-published')
-  await assertCmsPagePublished('off-the-plan-explainer')
+      const { assertCmsPagePublished } = await import('@/lib/cms-published')
+      await assertCmsPagePublished('off-the-plan-explainer')
 
-  const doc = await OffThePlanExplainerContent.findOne().lean()
-  const content = mergeOffThePlanExplainerContent(doc as Record<string, unknown> | null)
+      const doc = await OffThePlanExplainerContent.findOne().lean()
+      content = mergeOffThePlanExplainerContent(doc as Record<string, unknown> | null)
+  } catch {
+    // DB unavailable — render with defaults
+  }
 
   return <OffThePlanExplainerPage content={content} />
 }
