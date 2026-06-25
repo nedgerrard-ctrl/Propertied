@@ -384,7 +384,7 @@ function FederalBudgetSection({ content }: { content: LandingContentData }) {
           </p>
 
           <div className="flex flex-wrap gap-8 mb-10 text-[11px] uppercase tracking-[0.2em]">
-            <Link href="/blog" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
+            <Link href="/insights" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
               → Read the full Insights briefing
             </Link>
             <Link href="/buyers" className="text-[#c8a96e] border-b border-[#c8a96e]/40 pb-0.5 transition hover:border-[#c8a96e]">
@@ -551,3 +551,4 @@ export default function LandingPage({
     </main>
   )
 }
+                         

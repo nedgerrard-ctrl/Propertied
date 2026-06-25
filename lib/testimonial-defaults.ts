@@ -3,7 +3,7 @@ export const testimonialDefaults = {
   // NOTE: Ashwin Lemaye's testimonial (cine1) uses his full name — confirm
   // written consent is on file before the site goes live.
   cine1Quote:
-    "Eleven years ago I bought an investment property in Brunswick off-the-plan through Joan Alcock. For all that time my property was diligently managed — and when I decided to sell, I did not look further than Joan.\n\nDespite the Melbourne market being flat for a number of years, Joan's confidence gave me the comfort to proceed. She developed the sales strategy, styled the apartment, prepared the advertising copy herself and launched the campaign in out-of-season May.\n\nOn the first day of inspection 25 groups came through the door. I received five offers and the property sold in three days for a profit I did not expect.\n\nJoan performed an outstanding job all the way from her original sale to me, through managing the rental, to having it resold in record time. I have no hesitation in recommending Joan and PPM to anyone who wants to buy, have their asset preserved and resell upon expert advice.",
+    "Eleven years ago I bought my investment property in Brunswick off-the-plan from Joan. For all that time my property was diligently managed. When I decided to sell, I did not look further than her. Joan developed the sales strategy, styled the apartment and launched the campaign in May. On the first day of inspection 25 groups came through the door, I received five offers and the property sold in three days for a profit I did not expect. I have no hesitation in recommending Joan to anyone who wants their asset preserved and resold at the right time.",
   cine1Client: "— Ashwin Lemaye, Sales & Management",
 
   cine2Quote:

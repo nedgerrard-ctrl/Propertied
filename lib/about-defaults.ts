@@ -1,27 +1,27 @@
 export const aboutDefaults = {
   heroHeadingMain:
-    "Our track record was built inside",
-  heroHeadingAccent: "Melbourne’s development industry.",
+    "Built from the",
+  heroHeadingAccent: "inside.",
 
   introText:
-    "PPM’s track record was not built in the consumer property market. It was built inside Melbourne’s development industry — not by moving quickly from one project to another collecting transactional commissions, but by being retained for the long-term until a successful outcome was achieved.",
+    "PPM’s track record was not built in the traditional consumer property market. It was forged inside Melbourne’s development industry. We didn’t succeed by being intermediaries chasing volume sales, rather we worked on a small number of select projects at a time where we were directly accountable for their long-term success.",
 
   era1Year: "2013",
   era1Heading: "Founded to sell boutique off-the-plan projects",
   era1Body:
-    "PPM commenced operations marketing and selling boutique townhouse and apartment projects off-the-plan across Melbourne — building deep coalface knowledge of the city’s new property market from day one.",
+    "PPM began by marketing and selling boutique townhouse and apartment projects off-the-plan across Melbourne. From day one, we built deep, first-hand knowledge of the city’s new property market.",
 
   era2Year: "2018",
-  era2Heading: "Retained by major developers as management consultants",
+  era2Heading: "Retained by major developers as a specialist multi-purpose force",
   era2Body:
-    "Local and multinational developers engaged PPM to rescue underperforming projects and to develop and implement full operational frameworks from concept through to completion. We delivered results under their names, not ours.",
+    "Local and multinational developers retained PPM not just as another sales agent, but as a trusted specialist team. They relied on our business consulting expertise to diagnose issues and our operational capabilities to rebuild underperforming projects, or to manage their successful outcome from start to finish.",
 
   era3Year: "2026",
-  era3Heading: "The insider knowledge is now yours",
+  era3Heading: "Our insider knowledge is now available to buyers",
   era3Body1:
-    "PPM has transitioned from working exclusively within the development industry to working directly with buyers. Everything we built — the market intelligence, the developer relationships, the analytical frameworks — now works directly for individual investors, owner-occupiers and developers seeking a trusted third-party partner.",
+    "In partnership with Monash University, PPM has transitioned from B2B to B2C. Everything we learned working inside major developments — market intelligence, developer relationships, the analytical frameworks — is now available directly to individual investors and owner-occupiers.",
   era3Body2:
-    "Our services are now available direct to the market for the first time. Whether you are building a property portfolio, buying your first home, or developing a residential project, PPM brings the same institutional-grade standard to every client relationship.",
+    "We bring the same institutional grade standard and strategic focus to every client relationship, whether you are building a property portfolio or buying your first home.",
 
   // Owner-occupier steps section (about page)
   aboutOwnerStepsLabel: "THREE STEPS FOR OWNER-OCCUPIERS",

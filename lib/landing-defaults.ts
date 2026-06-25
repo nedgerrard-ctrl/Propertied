@@ -1,50 +1,69 @@
 export const landingDefaults = {
-  heroTagline: "Property Project Marketing",
-  heroLine1: "Management Consultants.",
-  heroAccent: "Licensed Real Estate Agents.",
-  heroLine3: "Off-the-Plan Specialists.",
+  heroTagline: "New Apartment & Townhouse Specialists",
+  heroLine1: "New apartment &",
+  heroAccent: "townhouse specialists",
+  heroLine3: "",
   heroSubtext:
-    "PPM is not a standard real estate agency. We are professional management consultants who hold a real estate licence — a combination that is unlikely to exist elsewhere in the Melbourne residential property market. Our model is built on depth, not volume: thirteen years of interactive project experience at the highest level and a deliberate decision to specialise rather than to diversify. The result is a quality of inside knowledge buyers simply cannot access anywhere else.",
+    "PPM is not your typical real estate agency. We are business and management consultants with a real estate licence — a distinct combination rarely found in the Melbourne market. We've been helping clients secure high-growth off-the-plan properties since 2013.",
+  heroSubtext2:
+    "We find the right property for you at no cost, manage it as a high-growth asset (not just a rental) and resell at the optimal time. As an investor, you can either take or reinvest your profit. As an owner-occupier, you can upgrade to a better lifestyle. We can help you with either journey.",
+  heroCta:
+    "Ready to take the next step? Click the button below — or simply scroll to learn more.",
 
   stat1Value: "$1.5B",
   stat1Unit: "",
   stat1Label: "Delivered Projects",
-  stat2Value: "1,000+",
+  stat2Value: "1,500+",
   stat2Unit: "",
   stat2Label: "Settled Sales",
   stat3Value: "$100M",
   stat3Unit: "",
-  stat3Label: "Managed Portfolio",
+  stat3Label: "Managed Portfolio (capped*)",
 
   // Who We Are section
   whoWeAreHeading:
-    "Management Consultants. Licensed Real Estate Agents. Off-the-Plan Specialists.",
+    "Business consultants. Licensed real estate agents. Off-the-plan specialists.",
   whoWeAreBody:
-    "PPM is not a standard real estate agency. We are professional management consultants who hold a real estate licence — a combination that is unlikely to exist elsewhere in the Melbourne residential property market. Our model is built on depth, not volume: thirteen years of interactive project experience at the highest level and a deliberate decision to specialise rather than to diversify. The result is a quality of inside knowledge buyers simply cannot access anywhere else.",
+    "PPM is neither a standard real estate agency nor a mere extension of a developer's marketing arm. We are professional business and management consultants who hold a full real estate licence. Our model is intentionally built on depth, not volume.",
+  whoWeAreBody2:
+    "While most firms operate as developers' outsourced sales arms, we were the actual embedded in-house team. We bring genuine hands-on experience driving major projects to success from the inside.",
+  whoWeAreBody3:
+    "The result is an unparalleled depth of market insight that buyers simply cannot access anywhere else.",
 
   ethosHeading:
-    "We sell new homes. We manage them. We resell them.",
+    "We Find. You Buy. We Manage & Resell — You Take Your Profit or Upgrade.",
   ethosBody:
-    "Our services are built around two distinct journeys. The first is for investors who want to grow wealth through property without the stress of poor stock selection, junior property managers, or buying the wrong asset at the wrong time. The second is for owner-occupiers who want to find the right home at the right price and sell their current one at a premium with someone who has a proven track record.",
+    "Our services are built around two distinct journeys.",
+
+  // What We Do cards
+  investorCardTitle: "A complete, stress-free wealth-building journey",
+  investorCardP1: "We provide a complete stress-free wealth building journey for those who want to grow their Australian property portfolio with confidence.",
+  investorCardP2: "Our process eliminates the common risks of poor property selection, inexperienced junior managers, or buying or selling at the wrong time.",
+  investorCardP3: "Because our property management portfolio is deliberately capped at $100 million, each client can rely on having an expert look after their asset.",
+  ownerCardTitle: "The right home, at the right price",
+  ownerCardP1: "We help you find the right home at the right price — and, when you are ready to sell, your property is sold at a premium by experts with a proven track record.",
+  ownerCardP2: "This allows you to leverage the built-up equity to repeat the cycle — upsizing into an even better property that further enhances your lifestyle.",
 
   ctaHeading: "Start your property journey with PPM.",
 
   // What We Do additional paragraphs
   whatWeDoBody2:
-    "Both journeys start on the same path: having the property independently selected, buying off-the-plan and then sold at the appropriate time.",
+    "Both journeys share the same foundation: the expert selection of high potential off-the-plan properties, a smooth and well-supported purchase process and a strategic resale at the optimal time in the property cycle.",
   whatWeDoBody3:
     "Buying off-the-plan is a better stepping stone into the property market than established property — and from 1 July 2027, a tax-advantaged one.",
 
   // Our Transition
-  transitionHeading: "From closed industry to open market",
+  transitionHeading: "From industry insider to direct-to-market.",
   transitionP1:
-    "After 13 years of working under our clients' brands, PPM has now partnered with Monash University to establish its own brand.",
+    "After 13 years of successfully working under our clients' brands, PPM has partnered with Monash University to establish its own independent brand.",
   transitionP2:
-    "This business re-launch enables the company to operate independently of any developer influence. There is no requirement to push any specific project, no volume quota to fill, and no third-party sales network to manage. Our only obligation is to the client in front of us.",
+    "This re-launch allows us to operate free of any vendor influence. There are no volume quotas to meet, no specific projects we must push and no third-party sales networks to manage. Our only obligation is to the client in front of us.",
   transitionP3:
-    "For the first time, our insider knowledge, real-time market intelligence and proven track record work directly and exclusively for buyers who are either investors or owner-occupiers.",
+    "For the first time, our insider knowledge, real-time market intelligence and proven track record work directly for buyers who are either investors or owner-occupiers.",
   transitionP4:
-    "We also maintain our developer relationships as selective third-party agents and provide access to our established buyer database of qualified local and overseas investors.",
+    "At the same time, we continue to maintain strong developer relationships as selective third-party agents and provide access to our established buyer database of qualified local and overseas investors.",
+  transitionCta:
+    "For more detail, click on the group below that is relevant to your position in the market:",
 
   // 2026 Federal Budget
   budgetHeading:
@@ -52,7 +71,7 @@ export const landingDefaults = {
   budgetBullet1:
     "Negative gearing. Preserved for new builds. Restricted for established homes.",
   budgetBullet2:
-    "50% CGT discount only available to new build investors. Other investors are much worse off.",
+    "50% CGT discount. Only available to new build investors. Other investors are much worse off.",
   budgetBody:
     "New builds — primarily off-the-plan apartments and townhouses — are the qualifying asset class. The after-tax position of new builds and established housing will diverge materially from that date.",
   budgetDisclaimer:
@@ -60,12 +79,12 @@ export const landingDefaults = {
 
   // Why Choose PPM
   whyHeading: "Six things no other Melbourne agency can offer.",
-  why1: "Insider knowledge — Years of working on every aspect of a project, not just on parts of it.",
-  why2: "Real-time intelligence — we see the market before published data does.",
-  why3: "Genuine independence — no quotas, no agenda, unbiased buyer recommendations.",
-  why4: "One relationship — buy, manage, sell, repeat.",
-  why5: "Zero buyer fees — the vendor pays us.",
-  why6: "We steward not just manage — your asset is looked after at the highest level.",
+  why1: "Insider knowledge — We are experienced in every aspect of a development, not just some parts of it.",
+  why2: "Real-time intelligence — Being at the coalface, our market knowledge is months ahead of published data.",
+  why3: "Independent property advice — We are not constrained by anyone else's agenda.",
+  why4: "One seamless relationship — We acquire, manage, divest and reinvest your capital gains.",
+  why5: "Zero buyer fees — The development vendor pays us.",
+  why6: "We manage your asset — Your property is looked after by experts not juniors.",
 
   // Why Choose PPM — stewardship addendum
   whyStewardBody:

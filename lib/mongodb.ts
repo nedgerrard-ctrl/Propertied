@@ -49,4 +49,8 @@ export async function connectDB() {
 /*Test db connection */
 // try {
 //     await mongoose.connect(MONGODB_URI!);
-//     console.log("✅ MongoDB connected successfull
+//     console.log("✅ MongoDB connected successfully");
+//   } catch (error) {
+//     console.error("❌ MongoDB connection failed:", error);
+//   }
+}
