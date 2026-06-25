@@ -56,15 +56,27 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local batch scripts (contain credentials)
+# local batch/powershell scripts (contain or may contain credentials)
 push.bat
 push2.bat
 push3.bat
 push4.bat
-push_log.txt
-push2_log.txt
-push3_log.txt
-push4_log.txt
+push5.bat
+push6.bat
+push7.bat
+push8.bat
+push9.bat
+push10.bat
+push11.bat
+push12.bat
+push13.bat
+push14.bat
+push15.bat
+push16.bat
+push-fix-log.bat
+push14.ps1
+push*.ps1
+push*_log.txt
 netlify-deploy.bat
 netlify-deploy-log.txt
 
