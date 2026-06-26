@@ -110,12 +110,6 @@ function VideoHero({ content }: { content: LandingContentData }) {
           >
             Get in Touch
           </Link>
-          <Link
-            href="/about"
-            className="border border-white/20 px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#9e8d7a] transition hover:border-white/40 hover:text-white"
-          >
-            Learn More
-          </Link>
         </motion.div>
       </motion.div>
 
