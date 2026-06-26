@@ -27,12 +27,9 @@ export default async function OwnerOccupiersPage() {
       Project.countDocuments(),
     ])
 
-    // Re-seed if empty OR if real seed projects are not present (clears mock/student data)
-    const hasRealData = count > 0 && await Project.findOne({ name: SEED_PROJECTS[0].name })
-    if (!hasRealData) {
-      await Project.deleteMany({})
-      await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
-    }
+    // Always wipe and re-seed — guarantees only canonical projects show
+    await Project.deleteMany({})
+    await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
 
     const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
     content = mergeBuyerContent(doc as Record<string, unknown> | null)

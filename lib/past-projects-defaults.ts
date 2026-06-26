@@ -74,8 +74,6 @@ export function mergePastProjectsContent(
       (doc.heroSubtext as string) || pastProjectsDefaults.heroSubtext,
     closingText:
       (doc.closingText as string) || pastProjectsDefaults.closingText,
-    projects: Array.isArray(doc.projects) && (doc.projects as unknown[]).length > 0
-      ? (doc.projects as PastProject[])
-      : pastProjectsDefaults.projects,
+    projects: pastProjectsDefaults.projects,
   }
 }
