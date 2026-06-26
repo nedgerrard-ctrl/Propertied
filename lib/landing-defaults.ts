@@ -12,13 +12,13 @@ export const landingDefaults = {
 
   stat1Value: "$1.5B",
   stat1Unit: "",
-  stat1Label: "Delivered Projects",
+  stat1Label: "Delivered projects",
   stat2Value: "1,500+",
   stat2Unit: "",
-  stat2Label: "Settled Sales",
+  stat2Label: "Settled sales",
   stat3Value: "$100M",
   stat3Unit: "",
-  stat3Label: "Managed Portfolio (capped*)",
+  stat3Label: "Managed portfolio (capped*)",
 
   // Who We Are section
   whoWeAreHeading:

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Cormorant_Garamond } from 'next/font/google'
 import Link from 'next/link'
@@ -130,36 +130,95 @@ function VideoHero({ content }: { content: LandingContentData }) {
   )
 }
 
+// ── Count-up hook (matches Claude Design motion layer) ───────────────────────
+function useInViewOnce() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) { setInView(true); return }
+    let done = false
+    const reveal = () => { if (!done) { done = true; setInView(true); cleanup() } }
+    const check = () => {
+      if (done) return
+      const vh = window.innerHeight || document.documentElement.clientHeight
+      if (el.getBoundingClientRect().top < vh * 0.9) reveal()
+    }
+    const onScroll = () => requestAnimationFrame(check)
+    function cleanup() {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    check()
+    return cleanup
+  }, [])
+  return [ref, inView] as const
+}
+
+function useCountUp(target: number, opts: { duration?: number; decimals?: number }, start: boolean) {
+  const { duration = 1700 } = opts
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!start || REDUCE) { setVal(target); return }
+    let raf: number
+    const t0 = performance.now()
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / duration)
+      const e = 1 - Math.pow(1 - p, 3)
+      setVal(target * e)
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [start]) // eslint-disable-line react-hooks/exhaustive-deps
+  return val
+}
+
+function CountStatItem({ prefix = '', target, decimals = 0, suffix = '', label }: {
+  prefix?: string; target: number; decimals?: number; suffix?: string; label: string
+}) {
+  const [ref, inView] = useInViewOnce()
+  const v = useCountUp(target, { decimals }, inView)
+  const num = decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString()
+  return (
+    <div ref={ref} className="flex flex-col justify-center px-10 py-12">
+      <p className={`${cormorant.className} text-[2.6rem] font-light leading-none text-white`}>
+        {prefix}{num}<span className="text-[#c8a96e]">{suffix}</span>
+      </p>
+      <p className="mt-3 text-[10px] uppercase tracking-[0.26em] text-[#6b5e54]">
+        {label}
+      </p>
+    </div>
+  )
+}
+
 function StatsStrip({ content }: { content: LandingContentData }) {
   const stats = [
-    { value: content.stat1Value, unit: content.stat1Unit, label: content.stat1Label },
-    { value: content.stat2Value, unit: content.stat2Unit, label: content.stat2Label },
-    { value: content.stat3Value, unit: content.stat3Unit, label: content.stat3Label },
+    { prefix: '$', target: 1.5, decimals: 1, suffix: 'B', label: content.stat1Label },
+    { prefix: '',  target: 1500, decimals: 0, suffix: '+', label: content.stat2Label },
+    { prefix: '$', target: 100,  decimals: 0, suffix: 'M', label: content.stat3Label },
   ]
 
   return (
     <section className="bg-[#1c1814] border-b border-white/[0.06]">
       <div className="mx-auto max-w-7xl px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="pt-10 pb-2 px-10"
+        >
+          <p className="text-[10px] uppercase tracking-[0.32em] text-[#8a7b6d]">
+            Our track record
+          </p>
+        </motion.div>
         <div className="grid grid-cols-1 divide-y divide-white/[0.06] md:grid-cols-3 md:divide-x md:divide-y-0">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: i * 0.1 }}
-              className="flex flex-col justify-center px-10 py-12"
-            >
-              <p className={`${cormorant.className} text-[2.6rem] font-light leading-none text-white`}>
-                {s.value}
-                {s.unit && (
-                  <span className="ml-1 text-[1.4rem] text-[#c8a96e]">{s.unit}</span>
-                )}
-              </p>
-              <p className="mt-3 text-[10px] uppercase tracking-[0.26em] text-[#6b5e54]">
-                {s.label}
-              </p>
-            </motion.div>
+          {stats.map((s) => (
+            <CountStatItem key={s.label} {...s} />
           ))}
         </div>
         <p className="border-t border-white/[0.06] py-4 px-10 text-center text-[10px] text-[#6b5e54]">
