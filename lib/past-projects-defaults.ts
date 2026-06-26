@@ -51,6 +51,13 @@ export const pastProjectsDefaults: PastProjectsContentData = {
       imageUrl: "https://placehold.co/800x500/1c1814/c8a96e?text=Elk",
       link:     "https://www.vpp.net.au/elk",
     },
+    {
+      id:       "botanica",
+      name:     "Botanica",
+      address:  "Melbourne VIC",
+      imageUrl: "https://placehold.co/800x500/1c1814/c8a96e?text=Botanica",
+      link:     "https://a-d.com.au/buying-living/market-insights/botanic-parc-vue",
+    },
   ],
 }
 

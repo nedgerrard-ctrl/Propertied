@@ -379,7 +379,7 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                 <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#c8a96e]">
                   {content.ownerStepsLabel}
                 </p>
-                <ol className="mb-12 space-y-4 text-[13px] text-[#2a1f1a]">
+                <ol className="mb-6 space-y-4 text-[13px] text-[#2a1f1a]">
                   {[content.ownerBullet1, content.ownerBullet2, content.ownerBullet3].map((item, i) => {
                     const sep = item.indexOf(' — ')
                     const bold = sep !== -1 ? item.slice(0, sep) : item
@@ -392,6 +392,20 @@ export default function BuyersPage({ content, projects, variant }: BuyersPagePro
                     )
                   })}
                 </ol>
+                {(content.ownerBullet4 || content.ownerBullet5) && (
+                  <div className="mb-12 space-y-2 border-t border-[#c8a96e]/20 pt-6">
+                    {[content.ownerBullet4, content.ownerBullet5].filter(Boolean).map((item) => {
+                      const sep = item.indexOf(' — ')
+                      const bold = sep !== -1 ? item.slice(0, sep) : item
+                      const rest = sep !== -1 ? item.slice(sep) : ''
+                      return (
+                        <p key={item} className="text-[12px] text-[#5a4a3f]">
+                          <strong className="text-[#c8a96e]">{bold}</strong>{rest}
+                        </p>
+                      )
+                    })}
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center gap-6">
                   <Link
                     href="/contact/buyers-investors"
