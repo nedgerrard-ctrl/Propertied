@@ -1,8 +1,8 @@
 export const landingDefaults = {
-  heroTagline: "New Apartment & Townhouse Specialists",
-  heroLine1: "New apartment &",
-  heroAccent: "townhouse specialists",
-  heroLine3: "",
+  heroTagline: "Property Project Marketing",
+  heroLine1: "Off-the-Plan &",
+  heroAccent: "Property Portfolio Management",
+  heroLine3: "Specialists",
   heroSubtext:
     "PPM is not your typical real estate agency. We are business and management consultants with a real estate licence — a distinct combination rarely found in the Melbourne market. We've been helping clients secure high-growth off-the-plan properties since 2013.",
   heroSubtext2:
