@@ -129,7 +129,7 @@ function GridCard({ quote, client, image }: { quote: string; client: string; ima
         )}
       </div>
 
-      <p className={`${cormorant.className} text-[1.25rem] italic text-[#2a1f1a] leading-relaxed`}>
+      <p className={`${cormorant.className} text-[1.4rem] md:text-[1.55rem] italic text-[#2a1f1a] leading-relaxed`}>
         &ldquo;{quote}&rdquo;
       </p>
 

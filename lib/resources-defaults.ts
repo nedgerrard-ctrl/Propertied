@@ -42,7 +42,6 @@ export const resourcesDefaults: ResourcesContentData = {
       items: [
         { id: "o1", label: "Owners Instruction Form",                                     fileUrl: "/assets/forms/owners-instruction-form.pdf",               fileName: "owners-instruction-form.pdf" },
         { id: "o2", label: "Sales Authority",                                             fileUrl: "",                                                         fileName: "" },
-        { id: "o3", label: "Management Authority",                                        fileUrl: "",                                                         fileName: "" },
         { id: "o4", label: "Mandatory Disclosure Checklist",                              fileUrl: "/assets/forms/mandatory-disclosure-checklist.pdf",         fileName: "mandatory-disclosure-checklist.pdf" },
         { id: "o5", label: "Transfer of Property Management (ADL Form)",                  fileUrl: "/assets/forms/transfer-of-property-management.pdf",        fileName: "transfer-of-property-management.pdf" },
       ],
