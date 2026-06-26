@@ -1,5 +1,9 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
+import Testimonial from '@/models/Testimonial'
+import Project from '@/models/Project'
 
 const SECRET = 'ppm-reset-2026-xK9mQ'
 
@@ -10,10 +14,9 @@ export async function GET(req: NextRequest) {
   }
 
   await connectDB()
-  const mongoose = (await import('mongoose')).default
 
-  const testimonialResult = await mongoose.connection.collection('testimonials').deleteMany({})
-  const projectResult = await mongoose.connection.collection('projects').deleteMany({})
+  const testimonialResult = await Testimonial.deleteMany({})
+  const projectResult = await Project.deleteMany({})
 
   return NextResponse.json({
     success: true,
