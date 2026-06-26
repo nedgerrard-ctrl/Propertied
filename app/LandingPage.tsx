@@ -31,6 +31,8 @@ const OFF_PLAN_ADVANTAGES = [
   'Configuration choices',
   'Your own finishes',
   'Appliance upgrades',
+  'Brand new — never lived in before',
+  'Builder and manufacturer warranties',
   'Tax advantages for new builds',
 ]
 
@@ -244,13 +246,15 @@ function WhoWeAreSection({ content }: { content: LandingContentData }) {
             Who We Are
           </p>
 
-          <h2 className="text-[1.75rem] md:text-[2.1rem] font-bold leading-[1.18] text-white mb-8 max-w-3xl">
+          <h2 className={`${cormorant.className} text-[1.75rem] md:text-[2.1rem] font-light leading-[1.18] text-white mb-8 max-w-3xl`}>
             {content.whoWeAreHeading}
           </h2>
 
-          <p className="text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[68ch] mb-8">
-            {content.whoWeAreBody}
-          </p>
+          <div className="space-y-5 text-[14px] leading-[1.95] text-[#9e8d7a] max-w-[68ch] mb-8">
+            <p>{content.whoWeAreBody}</p>
+            <p>{content.whoWeAreBody2}</p>
+            <p>{content.whoWeAreBody3}</p>
+          </div>
 
           <Link
             href="/our-people"
@@ -316,7 +320,7 @@ function WhatWeDoSection({ content }: { content: LandingContentData }) {
 
           <div className="border-t border-[#ddd3c6] pt-10 mb-10">
             <p className="text-[10px] uppercase tracking-[0.28em] text-[#c8a96e] mb-6">
-              The Six Advantages of Buying Off-the-Plan
+              The key advantages of buying off-the-plan
             </p>
             <ul className="grid sm:grid-cols-2 gap-x-12 gap-y-4">
               {OFF_PLAN_ADVANTAGES.map((adv) => (
@@ -528,7 +532,7 @@ function WhyChoosePPMSection({ content }: { content: LandingContentData }) {
               </p>
               <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-[0.2em]">
                 <Link href="/about" className={LINK_CLASS}>
-                  → What to steward actually means for your investment
+                  → What manage actually means for your investment
                 </Link>
                 <span className="text-[#9e8d7a]">[</span>
                 <Link href="/buyers/investors" className={LINK_CLASS}>

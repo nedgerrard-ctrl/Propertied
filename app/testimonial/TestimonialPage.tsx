@@ -88,7 +88,7 @@ function CinematicQuote({
         </p>
 
         <h2
-          className={`${cormorant.className} text-xl md:text-2xl lg:text-[1.85rem] text-neutral-100 leading-[1.45] tracking-tight`}
+          className={`${cormorant.className} text-2xl md:text-3xl lg:text-[2.6rem] text-neutral-100 leading-[1.45] tracking-tight`}
         >
           {quote}
         </h2>
