@@ -24,8 +24,8 @@ export const footerDefaults = {
   company3Href:  "/insights",
   company4Label: "Contact",
   company4Href:  "/contact",
-  company5Label: "",
-  company5Href:  "",
+  company5Label: "Past Projects",
+  company5Href:  "/past-projects",
 
   // Contact
   contactSalesEmail:      "sales@ppmproperty.com.au",
