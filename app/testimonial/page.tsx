@@ -83,7 +83,10 @@ export default async function TestimonialServerPage() {
       Testimonial.countDocuments(),
     ])
 
-    if (count === 0) {
+    // Re-seed if empty OR if real PPM testimonials are not present (clears mock/student data)
+    const hasRealData = count > 0 && await Testimonial.findOne({ client: SEED_TESTIMONIALS[0].client })
+    if (!hasRealData) {
+      await Testimonial.deleteMany({})
       await Testimonial.insertMany(SEED_TESTIMONIALS)
     }
 

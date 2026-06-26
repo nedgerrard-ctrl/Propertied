@@ -27,10 +27,11 @@ export default async function InvestorsPage() {
       Project.countDocuments(),
     ])
 
-    if (count === 0) {
-      await Project.insertMany(
-        SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest)
-      )
+    // Re-seed if empty OR if real seed projects are not present (clears mock/student data)
+    const hasRealData = count > 0 && await Project.findOne({ name: SEED_PROJECTS[0].name })
+    if (!hasRealData) {
+      await Project.deleteMany({})
+      await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
     }
 
     const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
