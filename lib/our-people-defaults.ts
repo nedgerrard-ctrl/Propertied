@@ -32,7 +32,7 @@ export const ourPeopleDefaults: OurPeopleContentData = {
       name: "Ned Gerrard",
       title: "Director & Principal",
       description:
-        "With multiple business qualifications from Monash University, including an MBA, Ned has had a distinguished career spanning senior executive roles in listed public companies. Major developers retained Ned not only as an external adviser, but also as an embedded marketing director tasked with building their corporate brand and developing and implementing project sales and marketing strategies.\n\nConsulting wise he has assisted developers with their organisational structuring, operational frameworks and project turnarounds. He brings intimate industry knowledge to an unsophisticated off-the-plan market.",
+        "With multiple business qualifications from Monash University, including an MBA, Ned has had a distinguished career spanning senior executive roles in listed public companies. Multinational developers retained Ned not only as an external adviser, but also as an embedded marketing director tasked with building their corporate brand and developing and implementing project sales and marketing strategies.\n\nNed brings deep insider industry knowledge and a highly sophisticated approach to the off-the-plan market.",
     },
     {
       id: "person-3",

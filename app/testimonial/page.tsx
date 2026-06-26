@@ -43,7 +43,7 @@ const SEED_TESTIMONIALS = [
     rating: 5,
   },
   {
-    quote:  "I had the pleasure of having Joan manage and represent myself and my property for many years — for both sales and rental. The service has been exceptional: with excellent clear communication and follow up to requests. Joan is highly knowledgeable and has a thorough understanding of the rental and sales market. I felt very supported throughout. I would highly recommend Joan and PPM to anyone requiring property representation.",
+    quote:  "I had the pleasure of having Joan manage and represent myself and my property for many years — for both sales and rental. The service has been exceptional: with excellent clear communication and follow up to requests. Joan is highly knowledgeable and has a thorough understanding of the rental and sales market. I felt very supported throughout. I would highly recommend Joan and PPM to anyone requiring property representation. Thank you so very much Joan, for everything you have done, and for making my experience so stress free.",
     client: "Samantha Ashford — Sales & Management",
     rating: 5,
   },
@@ -63,8 +63,8 @@ const SEED_TESTIMONIALS = [
     rating: 5,
   },
   {
-    quote:  "Thank you for your continued support and excellent management.",
-    client: "Jonas D. — Property Owner",
+    quote:  "We hope we can get you as our agent once again. As always it has been a real pleasure knowing you.",
+    client: "Chintan Thakkar — Property Management",
     rating: 5,
   },
 ]

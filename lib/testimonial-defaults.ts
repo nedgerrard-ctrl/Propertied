@@ -21,7 +21,7 @@ export const testimonialDefaults = {
   grid1Rating: 5,
 
   grid2Quote:
-    "I had the pleasure of having Joan manage and represent myself and my property for many years — for both sales and rental. The service has been exceptional: with excellent clear communication and follow up to requests. It is clear that Joan is highly knowledgeable and has a thorough understanding of the rental and sales market. Her expertise and experience has been very much appreciated and valued. I felt very supported throughout. I would highly recommend Joan and PPM to anyone requiring property representation.",
+    "I had the pleasure of having Joan manage and represent myself and my property for many years — for both sales and rental. The service has been exceptional: with excellent clear communication and follow up to requests. It is clear that Joan is highly knowledgeable and has a thorough understanding of the rental and sales market. Her expertise and experience has been very much appreciated and valued. I felt very supported throughout. I would highly recommend Joan and PPM to anyone requiring property representation. Thank you so very much Joan, for everything you have done, and for making my experience so stress free.",
   grid2Client: "— Samantha Ashford, Sales & Management",
   grid2Rating: 5,
 
@@ -41,8 +41,8 @@ export const testimonialDefaults = {
   grid5Rating: 5,
 
   grid6Quote:
-    "Thank you for your continued support and excellent management.",
-  grid6Client: "— Jonas D., Property Owner",
+    "We hope we can get you as our agent once again. As always it has been a real pleasure knowing you.",
+  grid6Client: "— Chintan Thakkar, Property Management",
   grid6Rating: 5,
 
   ctaHeading: "Ready to work with the PPM team?",
