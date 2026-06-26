@@ -27,9 +27,12 @@ export default async function InvestorsPage() {
       Project.countDocuments(),
     ])
 
-    // Always wipe and re-seed — guarantees only canonical projects show
-    await Project.deleteMany({})
-    await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
+    // Re-seed if empty or if real PPM projects are not yet in DB
+    const hasRealData = count > 0 && await Project.findOne({ name: 'Hawthorn Park' })
+    if (!hasRealData) {
+      await Project.deleteMany({})
+      await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
+    }
 
     const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
     content = mergeBuyerContent(doc as Record<string, unknown> | null)

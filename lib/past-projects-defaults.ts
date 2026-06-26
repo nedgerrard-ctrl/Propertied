@@ -33,7 +33,7 @@ export const pastProjectsDefaults: PastProjectsContentData = {
     {
       id:       "yarra-1",
       name:     "Yarra 1",
-      address:  "Richmond, Melbourne VIC",
+      address:  "South Yarra, Melbourne VIC",
       imageUrl: "https://placehold.co/800x500/1c1814/c8a96e?text=Yarra+1",
       link:     "https://www.yarraone.com.au/",
     },
@@ -47,14 +47,14 @@ export const pastProjectsDefaults: PastProjectsContentData = {
     {
       id:       "elk",
       name:     "Elk",
-      address:  "Richmond, Melbourne VIC",
+      address:  "Elsternwick, Melbourne VIC",
       imageUrl: "https://placehold.co/800x500/1c1814/c8a96e?text=Elk",
       link:     "https://www.vpp.net.au/elk",
     },
     {
       id:       "botanica",
       name:     "Botanica",
-      address:  "Melbourne VIC",
+      address:  "Bundoora, Melbourne VIC",
       imageUrl: "https://placehold.co/800x500/1c1814/c8a96e?text=Botanica",
       link:     "https://a-d.com.au/buying-living/market-insights/botanic-parc-vue",
     },
