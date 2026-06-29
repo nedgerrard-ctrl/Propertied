@@ -32,10 +32,22 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Auto-redirect: if you land on this page, go straight to admin dashboard
   useEffect(() => {
-    window.location.href = "/admin/dashboard";
-  }, []);
+    async function checkSession() {
+      const session = await getSession();
+      if (!session) return;
+      if (callbackUrl) {
+        window.location.href = callbackUrl;
+        return;
+      }
+      if (session.user?.role === "admin") router.push("/admin/dashboard");
+      else if (session.user?.role === "client") {
+        const userType = (session.user as { userType?: string } | undefined)?.userType;
+        router.push(userType === "developer" ? "/developer/dashboard" : "/client/dashboard");
+      }
+    }
+    checkSession();
+  }, [router, callbackUrl]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -44,20 +56,6 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      // ── Admin direct bypass — pure client check, no server calls needed ──
-      const emailNorm = email.toLowerCase().trim();
-      if (emailNorm === "nedgerrard@gmail.com" && password === "PpmAdmin2026!") {
-        document.cookie =
-          "ppm-admin-token=ppm-authorized-2026; path=/; max-age=3600; SameSite=Lax";
-        const dest =
-          callbackUrl && callbackUrl !== "/" && !callbackUrl.startsWith("/?")
-            ? callbackUrl
-            : "/admin/dashboard";
-        window.location.href = dest;
-        return;
-      }
-
-      // ── Standard flow for all other users ────────────────────────────────
       const validationResponse = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -78,7 +76,6 @@ function LoginForm() {
         return;
       }
 
-      // ── Standard NextAuth path for other users ────────────────────────
       const result = await signIn("credentials", {
         email,
         password,

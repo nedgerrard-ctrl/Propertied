@@ -6,9 +6,11 @@ import AdminTabs from "./admin-tabs";
 import ResetContentButton from "./reset-content-button";
 
 export default async function AdminDashboardPage() {
-  // Auth check DISABLED — re-enable once NextAuth is stable on Netlify
-  // const session = await auth();
-  // if (!session || session.user?.role !== "admin") redirect("/login");
+  const session = await auth();
+
+  if (!session || session.user?.role !== "admin") {
+    redirect("/login");
+  }
 
   return (
     <main className="min-h-screen bg-neutral-100">
@@ -47,7 +49,7 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-{/* ── CardNav + tab panels ──────────────────────────────────────────── */}
+      {/* ── CardNav + tab panels ──────────────────────────────────────────── */}
       <AdminTabs />
 
     </main>
