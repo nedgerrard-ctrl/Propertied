@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
   serverExternalPackages: ["docusign-esign"],
+  env: {
+    AUTH_SECRET: process.env.AUTH_SECRET || "PpmPropertyProjectMarketing2026SecretKey!!",
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "PpmPropertyProjectMarketing2026SecretKey!!",
+  },
   images: {
     remotePatterns: [
       {
