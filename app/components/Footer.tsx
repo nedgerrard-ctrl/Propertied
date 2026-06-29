@@ -69,7 +69,7 @@ export default function Footer() {
     { label: c.company2Label, href: c.company2Href },
     { label: c.company3Label, href: c.company3Href },
     { label: c.company4Label, href: c.company4Href },
-    { label: c.company5Label, href: c.company5Href },
+    { label: c.company5Label || footerDefaults.company5Label, href: c.company5Href || footerDefaults.company5Href },
   ].filter((s) => s.label && s.href);
 
   return (

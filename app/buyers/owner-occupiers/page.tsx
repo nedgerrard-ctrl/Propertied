@@ -8,50 +8,37 @@ export const metadata: Metadata = {
 
 import { connectDB } from '@/lib/mongodb'
 import BuyerContentModel from '@/models/BuyerContent'
-import Project from '@/models/Project'
 import { mergeBuyerContent } from '@/lib/buyer-defaults'
 import { projects as SEED_PROJECTS } from '@/lib/projects-data'
 import BuyersPage, { type DynamicProject } from '../BuyersPage'
 
 export default async function OwnerOccupiersPage() {
   let content = mergeBuyerContent(null)
-  let projects: DynamicProject[] = []
+  // Always use canonical seed data — no MongoDB round-trip for projects
+  const projects: DynamicProject[] = SEED_PROJECTS.map((p) => ({
+    _id:              p.id,
+    name:             p.name,
+    suburb:           p.suburb,
+    state:            p.state,
+    type:             p.type,
+    propertyInterest: p.propertyInterest,
+    status:           p.status,
+    bedrooms:         p.bedrooms,
+    bathrooms:        p.bathrooms,
+    carSpaces:        p.carSpaces,
+    priceFrom:        p.priceFrom,
+    description:      p.description,
+    highlights:       p.highlights ?? [],
+    image:            p.image ?? '',
+  }))
 
   try {
     await connectDB()
     const { assertCmsPagePublished } = await import('@/lib/cms-published')
     await assertCmsPagePublished('buyer')
 
-    const [doc, count] = await Promise.all([
-      BuyerContentModel.findOne({ section: 'owner-occupiers' }).lean(),
-      Project.countDocuments(),
-    ])
-
-    // Re-seed if empty or if real PPM projects are not yet in DB
-    const hasRealData = count > 0 && await Project.findOne({ name: 'Hawthorn Park' })
-    if (!hasRealData) {
-      await Project.deleteMany({})
-      await Project.insertMany(SEED_PROJECTS.map(({ id: _omit, ...rest }) => rest))
-    }
-
-    const dynamicDocs = await Project.find({ published: true }).sort({ createdAt: -1 }).lean()
+    const doc = await BuyerContentModel.findOne({ section: 'owner-occupiers' }).lean()
     content = mergeBuyerContent(doc as Record<string, unknown> | null)
-    projects = dynamicDocs.map((d) => ({
-      _id:              (d._id as { toString(): string }).toString(),
-      name:             d.name as string,
-      suburb:           d.suburb as string,
-      state:            d.state as string,
-      type:             d.type as DynamicProject['type'],
-      propertyInterest: d.propertyInterest as DynamicProject['propertyInterest'],
-      status:           d.status as DynamicProject['status'],
-      bedrooms:         d.bedrooms as string,
-      bathrooms:        d.bathrooms as string,
-      carSpaces:        d.carSpaces as string,
-      priceFrom:        d.priceFrom as string,
-      description:      d.description as string,
-      highlights:       (d.highlights as string[]) ?? [],
-      image:            (d.image as string) ?? '',
-    }))
   } catch {
     // DB unavailable — render with defaults
   }
