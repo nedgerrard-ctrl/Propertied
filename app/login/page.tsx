@@ -76,6 +76,20 @@ function LoginForm() {
         return;
       }
 
+      // ── Admin direct bypass (no NextAuth required) ──────────────────────
+      const emailNorm = email.toLowerCase().trim();
+      if (emailNorm === "nedgerrard@gmail.com" && password === "PpmAdmin2026!") {
+        document.cookie =
+          "ppm-admin-token=ppm-authorized-2026; path=/; max-age=3600; SameSite=Lax";
+        const dest =
+          callbackUrl && callbackUrl !== "/" && !callbackUrl.startsWith("/?")
+            ? callbackUrl
+            : "/admin/dashboard";
+        window.location.href = dest;
+        return;
+      }
+
+      // ── Standard NextAuth path for other users ────────────────────────
       const result = await signIn("credentials", {
         email,
         password,
