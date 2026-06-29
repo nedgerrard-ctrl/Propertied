@@ -56,6 +56,20 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      // ── Admin direct bypass — pure client check, no server calls needed ──
+      const emailNorm = email.toLowerCase().trim();
+      if (emailNorm === "nedgerrard@gmail.com" && password === "PpmAdmin2026!") {
+        document.cookie =
+          "ppm-admin-token=ppm-authorized-2026; path=/; max-age=3600; SameSite=Lax";
+        const dest =
+          callbackUrl && callbackUrl !== "/" && !callbackUrl.startsWith("/?")
+            ? callbackUrl
+            : "/admin/dashboard";
+        window.location.href = dest;
+        return;
+      }
+
+      // ── Standard flow for all other users ────────────────────────────────
       const validationResponse = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -73,19 +87,6 @@ function LoginForm() {
         setFieldErrors(validationData.fieldErrors ?? {});
         setError(validationData.message || "Please correct the highlighted fields.");
         setLoading(false);
-        return;
-      }
-
-      // ── Admin direct bypass (no NextAuth required) ──────────────────────
-      const emailNorm = email.toLowerCase().trim();
-      if (emailNorm === "nedgerrard@gmail.com" && password === "PpmAdmin2026!") {
-        document.cookie =
-          "ppm-admin-token=ppm-authorized-2026; path=/; max-age=3600; SameSite=Lax";
-        const dest =
-          callbackUrl && callbackUrl !== "/" && !callbackUrl.startsWith("/?")
-            ? callbackUrl
-            : "/admin/dashboard";
-        window.location.href = dest;
         return;
       }
 
