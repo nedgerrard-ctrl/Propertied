@@ -32,22 +32,10 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Auto-redirect: if you land on this page, go straight to admin dashboard
   useEffect(() => {
-    async function checkSession() {
-      const session = await getSession();
-      if (!session) return;
-      if (callbackUrl) {
-        window.location.href = callbackUrl;
-        return;
-      }
-      if (session.user?.role === "admin") router.push("/admin/dashboard");
-      else if (session.user?.role === "client") {
-        const userType = (session.user as { userType?: string } | undefined)?.userType;
-        router.push(userType === "developer" ? "/developer/dashboard" : "/client/dashboard");
-      }
-    }
-    checkSession();
-  }, [router, callbackUrl]);
+    window.location.href = "/admin/dashboard";
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
