@@ -19,6 +19,28 @@ export function resolveText(
   return overrides[key] || defaultText
 }
 
+/** Flatten every editable field across all sections into a { key: defaultText } map */
+export function defaultSectionFields(): Record<string, string> {
+  const fields: Record<string, string> = {}
+  for (const section of privacySections) {
+    const n = section.number
+    section.blocks.forEach((block, bi) => {
+      if (block.kind === 'paragraph' || block.kind === 'subheading') {
+        fields[`s${n}k${bi}`] = block.text
+      } else if (block.kind === 'bullets') {
+        if (block.intro) fields[`s${n}k${bi}i`] = block.intro
+        block.bullets.forEach((b, bui) => {
+          fields[`s${n}k${bi}b${bui}`] = b
+        })
+      }
+    })
+    section.details?.forEach((d, i) => {
+      fields[`s${n}d${i}`] = d
+    })
+  }
+  return fields
+}
+
 export const privacySections: PrivacySection[] = [
   {
     number: 1,
