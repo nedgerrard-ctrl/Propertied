@@ -23,7 +23,7 @@ type MonthSlot = {
   label: string;
   total: number;
   buyer: number;
-  developer: number;
+  documentRequest: number;
   general: number;
 };
 
@@ -51,13 +51,13 @@ const LIGHT = "#ddd5c8";
 
 const TYPE_COLORS: Record<string, string> = {
   buyer: GOLD,
-  developer: DARK,
+  "document-request": DARK,
   general: MID,
 };
 
 const TYPE_LABEL: Record<string, string> = {
   buyer: "Buyer",
-  developer: "Developer",
+  "document-request": "Document Request",
   general: "General",
 };
 
@@ -292,10 +292,10 @@ function MonthlyDataTable({ monthly }: { monthly: MonthSlot[] }) {
     (acc, m) => ({
       total: acc.total + m.total,
       buyer: acc.buyer + m.buyer,
-      developer: acc.developer + m.developer,
+      documentRequest: acc.documentRequest + m.documentRequest,
       general: acc.general + m.general,
     }),
-    { total: 0, buyer: 0, developer: 0, general: 0 }
+    { total: 0, buyer: 0, documentRequest: 0, general: 0 }
   );
   return (
     <div className="overflow-x-auto">
@@ -307,7 +307,7 @@ function MonthlyDataTable({ monthly }: { monthly: MonthSlot[] }) {
             <th className="pb-3 pr-6 text-right" style={{ color: GOLD }}>
               Buyer
             </th>
-            <th className="pb-3 pr-6 text-right text-neutral-400">Developer</th>
+            <th className="pb-3 pr-6 text-right text-neutral-400">Document Request</th>
             <th className="pb-3 text-right text-neutral-400">General</th>
           </tr>
         </thead>
@@ -334,10 +334,10 @@ function MonthlyDataTable({ monthly }: { monthly: MonthSlot[] }) {
               </td>
               <td
                 className={`py-2.5 pr-6 text-right ${
-                  m.developer > 0 ? "text-neutral-700" : "text-neutral-300"
+                  m.documentRequest > 0 ? "text-neutral-700" : "text-neutral-300"
                 }`}
               >
-                {m.developer}
+                {m.documentRequest}
               </td>
               <td
                 className={`py-2.5 text-right ${
@@ -361,7 +361,7 @@ function MonthlyDataTable({ monthly }: { monthly: MonthSlot[] }) {
               {totals.buyer}
             </td>
             <td className="pt-3.5 pr-6 text-right font-semibold text-neutral-700">
-              {totals.developer}
+              {totals.documentRequest}
             </td>
             <td className="pt-3.5 text-right font-semibold text-neutral-700">
               {totals.general}
@@ -570,7 +570,7 @@ export default function StatsPanel() {
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
                 <Line type="monotone" dataKey="total" name="Total" stroke="#2f2923" strokeWidth={2.5} dot={{ r: 3, fill: "#2f2923", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5, fill: "#2f2923", stroke: "white", strokeWidth: 2 }} />
                 <Line type="monotone" dataKey="buyer" name="Buyer" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: GOLD, stroke: "white", strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="developer" name="Developer" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "#6b7280", stroke: "white", strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="documentRequest" name="Document Request" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: "#6b7280", stroke: "white", strokeWidth: 2 }} />
                 <Line type="monotone" dataKey="general" name="General" stroke={MID} strokeWidth={1.5} strokeDasharray="4 3" dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4, fill: MID, stroke: "white", strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -611,7 +611,7 @@ export default function StatsPanel() {
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f9f7f4" }} />
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: "#7a7166" }} />
                 <Bar dataKey="buyer" name="Buyer" stackId="a" fill={GOLD} />
-                <Bar dataKey="developer" name="Developer" stackId="a" fill="#6b7280" />
+                <Bar dataKey="documentRequest" name="Document Request" stackId="a" fill="#6b7280" />
                 <Bar dataKey="general" name="General" stackId="a" fill={MID} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -753,7 +753,7 @@ export default function StatsPanel() {
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16, color: "#7a7166" }} />
               <Line type="monotone" dataKey="total" name="Total" stroke={DARK} strokeWidth={2.5} dot={{ r: 3, fill: DARK, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
               <Line type="monotone" dataKey="buyer" name="Buyer" stroke={GOLD} strokeWidth={1.5} dot={{ r: 3, fill: GOLD, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
-              <Line type="monotone" dataKey="developer" name="Developer" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
+              <Line type="monotone" dataKey="documentRequest" name="Document Request" stroke="#6b7280" strokeWidth={1.5} dot={{ r: 3, fill: "#6b7280", stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
               <Line type="monotone" dataKey="general" name="General" stroke={MID} strokeWidth={1.5} strokeDasharray="4 3" dot={{ r: 3, fill: MID, stroke: "white", strokeWidth: 1.5 }} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -784,7 +784,7 @@ export default function StatsPanel() {
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f9f7f4" }} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12, color: "#7a7166" }} />
               <Bar dataKey="buyer" name="Buyer" stackId="a" fill={GOLD} />
-              <Bar dataKey="developer" name="Developer" stackId="a" fill="#6b7280" />
+              <Bar dataKey="documentRequest" name="Document Request" stackId="a" fill="#6b7280" />
               <Bar dataKey="general" name="General" stackId="a" fill={MID} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

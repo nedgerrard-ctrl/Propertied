@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     await Enquiry.create({
-      enquiryType: "general",
+      enquiryType: "document-request",
       name,
       email,
       phoneCountryCode,

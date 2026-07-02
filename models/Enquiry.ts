@@ -40,7 +40,7 @@ const enquirySchema = new Schema(
     enquiryType: {
       type: String,
       required: true,
-      enum: ["general", "developer", "buyer"],
+      enum: ["general", "developer", "buyer", "document-request"],
     },
 
     name: {

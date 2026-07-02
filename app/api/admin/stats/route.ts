@@ -13,9 +13,16 @@ async function requireAdmin() {
 
 const TYPE_LABELS: Record<string, string> = {
   buyer: "Buyer",
-  developer: "Developer",
+  "document-request": "Document Request",
   general: "General",
 };
+
+// Developer-partner enquiries aren't broken out in stats — they fold into General.
+function normalizeStatsType(enquiryType: string): "buyer" | "document-request" | "general" {
+  if (enquiryType === "buyer") return "buyer";
+  if (enquiryType === "document-request") return "document-request";
+  return "general";
+}
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -74,9 +81,9 @@ export async function GET() {
       ]),
     ]);
 
-  const typeCounts: Record<string, number> = { buyer: 0, developer: 0, general: 0 };
+  const typeCounts: Record<string, number> = { buyer: 0, "document-request": 0, general: 0 };
   for (const t of typeAgg) {
-    if (t._id in typeCounts) typeCounts[t._id as string] = t.count;
+    typeCounts[normalizeStatsType(t._id as string)] += t.count;
   }
 
   const statusCounts: Record<string, number> = {
@@ -89,13 +96,14 @@ export async function GET() {
     if (s._id in statusCounts) statusCounts[s._id as string] = s.count;
   }
 
-  const monthlyMap = new Map<string, { buyer: number; developer: number; general: number }>();
+  const monthlyMap = new Map<string, { buyer: number; documentRequest: number; general: number }>();
   for (const m of monthlyAgg) {
     const key = `${m._id.year}-${m._id.month}`;
-    const entry = monthlyMap.get(key) ?? { buyer: 0, developer: 0, general: 0 };
-    if (m._id.type in entry) {
-      entry[m._id.type as keyof typeof entry] = m.count;
-    }
+    const entry = monthlyMap.get(key) ?? { buyer: 0, documentRequest: 0, general: 0 };
+    const type = normalizeStatsType(m._id.type as string);
+    if (type === "buyer") entry.buyer += m.count;
+    else if (type === "document-request") entry.documentRequest += m.count;
+    else entry.general += m.count;
     monthlyMap.set(key, entry);
   }
 
@@ -103,12 +111,12 @@ export async function GET() {
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
-    const entry = monthlyMap.get(key) ?? { buyer: 0, developer: 0, general: 0 };
+    const entry = monthlyMap.get(key) ?? { buyer: 0, documentRequest: 0, general: 0 };
     monthly.push({
       label: `${MONTH_LABELS[d.getMonth()]} '${String(d.getFullYear()).slice(-2)}`,
-      total: entry.buyer + entry.developer + entry.general,
+      total: entry.buyer + entry.documentRequest + entry.general,
       buyer: entry.buyer,
-      developer: entry.developer,
+      documentRequest: entry.documentRequest,
       general: entry.general,
     });
   }

@@ -96,9 +96,17 @@ export async function sendDocuSignEnvelope(args: SendEnvelopeArgs): Promise<stri
   const envelope = buildEnvelope(args);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await envelopesApi.createEnvelope(accountId, {
-    envelopeDefinition: envelope,
-  });
+  let result: any;
+  try {
+    result = await envelopesApi.createEnvelope(accountId, {
+      envelopeDefinition: envelope,
+    });
+  } catch (e: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body = (e as any)?.response?.body ?? (e as any)?.response?.data;
+    const detail = body ? JSON.stringify(body) : String(e);
+    throw new Error(`DocuSign createEnvelope failed: ${detail}`);
+  }
 
   // SDK resolves with { body: EnvelopeSummary } in promise mode
   const envelopeId: string | undefined =
